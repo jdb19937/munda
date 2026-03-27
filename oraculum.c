@@ -358,12 +358,22 @@ int oraculum_mitte(const char *sapientum, const char *instructiones,
     }
 
     CURL *curl = curl_easy_init();
-    if (!curl) return -1;
+    if (!curl) {
+        lexicon_adde_compositam(numeri_lex, f->sapientum, "errores", 1);
+        f->responsum = strdup("curl_easy_init defecit");
+        f->exitus = -1;
+        f->actum = FOSSA_PERFECTA;
+        return fi;
+    }
 
     if (para_curl(curl, sapientum, instructiones, rogatum,
                   &f->corpus, &f->capita, &f->mem) < 0) {
         curl_easy_cleanup(curl);
-        return -1;
+        lexicon_adde_compositam(numeri_lex, f->sapientum, "errores", 1);
+        f->responsum = strdup("para defecit (clavis API deest?)");
+        f->exitus = -1;
+        f->actum = FOSSA_PERFECTA;
+        return fi;
     }
 
     f->actum = FOSSA_VOLANS;
