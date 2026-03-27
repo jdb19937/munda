@@ -305,6 +305,8 @@ void terminalis_pinge(const tabula_t *tab)
         const char *nomen;
         const char *mens;
         unsigned long mens_gradus;
+        int ultima_directio;
+        int ultima_permissa;
     } visus_animi_t;
     int cap_animi = latus * latus;
     visus_animi_t *indices = malloc((size_t)cap_animi * sizeof *indices);
@@ -317,24 +319,31 @@ void terminalis_pinge(const tabula_t *tab)
                 continue;
             const char *nom, *men;
             unsigned long mg;
+            int ud, up;
             if (ph == DEI) {
                 nom = c->deus.nomen;
                 men = c->deus.mens;
                 mg  = c->deus.mens_gradus;
+                ud  = c->deus.ultima_directio;
+                up  = c->deus.ultima_permissa;
             } else {
                 nom = c->animus.nomen;
                 men = c->animus.mens;
                 mg  = c->animus.mens_gradus;
+                ud  = c->animus.ultima_directio;
+                up  = c->animus.ultima_permissa;
             }
             if (!nom[0])
                 continue;
             const char *pic = genera_ops[c->genus].pictura;
             if (!pic) pic = "??";
             indices[num_animi++] = (visus_animi_t){
-                .pictura     = pic,
-                .nomen       = nom,
-                .mens        = men,
-                .mens_gradus = mg
+                .pictura          = pic,
+                .nomen            = nom,
+                .mens             = men,
+                .mens_gradus      = mg,
+                .ultima_directio  = ud,
+                .ultima_permissa  = up
             };
         }
     }
@@ -351,18 +360,22 @@ void terminalis_pinge(const tabula_t *tab)
     }
 
     /* exhibe */
+    static const char *dir_signa[] = {"·","↑","↓","←","→"};
     for (int i = 0; i < num_animi; i++) {
+        int d = indices[i].ultima_directio;
+        const char *ds = (d >= 0 && d <= 4) ? dir_signa[d] : "?";
+        const char *ps = indices[i].ultima_permissa ? "":"✗";
         if (indices[i].mens[0]) {
             p += sprintf(p, "\033[%d;1H %s " ANSI_CYN "%-4s" ANSI_RST
-                         " " ANSI_DIM "[%lu] %s" ANSI_RST "\033[K",
+                         " " ANSI_DIM "[%lu] {%s%s} — %s" ANSI_RST "\033[K",
                          versus_animi++, indices[i].pictura,
                          indices[i].nomen, indices[i].mens_gradus,
-                         indices[i].mens);
+                         ds, ps, indices[i].mens);
         } else {
             p += sprintf(p, "\033[%d;1H %s " ANSI_CYN "%-4s" ANSI_RST
-                         " " ANSI_DIM "—" ANSI_RST "\033[K",
+                         " " ANSI_DIM "{%s%s} —" ANSI_RST "\033[K",
                          versus_animi++, indices[i].pictura,
-                         indices[i].nomen);
+                         indices[i].nomen, ds, ps);
         }
     }
     free(indices);
