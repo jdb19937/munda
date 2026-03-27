@@ -1,0 +1,68 @@
+# Makefile — tabula munda
+
+CC      = cc
+CFLAGS  = -Wall -Wextra -O2 -I.
+
+# fontes communes
+COMMUNES = tabula.c \
+          cellae/fixa/vacuum.c cellae/fixa/saxum.c cellae/fixa/murus.c \
+          cellae/cibi/rapum.c cellae/cibi/fungus.c \
+          cellae/animae/feles.c cellae/animae/dalekus.c cellae/animae/ursus.c \
+          cellae/dei/zodus.c cellae/dei/oculus.c cellae/deus.c \
+          cella_ops.c cellae/fixum.c cellae/cibus.c cellae/animus.c \
+          cogitatio.c json.c utilia.c fictio.c
+COMMUNES_OBJ = $(COMMUNES:.c=.o)
+
+CAPITA  = cellula.h cella.h tabula.h terminalis.h oraculum.h json.h cogitatio.h utilia.h fictio.h \
+          cellae/animae/feles.h cellae/animae/dalekus.h cellae/animae/ursus.h \
+          cellae/fixum.h cellae/cibus.h cellae/animus.h cellae/deus.h \
+          cellae/dei/zodus.h cellae/dei/oculus.h
+
+ORACULA_OBJ = oracula/openai.o oracula/xai.o oracula/anthropic.o oracula/munda.o oracula/fictus.o
+ORACULA_FARE = oracula/openai.o oracula/xai.o oracula/anthropic.o oracula/munda.o oracula/fictus.o
+ORACULA_DEP = oracula/provisor.h json.h
+
+# --- omnia ---
+
+omnia: curre lude fare
+all: omnia
+
+# --- curre (sine terminali) ---
+
+curre: curre.o $(COMMUNES_OBJ) oraculum.o $(ORACULA_OBJ)
+	$(CC) $(CFLAGS) -o $@ $^ -lcurl
+
+# --- lude (cum terminali) ---
+
+lude: lude.o terminalis.o $(COMMUNES_OBJ) oraculum.o $(ORACULA_OBJ)
+	$(CC) $(CFLAGS) -o $@ $^ -lcurl
+
+%.o: %.c $(CAPITA)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# --- oraculum ---
+
+oraculum.o: oraculum.c oraculum.h $(ORACULA_DEP) utilia.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+oracula/%.o: oracula/%.c $(ORACULA_DEP)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# --- fare (imperativum oraculi) ---
+
+fare.o: fare.c oraculum.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+fare: fare.o oraculum.o $(ORACULA_FARE) json.o utilia.o fictio.o
+	$(CC) $(CFLAGS) -o $@ $^ -lcurl
+
+# --- mundatio ---
+
+mundus:
+	rm -f curre.o lude.o terminalis.o $(COMMUNES_OBJ)
+	rm -f oraculum.o fare.o
+	rm -f $(ORACULA_OBJ)
+	rm -f curre lude fare
+clean: mundus
+
+.PHONY: omnia all mundus clean
