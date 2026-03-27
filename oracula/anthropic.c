@@ -12,7 +12,7 @@
 static int para(const char *nomen, const char *conatus,
                 const char *clavis_api,
                 const char *instructiones, const char *rogatum,
-                char **corpus, struct curl_slist **capita)
+                char **corpus, struct crispus_slist **capita)
 {
     char *eff_user = json_effuge(rogatum);
     if (!eff_user) return -1;
@@ -48,10 +48,10 @@ static int para(const char *nomen, const char *conatus,
     char caput_auth[512];
     snprintf(caput_auth, sizeof(caput_auth), "x-api-key: %s", clavis_api);
 
-    struct curl_slist *c = NULL;
-    c = curl_slist_append(c, "Content-Type: application/json");
-    c = curl_slist_append(c, caput_auth);
-    c = curl_slist_append(c, "anthropic-version: 2023-06-01");
+    struct crispus_slist *c = NULL;
+    c = crispus_slist_adde(c, "Content-Type: application/json");
+    c = crispus_slist_adde(c, caput_auth);
+    c = crispus_slist_adde(c, "anthropic-version: 2023-06-01");
 
     *corpus = buf;
     *capita = c;

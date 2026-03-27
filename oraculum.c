@@ -12,7 +12,7 @@
 #include "oracula/provisor.h"
 #include "utilia.h"
 
-#include <curl/curl.h>
+#include "crispus/crispus.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -118,11 +118,11 @@ static const provisor_t *resolve(const char *sapientum,
     return prov;
 }
 
-/* --- para CURL cum provisore --- */
+/* --- para crispum cum provisore --- */
 
-static int para_curl(CURL *curl, const char *sapientum,
+static int para_crispum(CRISPUS *crispus, const char *sapientum,
                      const char *instructiones, const char *rogatum,
-                     char **corpus_out, struct curl_slist **capita_out,
+                     char **corpus_out, struct crispus_slist **capita_out,
                      struct memoria *mem)
 {
     char nomen[128], conatus[32];
@@ -134,7 +134,7 @@ static int para_curl(CURL *curl, const char *sapientum,
     if (!clavis || !*clavis) return -1;
 
     char *corpus = NULL;
-    struct curl_slist *capita = NULL;
+    struct crispus_slist *capita = NULL;
 
     if (prov->para(nomen, conatus, clavis,
                    instructiones, rogatum,
@@ -144,12 +144,12 @@ static int para_curl(CURL *curl, const char *sapientum,
     mem->data = NULL;
     mem->magnitudo = 0;
 
-    curl_easy_setopt(curl, CURLOPT_URL, prov->finis_url);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, corpus);
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, capita);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, scribe_fn);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, mem);
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 60L);
+    crispus_facilis_pone(crispus, CRISPUSOPT_URL, prov->finis_url);
+    crispus_facilis_pone(crispus, CRISPUSOPT_CAMPI_POSTAE, corpus);
+    crispus_facilis_pone(crispus, CRISPUSOPT_CAPITA_HTTP, capita);
+    crispus_facilis_pone(crispus, CRISPUSOPT_FUNCTIO_SCRIBENDI, scribe_fn);
+    crispus_facilis_pone(crispus, CRISPUSOPT_DATA_SCRIBENDI, mem);
+    crispus_facilis_pone(crispus, CRISPUSOPT_TEMPUS, 60L);
 
     *corpus_out = corpus;
     *capita_out = capita;
@@ -160,8 +160,8 @@ static int para_curl(CURL *curl, const char *sapientum,
 
 struct fossa {
     enum fossa_actum actum;
-    CURL *curl;
-    struct curl_slist *capita;
+    CRISPUS *manubrium;
+    struct crispus_slist *capita;
     char *corpus;
     struct memoria mem;
     char *responsum;
@@ -170,25 +170,25 @@ struct fossa {
     char sapientum[128];    /* sapientum plenum pro attributione */
 };
 
-static CURLM *multi;
+static CRISPUSM *multi;
 static struct fossa fossae[FOSSA_MAX];
 
 /* numeri per sapientum (clavis = "sapientum:metrica") */
 static lexicon_t *numeri_lex;
 
-static void fossa_fini_transferum(struct fossa *f, CURLcode rc)
+static void fossa_fini_transferum(struct fossa *f, CRISPUScode rc)
 {
     const provisor_t *prov = f->provisor ? f->provisor : &provisor_openai;
 
-    if (rc != CURLE_OK) {
+    if (rc != CRISPUSE_OK) {
         char err[256];
-        snprintf(err, sizeof(err), "curl error: %s",
-                 curl_easy_strerror(rc));
+        snprintf(err, sizeof(err), "crispus error: %s",
+                 crispus_facilis_error(rc));
         f->responsum = strdup(err);
         f->exitus = -1;
     } else {
         long codex;
-        curl_easy_getinfo(f->curl, CURLINFO_RESPONSE_CODE, &codex);
+        crispus_facilis_info(f->manubrium, CRISPUSINFO_CODEX_RESPONSI, &codex);
         if (!f->mem.data) {
             f->responsum = strdup("responsum vacuum");
             f->exitus = -1;
@@ -215,12 +215,12 @@ static void fossa_fini_transferum(struct fossa *f, CURLcode rc)
         lexicon_adde_compositam(numeri_lex, nomen, "cogitata", cogitata);
     }
 
-    curl_multi_remove_handle(multi, f->curl);
-    curl_easy_cleanup(f->curl);
-    curl_slist_free_all(f->capita);
+    crispus_multi_remove(multi, f->manubrium);
+    crispus_facilis_fini(f->manubrium);
+    crispus_slist_libera(f->capita);
     free(f->corpus);
     free(f->mem.data);
-    f->curl = NULL;
+    f->manubrium = NULL;
     f->capita = NULL;
     f->corpus = NULL;
     f->mem.data = NULL;
@@ -232,9 +232,9 @@ static void fossa_fini_transferum(struct fossa *f, CURLcode rc)
 
 int oraculum_initia(void)
 {
-    if (curl_global_init(CURL_GLOBAL_DEFAULT) != CURLE_OK)
+    if (crispus_orbis_initia(CRISPUS_GLOBAL_DEFAULT) != CRISPUSE_OK)
         return -1;
-    multi = curl_multi_init();
+    multi = crispus_multi_initia();
     if (!multi) return -1;
     memset(fossae, 0, sizeof(fossae));
     numeri_lex = lexicon_crea();
@@ -244,20 +244,20 @@ int oraculum_initia(void)
 void oraculum_fini(void)
 {
     for (int i = 0; i < FOSSA_MAX; i++) {
-        if (fossae[i].actum == FOSSA_VOLANS && fossae[i].curl) {
-            curl_multi_remove_handle(multi, fossae[i].curl);
-            curl_easy_cleanup(fossae[i].curl);
-            curl_slist_free_all(fossae[i].capita);
+        if (fossae[i].actum == FOSSA_VOLANS && fossae[i].manubrium) {
+            crispus_multi_remove(multi, fossae[i].manubrium);
+            crispus_facilis_fini(fossae[i].manubrium);
+            crispus_slist_libera(fossae[i].capita);
             free(fossae[i].corpus);
             free(fossae[i].mem.data);
         }
         free(fossae[i].responsum);
         fossae[i].actum = FOSSA_LIBERA;
     }
-    if (multi) curl_multi_cleanup(multi);
+    if (multi) crispus_multi_fini(multi);
     lexicon_libera(numeri_lex);
     numeri_lex = NULL;
-    curl_global_cleanup();
+    crispus_orbis_fini();
 }
 
 /* --- synchrona --- */
@@ -273,41 +273,41 @@ int oraculum_roga(const char *sapientum, const char *instructiones,
                                      nomen, sizeof(nomen),
                                      conatus, sizeof(conatus));
 
-    /* provisores locales: genera responsum statim, sine curl */
+    /* provisores locales: genera responsum statim, sine rete */
     if (strcmp(prov->nomen, "munda") == 0 ||
         strcmp(prov->nomen, "fictus") == 0) {
         *responsum = prov->extrahe(rogatum);
         return *responsum ? 0 : -1;
     }
 
-    CURL *curl = curl_easy_init();
-    if (!curl) {
-        *responsum = strdup("curl_easy_init defecit");
+    CRISPUS *crispus = crispus_facilis_initia();
+    if (!crispus) {
+        *responsum = strdup("crispus_facilis_initia defecit");
         return -1;
     }
 
     char *corpus = NULL;
-    struct curl_slist *capita = NULL;
+    struct crispus_slist *capita = NULL;
     struct memoria mem = { NULL, 0 };
 
-    if (para_curl(curl, sapientum, instructiones, rogatum,
+    if (para_crispum(crispus, sapientum, instructiones, rogatum,
                   &corpus, &capita, &mem) < 0) {
-        curl_easy_cleanup(curl);
+        crispus_facilis_fini(crispus);
         *responsum = strdup("clavis API deest vel para defecit");
         return -1;
     }
 
-    CURLcode rc = curl_easy_perform(curl);
+    CRISPUScode rc = crispus_facilis_age(crispus);
     int exitus = -1;
 
-    if (rc != CURLE_OK) {
+    if (rc != CRISPUSE_OK) {
         char err[256];
-        snprintf(err, sizeof(err), "curl error: %s",
-                 curl_easy_strerror(rc));
+        snprintf(err, sizeof(err), "crispus error: %s",
+                 crispus_facilis_error(rc));
         *responsum = strdup(err);
     } else {
         long codex;
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &codex);
+        crispus_facilis_info(crispus, CRISPUSINFO_CODEX_RESPONSI, &codex);
         if (!mem.data) {
             *responsum = strdup("responsum vacuum");
         } else {
@@ -319,8 +319,8 @@ int oraculum_roga(const char *sapientum, const char *instructiones,
 
     free(mem.data);
     free(corpus);
-    curl_easy_cleanup(curl);
-    curl_slist_free_all(capita);
+    crispus_facilis_fini(crispus);
+    crispus_slist_libera(capita);
     return exitus;
 }
 
@@ -347,7 +347,7 @@ int oraculum_mitte(const char *sapientum, const char *instructiones,
     snprintf(f->sapientum, sizeof(f->sapientum), "%s", sapientum_currens);
     lexicon_adde_compositam(numeri_lex, f->sapientum, "missae", 1);
 
-    /* provisores locales: genera responsum statim, sine curl */
+    /* provisores locales: genera responsum statim, sine rete */
     if (strcmp(prov->nomen, "munda") == 0 ||
         strcmp(prov->nomen, "fictus") == 0) {
         f->responsum = prov->extrahe(rogatum);
@@ -357,18 +357,18 @@ int oraculum_mitte(const char *sapientum, const char *instructiones,
         return fi;
     }
 
-    CURL *curl = curl_easy_init();
-    if (!curl) {
+    CRISPUS *crispus = crispus_facilis_initia();
+    if (!crispus) {
         lexicon_adde_compositam(numeri_lex, f->sapientum, "errores", 1);
-        f->responsum = strdup("curl_easy_init defecit");
+        f->responsum = strdup("crispus_facilis_initia defecit");
         f->exitus = -1;
         f->actum = FOSSA_PERFECTA;
         return fi;
     }
 
-    if (para_curl(curl, sapientum, instructiones, rogatum,
+    if (para_crispum(crispus, sapientum, instructiones, rogatum,
                   &f->corpus, &f->capita, &f->mem) < 0) {
-        curl_easy_cleanup(curl);
+        crispus_facilis_fini(crispus);
         lexicon_adde_compositam(numeri_lex, f->sapientum, "errores", 1);
         f->responsum = strdup("para defecit (clavis API deest?)");
         f->exitus = -1;
@@ -377,8 +377,8 @@ int oraculum_mitte(const char *sapientum, const char *instructiones,
     }
 
     f->actum = FOSSA_VOLANS;
-    f->curl = curl;
-    curl_multi_add_handle(multi, curl);
+    f->manubrium = crispus;
+    crispus_multi_adde(multi, crispus);
     return fi;
 }
 
@@ -387,17 +387,17 @@ void oraculum_processus(void)
     if (!multi) return;
 
     int running;
-    curl_multi_perform(multi, &running);
+    crispus_multi_age(multi, &running);
 
-    CURLMsg *msg;
+    CRISPUSMsg *msg;
     int remaining;
-    while ((msg = curl_multi_info_read(multi, &remaining))) {
-        if (msg->msg != CURLMSG_DONE)
+    while ((msg = crispus_multi_lege(multi, &remaining))) {
+        if (msg->msg != CRISPUSMSG_PERFECTUM)
             continue;
 
-        CURL *curl = msg->easy_handle;
+        CRISPUS *crispus = msg->easy_handle;
         for (int i = 0; i < FOSSA_MAX; i++) {
-            if (fossae[i].actum == FOSSA_VOLANS && fossae[i].curl == curl) {
+            if (fossae[i].actum == FOSSA_VOLANS && fossae[i].manubrium == crispus) {
                 fossa_fini_transferum(&fossae[i], msg->data.result);
                 break;
             }

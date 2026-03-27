@@ -8,7 +8,7 @@ Ludus simulationis tabularis in terminali, lingua C scriptus. Entia viva (feles,
 make
 ```
 
-Requiritur `libcurl`. Duo binaria creantur:
+Sine dependentiis externis (HTTPS per crispus). Duo binaria creantur:
 
 - **munda** — ludus ipse
 - **fare** — imperativum oraculi (CLI ad LLM rogandum)
@@ -65,7 +65,8 @@ main.c            — ansa principalis, initia, implendi tabula
 tabula.c/h        — tabula toroidalis, gradus simulationis
 cella.h           — definitiones generum, phylorum, actionum
 terminalis.c/h    — redditio terminalis (ANSI)
-oraculum.c/h      — interfacies ad LLM (sync et async per libcurl)
+oraculum.c/h      — interfacies ad LLM (sync et async per crispus)
+crispus/           — bibliotheca HTTPS (TLS 1.2, AES-GCM, ECDHE, SHA-256)
 cogitatio.c/h     — praecogitatio generica per oraculum
 fare.c            — CLI imperativum oraculi
 json.c/h          — parser JSON

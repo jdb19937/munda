@@ -22,6 +22,14 @@ ORACULA_OBJ = oracula/openai.o oracula/xai.o oracula/anthropic.o oracula/munda.o
 ORACULA_FARE = oracula/openai.o oracula/xai.o oracula/anthropic.o oracula/munda.o oracula/fictus.o
 ORACULA_DEP = oracula/provisor.h json.h
 
+# --- crispus (HTTPS sine dependentiis externis) ---
+
+CRISPUS_OBJ = crispus/crispus.o crispus/summa.o crispus/arca.o crispus/numerus.o crispus/velum.o
+CRISPUS_DEP = crispus/crispus.h crispus/internum.h
+
+crispus/%.o: crispus/%.c $(CRISPUS_DEP)
+	$(CC) $(CFLAGS) -c $< -o $@
+
 # --- omnia ---
 
 omnia: curre lude fare
@@ -29,20 +37,20 @@ all: omnia
 
 # --- curre (sine terminali) ---
 
-curre: curre.o $(COMMUNES_OBJ) oraculum.o $(ORACULA_OBJ)
-	$(CC) $(CFLAGS) -o $@ $^ -lcurl
+curre: curre.o $(COMMUNES_OBJ) oraculum.o $(ORACULA_OBJ) $(CRISPUS_OBJ)
+	$(CC) $(CFLAGS) -o $@ $^
 
 # --- lude (cum terminali) ---
 
-lude: lude.o terminalis.o $(COMMUNES_OBJ) oraculum.o $(ORACULA_OBJ)
-	$(CC) $(CFLAGS) -o $@ $^ -lcurl
+lude: lude.o terminalis.o $(COMMUNES_OBJ) oraculum.o $(ORACULA_OBJ) $(CRISPUS_OBJ)
+	$(CC) $(CFLAGS) -o $@ $^
 
 %.o: %.c $(CAPITA)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # --- oraculum ---
 
-oraculum.o: oraculum.c oraculum.h $(ORACULA_DEP) utilia.h
+oraculum.o: oraculum.c oraculum.h $(ORACULA_DEP) utilia.h $(CRISPUS_DEP)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 oracula/%.o: oracula/%.c $(ORACULA_DEP)
@@ -53,16 +61,21 @@ oracula/%.o: oracula/%.c $(ORACULA_DEP)
 fare.o: fare.c oraculum.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-fare: fare.o oraculum.o $(ORACULA_FARE) json.o utilia.o fictio.o
-	$(CC) $(CFLAGS) -o $@ $^ -lcurl
+fare: fare.o oraculum.o $(ORACULA_FARE) json.o utilia.o fictio.o $(CRISPUS_OBJ)
+	$(CC) $(CFLAGS) -o $@ $^
+
+# --- probatio crispus ---
+
+proba_crispum: proba_crispum.c $(CRISPUS_OBJ)
+	$(CC) $(CFLAGS) -o $@ $^
 
 # --- mundatio ---
 
 mundus:
 	rm -f curre.o lude.o terminalis.o $(COMMUNES_OBJ)
 	rm -f oraculum.o fare.o
-	rm -f $(ORACULA_OBJ)
-	rm -f curre lude fare
+	rm -f $(ORACULA_OBJ) $(CRISPUS_OBJ)
+	rm -f curre lude fare proba_crispum
 clean: mundus
 
 .PHONY: omnia all mundus clean

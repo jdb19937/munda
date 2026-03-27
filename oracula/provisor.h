@@ -7,7 +7,7 @@
 #ifndef PROVISOR_H
 #define PROVISOR_H
 
-#include <curl/curl.h>
+#include "../crispus/crispus.h"
 
 typedef struct provisor {
     const char *nomen;          /* "openai", "xai", "anthropic", "munda", "fictus" */
@@ -28,7 +28,7 @@ typedef struct provisor {
     int (*para)(const char *nomen, const char *conatus,
                 const char *clavis_api,
                 const char *instructiones, const char *rogatum,
-                char **corpus, struct curl_slist **capita);
+                char **corpus, struct crispus_slist **capita);
 
     /* extrahe textum responsi ex JSON crudo API */
     char *(*extrahe)(const char *json);

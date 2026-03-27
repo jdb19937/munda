@@ -157,7 +157,7 @@ int main(int argc, char **argv)
     zodus_initia();
     oculus_initia();
 
-    /* initia oraculum (libcurl) pro dalekis et ursis */
+    /* initia oraculum (crispus) pro dalekis et ursis */
     if (oraculum_initia() < 0)
         MORIRE("oraculum initiari non potuit");
 

@@ -1,7 +1,7 @@
 /*
  * oraculum.h — interfacies ad OpenAI Responses API
  *
- * Oraculum rogat et responsa accipit per libcurl.
+ * Oraculum rogat et responsa accipit per crispus.
  * Praebet et synchronam et asynchronam interfaciem.
  * Instructiones et rogatum separantur.
  */
@@ -16,14 +16,14 @@ enum fossa_actum {
     FOSSA_PERFECTA = 2      /* responsum acceptum, legendum */
 };
 
-/* initia libcurl et curl_multi — semel voca */
+/* initia crispus et crispus_multi — semel voca */
 int oraculum_initia(void);
 
 /* adde provisorem externum (e.g. fictus) */
 struct provisor;
 void oraculum_adde_provisorem(const struct provisor *prov);
 
-/* munda libcurl */
+/* munda crispus */
 void oraculum_fini(void);
 
 /* --- interfacies synchrona --- */

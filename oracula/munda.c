@@ -188,7 +188,7 @@ static void genera_actionem(const char *nomen, const char *valor,
 static int para(const char *nomen, const char *conatus,
                 const char *clavis_api,
                 const char *instructiones, const char *rogatum,
-                char **corpus, struct curl_slist **capita)
+                char **corpus, struct crispus_slist **capita)
 {
     (void)nomen; (void)conatus; (void)clavis_api;
     (void)instructiones; (void)capita;
