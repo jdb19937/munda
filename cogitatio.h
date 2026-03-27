@@ -58,4 +58,16 @@ void cogitatio_praecogita(struct tabula *tab, genus_t genus,
 
 actio_t cogitatio_quaere(praecogitata_t *res, int x, int y);
 
+/*
+ * cogitatio_praecogita_tabulam — mittit totam tabulam ut JSON array.
+ * cellulae generis dati ostenduntur per nomen, ceterae per signum generis.
+ * rogatum continet: "tabula" (array duplex), "nomina" (lista nominum),
+ * et statum cuiusque cellulae (ultima_actio, satietas, audita, mens).
+ * responsum idem format: {"nomen": "actio", "nomen.mens": "cogitationes"}
+ */
+void cogitatio_praecogita_tabulam(struct tabula *tab, genus_t genus,
+                                   const char *sapientum,
+                                   const char *instructiones,
+                                   praecogitata_t *res);
+
 #endif /* COGITATIO_H */

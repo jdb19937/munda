@@ -27,9 +27,8 @@ void dalekus_praecogita(tabula_t *tab)
 {
     if (!instructiones)
         instructiones = lege_instructiones(__FILE__);
-    cogitatio_praecogita(tab, DALEKUS, 1, 1,
-                         PRAECOGITATA_MAX, 1, 2,
-                         NULL, instructiones, &praecogitata);
+    cogitatio_praecogita_tabulam(tab, DALEKUS,
+                                  NULL, instructiones, &praecogitata);
 }
 
 static actio_t dalekus_cogito(const struct tabula *tab, int x, int y)

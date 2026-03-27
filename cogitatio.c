@@ -473,6 +473,288 @@ void cogitatio_praecogita(tabula_t *tab, genus_t genus,
     }
 }
 
+/* ================================================================
+ * cogitatio_praecogita_tabulam — mittit totam tabulam ut unam rogationem
+ * ================================================================ */
+
+static const char *INSTRUCTIONES_TABULAE =
+    "Ludus tabulae es. Regis agmen cellularum in tabula.\n\n"
+    "Legenda: .=vacuum #=saxum W=murus F=feles B=dalekus U=ursus "
+    "r=rapum f=fungus Z=zodus O=oculus\n\n"
+    "TABULA:\n"
+    "Campo \"tabula\" est JSON array duplex: tabula[series][columna].\n"
+    "  series 0 = septentrio (sursum), ultima series = meridies (deorsum)\n"
+    "  columna 0 = occidens (sinistrorsum), ultima columna = oriens (dextrorsum)\n"
+    "Cellulae agminis tui ostenduntur per NOMEN (e.g. \"B001\") "
+    "— ceterae cellulae per signum generis (e.g. \"U\", \"F\", \".\").\n"
+    "Campo \"nomina\" enumerat nomina omnium cellularum agminis tui.\n\n"
+    "DIRECTIO actionum = septentrio, meridies, oriens, occidens "
+    "(solum quattuor cardinales, non diagonales).\n"
+    "  septentrio = series minuitur (sursum)\n"
+    "  meridies = series crescit (deorsum)\n"
+    "  occidens = columna minuitur (sinistrorsum)\n"
+    "  oriens = columna crescit (dextrorsum)\n\n"
+    "Pro quoque nomine in \"nomina\", status datur:\n"
+    "- \"ultima_actio\": ultima actio tentata et exitus\n"
+    "- \"satietas\": saturitas ex cibis editis\n"
+    "- \"audita\": verba quae alii dixerunt\n"
+    "- \"mens\": cogitationes priores\n\n"
+    "Modi actionum:\n"
+    "- move DIRECTIO: move ad vacuum tantum\n"
+    "- pelle DIRECTIO: pelle obiectum ante te in ea directione\n"
+    "- cape DIRECTIO: cape (ede) cibum, move in locum eius\n"
+    "- trahe DIRECTIO: move ad vacuum, trahe obiectum a tergo tuo\n"
+    "- oppugna DIRECTIO: neca animum vicinum (vires > vitalitas requirit)\n"
+    "- loquere DIRECTIO verba: dic verba ad vicinum in ea directione\n"
+    "- clama verba: clama ad omnes in vicinitate 3x3\n"
+    "- quiesce: nihil agere\n\n"
+    "TU REGIS TOTUM AGMEN SIMUL. Decide actionem pro QUOQUE membro.\n"
+    "Vide tabulam totam — cogita de strategia collectiva.\n"
+    "Membra debent cooperari et coordinare motus ut unam unitatem.\n\n"
+    "Responde objecto JSON: {\"nomen\": \"actio\", \"nomen.mens\": \"cogitationes\"}\n"
+    "Clavis .mens est voluntaria. Da actionem pro quoque nomine.\n"
+    "Exemplum: {\"B001\": \"move oriens\", \"B001.mens\": \"circumdo ursum\", "
+    "\"B002\": \"oppugna septentrio\"}\n\n";
+
+/* aedifica tabulam JSON: [[".", "B001", "F"], ...] */
+static void aedifica_tabulam_json(const tabula_t *tab, genus_t genus,
+                                   char *buf, size_t mag)
+{
+    char *p = buf;
+    char *finis = buf + mag - 2;
+    int latus = tab->latus;
+
+    *p++ = '[';
+    for (int y = 0; y < latus && p < finis; y++) {
+        if (y > 0) *p++ = ',';
+        *p++ = '[';
+        for (int x = 0; x < latus && p + 12 < finis; x++) {
+            if (x > 0) *p++ = ',';
+            const cella_t *c = tabula_da_const(tab, x, y);
+            *p++ = '"';
+            if (c->genus == genus) {
+                /* ostende nomen */
+                const char *nom = (genera_ops[genus].phylum == DEI)
+                                  ? c->deus.nomen : c->animus.nomen;
+                for (const char *n = nom; *n && p + 2 < finis; n++)
+                    *p++ = *n;
+            } else {
+                *p++ = genus_signum(c->genus);
+            }
+            *p++ = '"';
+        }
+        *p++ = ']';
+    }
+    *p++ = ']';
+    *p = '\0';
+}
+
+/* aedifica listam nominum: ["B001","B002",...] */
+static void aedifica_nomina_json(const tabula_t *tab, genus_t genus,
+                                  int *xx, int *yy, char nomina[][8],
+                                  int *num_out,
+                                  char *buf, size_t mag)
+{
+    char *p = buf;
+    char *finis = buf + mag - 2;
+    int latus = tab->latus;
+    int n = 0;
+
+    *p++ = '[';
+    for (int y = 0; y < latus; y++) {
+        for (int x = 0; x < latus; x++) {
+            const cella_t *c = tabula_da_const(tab, x, y);
+            if (c->genus != genus) continue;
+            if (n >= FASCICULUS_MAX) break;
+
+            const char *nom = (genera_ops[genus].phylum == DEI)
+                              ? c->deus.nomen : c->animus.nomen;
+            xx[n] = x;
+            yy[n] = y;
+            memcpy(nomina[n], nom, 8);
+
+            if (n > 0 && p < finis) *p++ = ',';
+            *p++ = '"';
+            for (const char *s = nom; *s && p + 2 < finis; s++)
+                *p++ = *s;
+            *p++ = '"';
+            n++;
+        }
+    }
+    *p++ = ']';
+    *p = '\0';
+    *num_out = n;
+}
+
+/* aedifica statum unius cellulae (sine vicinitate) */
+static void aedifica_statum(const tabula_t *tab, int x, int y,
+                             char *buf, size_t mag)
+{
+    static const char *dir_nomina_s[] = {
+        "nihil", "septentrio", "meridies", "occidens", "oriens"
+    };
+    static const char *modus_nomina_s[] = {
+        "quiesce", "move", "pelle", "cape", "trahe", "loquere", "clama"
+    };
+
+    const cella_t *c = tabula_da_const(tab, x, y);
+    int est_deus = (genera_ops[c->genus].phylum == DEI);
+    int um = est_deus ? c->deus.ultima_modus    : c->animus.ultima_modus;
+    int ud = est_deus ? c->deus.ultima_directio  : c->animus.ultima_directio;
+    int up = est_deus ? c->deus.ultima_permissa   : c->animus.ultima_permissa;
+    const char *audita = est_deus ? c->deus.audita : c->animus.audita;
+    const char *mens   = est_deus ? c->deus.mens   : c->animus.mens;
+
+    char *p = buf;
+    size_t r = mag;
+    int n;
+
+    n = snprintf(p, r, "{");
+    p += n; r -= (size_t)n;
+
+    int primo = 1;
+
+    if (um > 0 && um <= 4 && ud >= 1 && ud <= 4) {
+        n = snprintf(p, r, "\"ultima_actio\": \"%s %s, %s\"",
+                     modus_nomina_s[um], dir_nomina_s[ud],
+                     up ? "successum" : "impeditus");
+        p += n; r -= (size_t)n;
+        primo = 0;
+    }
+
+    if (!est_deus && c->animus.satietas > 0) {
+        n = snprintf(p, r, "%s\"satietas\": %d",
+                     primo ? "" : ", ", c->animus.satietas);
+        p += n; r -= (size_t)n;
+        primo = 0;
+    }
+
+    if (audita[0]) {
+        n = snprintf(p, r, "%s\"audita\": \"", primo ? "" : ", ");
+        p += n; r -= (size_t)n;
+        for (const char *a = audita; *a && r > 4; a++) {
+            if (*a == '"' || *a == '\\') { *p++ = '\\'; r--; }
+            else if (*a == '\n') { *p++ = '\\'; *p++ = 'n'; r -= 2; continue; }
+            *p++ = *a; r--;
+        }
+        *p++ = '"'; r--;
+        primo = 0;
+    }
+
+    if (mens[0]) {
+        n = snprintf(p, r, "%s\"mens\": \"", primo ? "" : ", ");
+        p += n; r -= (size_t)n;
+        for (const char *m = mens; *m && r > 4; m++) {
+            if (*m == '"' || *m == '\\') { *p++ = '\\'; r--; }
+            else if (*m == '\n') { *p++ = '\\'; *p++ = 'n'; r -= 2; continue; }
+            *p++ = *m; r--;
+        }
+        *p++ = '"'; r--;
+    }
+
+    snprintf(p, r, "}");
+}
+
+void cogitatio_praecogita_tabulam(tabula_t *tab, genus_t genus,
+                                   const char *sapientum,
+                                   const char *instructiones,
+                                   praecogitata_t *res)
+{
+    oraculum_processus();
+
+    /* --- 1. collige responsa completa --- */
+    {
+        int dest = 0;
+        for (int v = 0; v < res->volantes_num; v++) {
+            if (res->volantes[v].fossa < 0) continue;
+
+            char *responsum = NULL;
+            int st = oraculum_status(res->volantes[v].fossa, &responsum);
+
+            if (st == ORACULUM_PENDENS) {
+                res->volantes[dest++] = res->volantes[v];
+                continue;
+            }
+
+            if (st == ORACULUM_PARATUM && responsum)
+                collige_responsum(responsum, &res->volantes[v], res);
+
+            free(responsum);
+            oraculum_dimitte(res->volantes[v].fossa);
+        }
+        res->volantes_num = dest;
+    }
+
+    /* si iam volans est, expecta */
+    if (res->volantes_num > 0) return;
+
+    /* si acta nondum consumpta, expecta */
+    if (res->num > 0) return;
+
+    /* --- 2. aedifica et mitte tabulam totam --- */
+    char *inst = aedifica_instructiones(instructiones);
+    if (!inst) return;
+
+    /* praepone instructiones tabulae */
+    size_t imag = strlen(INSTRUCTIONES_TABULAE) + strlen(inst) + 1;
+    char *inst_totae = malloc(imag);
+    if (!inst_totae) { free(inst); return; }
+    snprintf(inst_totae, imag, "%s%s", INSTRUCTIONES_TABULAE, inst);
+    free(inst);
+
+    /* aedifica rogatum */
+    json_scriptor_t *js = json_scriptor_crea();
+    if (!js) { free(inst_totae); return; }
+
+    /* tabula JSON */
+    size_t tab_mag = (size_t)tab->latus * tab->latus * 12 + 256;
+    char *tab_buf = malloc(tab_mag);
+    if (!tab_buf) { free(inst_totae); json_scriptor_fini(js); return; }
+    aedifica_tabulam_json(tab, genus, tab_buf, tab_mag);
+    json_scriptor_adde_crudum(js, "tabula", tab_buf);
+    free(tab_buf);
+
+    /* nomina JSON + collige positiones */
+    cogitatio_volans_t *vl = &res->volantes[0];
+    vl->num = 0;
+
+    size_t nom_mag = FASCICULUS_MAX * 12 + 64;
+    char *nom_buf = malloc(nom_mag);
+    if (!nom_buf) { free(inst_totae); json_scriptor_fini(js); return; }
+    aedifica_nomina_json(tab, genus, vl->xx, vl->yy, vl->nomina,
+                          &vl->num, nom_buf, nom_mag);
+    json_scriptor_adde_crudum(js, "nomina", nom_buf);
+    free(nom_buf);
+
+    /* status cuiusque membri */
+    for (int i = 0; i < vl->num; i++) {
+        char stat[1024];
+        aedifica_statum(tab, vl->xx[i], vl->yy[i], stat, sizeof(stat));
+        json_scriptor_adde_crudum(js, vl->nomina[i], stat);
+    }
+
+    char *rogatum = json_scriptor_fini(js);
+    if (!rogatum) { free(inst_totae); return; }
+
+    int fossa = oraculum_mitte(sapientum, inst_totae, rogatum);
+    free(rogatum);
+    free(inst_totae);
+
+    if (fossa < 0) return;
+
+    vl->fossa = fossa;
+    res->volantes_num = 1;
+
+    /* purga audita */
+    for (int i = 0; i < vl->num; i++) {
+        cella_t *c = tabula_da(tab, vl->xx[i], vl->yy[i]);
+        if (genera_ops[c->genus].phylum == DEI)
+            c->deus.audita[0] = '\0';
+        else
+            c->animus.audita[0] = '\0';
+    }
+}
+
 actio_t cogitatio_quaere(praecogitata_t *res, int x, int y)
 {
     for (int i = 0; i < res->num; i++) {
