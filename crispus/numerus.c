@@ -101,7 +101,8 @@ void nm_adde(nm_t *r, const nm_t *a, const nm_t *b)
 {
     uint64_t portatio = 0;
     int m = a->n > b->n ? a->n : b->n;
-    for (int i = 0; i < m || portatio; i++) {
+    int i;
+    for (i = 0; i < m || portatio; i++) {
         uint64_t summa = portatio;
         if (i < a->n) summa += a->v[i];
         if (i < b->n) summa += b->v[i];
@@ -109,6 +110,8 @@ void nm_adde(nm_t *r, const nm_t *a, const nm_t *b)
             r->v[i] = (uint32_t)summa;
         portatio = summa >> 32;
     }
+    /* nula verba superstantia */
+    for (; i < NM_VERBA; i++) r->v[i] = 0;
     r->n = m + 1;
     if (r->n > NM_VERBA) r->n = NM_VERBA;
     nm_normaliza(r);
@@ -119,7 +122,8 @@ void nm_subtrahe(nm_t *r, const nm_t *a, const nm_t *b)
 {
     int64_t mutuum = 0;
     int m = a->n > b->n ? a->n : b->n;
-    for (int i = 0; i < m; i++) {
+    int i;
+    for (i = 0; i < m; i++) {
         int64_t diff = mutuum;
         if (i < a->n) diff += (int64_t)a->v[i];
         if (i < b->n) diff -= (int64_t)b->v[i];
@@ -127,6 +131,7 @@ void nm_subtrahe(nm_t *r, const nm_t *a, const nm_t *b)
             r->v[i] = (uint32_t)(diff & 0xFFFFFFFF);
         mutuum = diff >> 32;
     }
+    for (; i < NM_VERBA; i++) r->v[i] = 0;
     r->n = m;
     nm_normaliza(r);
 }

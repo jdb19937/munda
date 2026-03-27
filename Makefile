@@ -32,7 +32,7 @@ crispus/%.o: crispus/%.c $(CRISPUS_DEP)
 
 # --- omnia ---
 
-omnia: curre lude fare
+omnia: curre lude fare proba
 all: omnia
 
 # --- curre (sine terminali) ---
@@ -66,8 +66,14 @@ fare: fare.o oraculum.o $(ORACULA_FARE) json.o utilia.o fictio.o $(CRISPUS_OBJ)
 
 # --- probatio crispus ---
 
-proba_crispum: proba_crispum.c $(CRISPUS_OBJ)
+proba: proba.o crispus/proba.o $(CRISPUS_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
+
+proba.o: proba.c crispus/proba.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+crispus/proba.o: crispus/proba.c crispus/proba.h $(CRISPUS_DEP)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # --- mundatio ---
 
@@ -75,7 +81,8 @@ mundus:
 	rm -f curre.o lude.o terminalis.o $(COMMUNES_OBJ)
 	rm -f oraculum.o fare.o
 	rm -f $(ORACULA_OBJ) $(CRISPUS_OBJ)
-	rm -f curre lude fare proba_crispum
+	rm -f crispus/proba.o proba.o
+	rm -f curre lude fare proba
 clean: mundus
 
 .PHONY: omnia all mundus clean

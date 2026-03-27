@@ -58,7 +58,7 @@ int arca128_gcm_revela(const uint8_t clavis[16], const uint8_t iv[12],
  *  Numerus Magnus (bignum)
  * ================================================================ */
 
-#define NM_VERBA 144   /* 144 * 32 = 4608 bits (sufficit RSA-4096) */
+#define NM_VERBA 260   /* 260 * 32 = 8320 bits (sufficit productis RSA-4096) */
 
 typedef struct {
     uint32_t v[NM_VERBA];

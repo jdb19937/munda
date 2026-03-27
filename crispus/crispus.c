@@ -103,6 +103,10 @@ static int resolve_url(const char *url, struct url_partes *p)
     if (obliquus)
         snprintf(p->via, sizeof(p->via), "%s", obliquus);
 
+    /* remove fragmentum (#...) — non mittitur ad servitorem */
+    char *fragmentum = strchr(p->via, '#');
+    if (fragmentum) *fragmentum = '\0';
+
     return 0;
 }
 

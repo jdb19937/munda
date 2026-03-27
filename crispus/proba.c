@@ -1,12 +1,13 @@
 /*
- * proba_crispum.c — probationes bibliothecae crispus
+ * crispus/proba.c — probationes bibliothecae crispus
  *
  * Probat cryptographiam (SHA-256, AES-GCM, bignum, EC P-256)
  * et coniunctionem HTTPS ad servitores notos.
  */
 
-#include "crispus/crispus.h"
-#include "crispus/internum.h"
+#include "proba.h"
+#include "crispus.h"
+#include "internum.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,23 +40,24 @@ static void proba_summam(void)
         PROBA("SHA-256(\"\")", memcmp(digestum, expectatum, 32) == 0);
     }
 
-    /* SHA-256("abc") = ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad */
+    /* SHA-256("Gallia est omnis divisa in partes tres") */
     {
         uint8_t digestum[32];
-        summa256((const uint8_t *)"abc", 3, digestum);
+        const char *gall = "Gallia est omnis divisa in partes tres";
+        summa256((const uint8_t *)gall, strlen(gall), digestum);
         uint8_t expectatum[] = {
-            0xba,0x78,0x16,0xbf,0x8f,0x01,0xcf,0xea,
-            0x41,0x41,0x40,0xde,0x5d,0xae,0x22,0x23,
-            0xb0,0x03,0x61,0xa3,0x96,0x17,0x7a,0x9c,
-            0xb4,0x10,0xff,0x61,0xf2,0x00,0x15,0xad
+            0x04,0xaa,0x0e,0xfa,0x57,0x1a,0x7e,0xd6,
+            0xca,0x18,0x10,0xf9,0x35,0xfb,0xda,0x33,
+            0xa3,0xe2,0xc2,0x96,0xda,0x4c,0xca,0xe8,
+            0x27,0x25,0x4c,0xbf,0x57,0x15,0x07,0x3a
         };
-        PROBA("SHA-256(\"abc\")", memcmp(digestum, expectatum, 32) == 0);
+        PROBA("SHA-256(Gallia)", memcmp(digestum, expectatum, 32) == 0);
     }
 
     /* SHA-256 incrementalis */
     {
         uint8_t digestum1[32], digestum2[32];
-        const char *nuntius = "The quick brown fox jumps over the lazy dog";
+        const char *nuntius = "Ars conjectandi est fundamentum calculi probabilitatum";
         summa256((const uint8_t *)nuntius, strlen(nuntius), digestum1);
 
         summa256_ctx_t ctx;
@@ -297,12 +299,13 @@ static void proba_https(void)
         crispus_facilis_fini(c);
     }
 
-    /* GET https://httpbin.org/get */
+    /* GET https://empslocal.ex.ac.uk/people/staff/mrwatkin/isoc/ (RSA-4096) */
     {
         CRISPUS *c = crispus_facilis_initia();
         struct { char *data; size_t mag; } resp = { NULL, 0 };
 
-        crispus_facilis_pone(c, CRISPUSOPT_URL, "https://httpbin.org/get");
+        crispus_facilis_pone(c, CRISPUSOPT_URL,
+            "https://empslocal.ex.ac.uk/people/staff/mrwatkin/isoc/");
         crispus_facilis_pone(c, CRISPUSOPT_FUNCTIO_SCRIBENDI, proba_scribe_fn);
         crispus_facilis_pone(c, CRISPUSOPT_DATA_SCRIBENDI, &resp);
         crispus_facilis_pone(c, CRISPUSOPT_TEMPUS, 15L);
@@ -314,26 +317,22 @@ static void proba_https(void)
 
         printf("    rc=%d codex=%ld resp_mag=%zu\n", rc, codex, resp.mag);
 
-        PROBA("httpbin.org coniunctio", rc == CRISPUSE_OK);
-        PROBA("httpbin.org codex 200", codex == 200);
+        PROBA("exeter.ac.uk coniunctio", rc == CRISPUSE_OK);
+        PROBA("exeter.ac.uk codex 200", codex == 200);
         if (resp.data)
-            PROBA("httpbin.org JSON", strstr(resp.data, "\"url\"") != NULL);
+            PROBA("exeter.ac.uk HTML", strstr(resp.data, "<") != NULL);
 
         free(resp.data);
         crispus_facilis_fini(c);
     }
 
-    /* POST https://httpbin.org/post */
+    /* GET https://plato.stanford.edu/entries/logic-modal/#TwoD */
     {
         CRISPUS *c = crispus_facilis_initia();
         struct { char *data; size_t mag; } resp = { NULL, 0 };
 
-        struct crispus_slist *capita = NULL;
-        capita = crispus_slist_adde(capita, "Content-Type: application/json");
-
-        crispus_facilis_pone(c, CRISPUSOPT_URL, "https://httpbin.org/post");
-        crispus_facilis_pone(c, CRISPUSOPT_CAMPI_POSTAE, "{\"salve\":\"munde\"}");
-        crispus_facilis_pone(c, CRISPUSOPT_CAPITA_HTTP, capita);
+        crispus_facilis_pone(c, CRISPUSOPT_URL,
+            "https://plato.stanford.edu/entries/logic-modal/#TwoD");
         crispus_facilis_pone(c, CRISPUSOPT_FUNCTIO_SCRIBENDI, proba_scribe_fn);
         crispus_facilis_pone(c, CRISPUSOPT_DATA_SCRIBENDI, &resp);
         crispus_facilis_pone(c, CRISPUSOPT_TEMPUS, 15L);
@@ -345,23 +344,52 @@ static void proba_https(void)
 
         printf("    rc=%d codex=%ld resp_mag=%zu\n", rc, codex, resp.mag);
 
-        PROBA("httpbin.org POST coniunctio", rc == CRISPUSE_OK);
-        PROBA("httpbin.org POST codex 200", codex == 200);
+        PROBA("stanford.edu coniunctio", rc == CRISPUSE_OK);
+        PROBA("stanford.edu codex 200", codex == 200);
         if (resp.data)
-            PROBA("httpbin.org POST echo", strstr(resp.data, "salve") != NULL);
+            PROBA("stanford.edu HTML", strstr(resp.data, "modal") != NULL);
 
         free(resp.data);
-        crispus_slist_libera(capita);
+        crispus_facilis_fini(c);
+    }
+
+    /* GET https://www.fordcountychronicle.com/ */
+    {
+        CRISPUS *c = crispus_facilis_initia();
+        struct { char *data; size_t mag; } resp = { NULL, 0 };
+
+        crispus_facilis_pone(c, CRISPUSOPT_URL,
+            "https://www.fordcountychronicle.com/articles/featured/naked-gunman-70-still-not-located/");
+        crispus_facilis_pone(c, CRISPUSOPT_FUNCTIO_SCRIBENDI, proba_scribe_fn);
+        crispus_facilis_pone(c, CRISPUSOPT_DATA_SCRIBENDI, &resp);
+        crispus_facilis_pone(c, CRISPUSOPT_TEMPUS, 15L);
+
+        CRISPUScode rc = crispus_facilis_age(c);
+
+        long codex = 0;
+        crispus_facilis_info(c, CRISPUSINFO_CODEX_RESPONSI, &codex);
+
+        printf("    rc=%d codex=%ld resp_mag=%zu\n", rc, codex, resp.mag);
+
+        PROBA("fordcountychronicle coniunctio", rc == CRISPUSE_OK);
+        PROBA("fordcountychronicle codex", codex >= 200 && codex < 400);
+        if (resp.data)
+            PROBA("fordcountychronicle HTML", strstr(resp.data, "<") != NULL);
+
+        free(resp.data);
         crispus_facilis_fini(c);
     }
 
     crispus_orbis_fini();
 }
 
-/* --- Principalis --- */
+/* --- interfacies publica --- */
 
-int main(void)
+int crispus_proba(void)
 {
+    probationes_successae = 0;
+    probationes_defectae = 0;
+
     printf("=== PROBATIONES CRISPUS ===\n\n");
 
     proba_summam();
@@ -378,5 +406,5 @@ int main(void)
 
     printf("\n=== EFFECTUS: %d successae, %d defectae ===\n",
            probationes_successae, probationes_defectae);
-    return probationes_defectae > 0 ? 1 : 0;
+    return probationes_defectae;
 }

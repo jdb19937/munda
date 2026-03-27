@@ -76,7 +76,12 @@ struct velum {
     int occultans;    /* scribimus cum crypto */
     int revelans;     /* legimus cum crypto */
 
-    /* alveus lectionis pro tabellis partialibus */
+    /* alveus salutationis (accumulat nuntios trans tabellas) */
+    uint8_t alveus_sal[32768];
+    size_t sal_pos;
+    size_t sal_mag;
+
+    /* alveus applicationis (data revelata) */
     uint8_t alveus_app[16384 + 256];
     size_t app_pos;
     size_t app_mag;
@@ -405,56 +410,53 @@ static int mitte_salve_clientis(velum_t *v)
 /* --- legere nuntios salutationis a servitore --- */
 
 /* lege unum nuntium salutationis (potest legere plures tabellas) */
+static int sal_imple(velum_t *v, size_t opus)
+{
+    while (v->sal_mag - v->sal_pos < opus) {
+        uint8_t gen_tab;
+        uint8_t alveus[16384 + 256];
+        size_t alveus_mag;
+        if (lege_tabellam(v, &gen_tab, alveus, &alveus_mag) < 0)
+            return -1;
+        if (gen_tab != TABELLA_SALUTATIO)
+            return -1;
+        /* compacta si opus est */
+        if (v->sal_pos > 0 && v->sal_mag + alveus_mag > sizeof(v->alveus_sal)) {
+            memmove(v->alveus_sal, v->alveus_sal + v->sal_pos,
+                    v->sal_mag - v->sal_pos);
+            v->sal_mag -= v->sal_pos;
+            v->sal_pos = 0;
+        }
+        if (v->sal_mag + alveus_mag > sizeof(v->alveus_sal)) return -1;
+        memcpy(v->alveus_sal + v->sal_mag, alveus, alveus_mag);
+        v->sal_mag += alveus_mag;
+    }
+    return 0;
+}
+
 static int lege_nuntium_sal(velum_t *v, uint8_t *genus, uint8_t *data,
                              size_t *mag)
 {
-    /* si alveus habet data residua, utere illis */
-    if (v->app_pos < v->app_mag) {
-        if (v->app_mag - v->app_pos < 4) {
-            v->app_pos = v->app_mag = 0;
-            goto lege_novam;
-        }
-        uint8_t *p = v->alveus_app + v->app_pos;
-        *genus = p[0];
-        size_t lon = leg24(p + 1);
-        if (v->app_pos + 4 + lon > v->app_mag) {
-            v->app_pos = v->app_mag = 0;
-            goto lege_novam;
-        }
-        memcpy(data, p + 4, lon);
-        *mag = lon;
+    /* assure caput salutationis (4 octorum) */
+    if (sal_imple(v, 4) < 0) return -1;
 
-        /* adde ad transcriptum (caput + corpus) */
-        transcribe(v, p, 4 + lon);
+    uint8_t *p = v->alveus_sal + v->sal_pos;
+    *genus = p[0];
+    size_t lon = leg24(p + 1);
 
-        v->app_pos += 4 + lon;
-        return 0;
-    }
+    /* assure corpus integrum */
+    if (sal_imple(v, 4 + lon) < 0) return -1;
 
-lege_novam:;
-    uint8_t gen_tab;
-    uint8_t alveus[16384 + 256];
-    size_t alveus_mag;
-    if (lege_tabellam(v, &gen_tab, alveus, &alveus_mag) < 0) return -1;
-    if (gen_tab != TABELLA_SALUTATIO) return -1;
-
-    if (alveus_mag < 4) return -1;
-    *genus = alveus[0];
-    size_t lon = leg24(alveus + 1);
-    if (4 + lon > alveus_mag) return -1;
-    memcpy(data, alveus + 4, lon);
+    p = v->alveus_sal + v->sal_pos;
+    memcpy(data, p + 4, lon);
     *mag = lon;
 
     /* adde ad transcriptum */
-    transcribe(v, alveus, 4 + lon);
+    transcribe(v, p, 4 + lon);
 
-    /* serva residua in alveo */
-    size_t consumptum = 4 + lon;
-    if (consumptum < alveus_mag) {
-        memcpy(v->alveus_app, alveus + consumptum, alveus_mag - consumptum);
-        v->app_pos = 0;
-        v->app_mag = alveus_mag - consumptum;
-    }
+    v->sal_pos += 4 + lon;
+    if (v->sal_pos == v->sal_mag)
+        v->sal_pos = v->sal_mag = 0;
 
     return 0;
 }
@@ -478,7 +480,7 @@ velum_t *velum_crea(int fd, const char *hospes)
 
 int velum_saluta(velum_t *v)
 {
-    uint8_t data[16384];
+    uint8_t data[32768];
     size_t mag;
     uint8_t genus;
 
@@ -583,7 +585,6 @@ int velum_saluta(velum_t *v)
         if (mitte_tabellam(v, TABELLA_SALUTATIO, cke, 70) < 0)
             return -1;
     }
-
     /* 8. computa secretum commune */
     ec_punctum_t punctum_commune;
     ec_multiplica(&punctum_commune, &v->ec_privata, &v->ec_publica_servitoris);
