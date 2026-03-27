@@ -25,6 +25,7 @@ typedef struct {
     int vitalitas;          /* quantum impetum sustinere possit */
     char audita[AUDITA_MAX];
     char mens[MENS_MAX];
+    unsigned long mens_gradus;  /* gradus quo mens novissime mutata est */
 } animus_t;
 
 /*

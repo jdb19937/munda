@@ -23,6 +23,7 @@ typedef struct {
     int potentia;           /* vis divina */
     char audita[AUDITA_MAX];
     char mens[MENS_MAX];
+    unsigned long mens_gradus;  /* gradus quo mens novissime mutata est */
 } deus_t;
 
 /*

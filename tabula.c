@@ -234,8 +234,10 @@ static void ursi_praegradum(tabula_t *tab)
 
             actio_t act = ops->cogito(tab, x, y);
 
-            if (act.mens[0])
+            if (act.mens[0]) {
                 memcpy(c->animus.mens, act.mens, MENS_MAX);
+                c->animus.mens_gradus = tab->gradus_num;
+            }
 
             if (act.modus == QUIESCE) { c->motum = 1; continue; }
 
@@ -376,8 +378,10 @@ static void dei_praegradum(tabula_t *tab)
 
             actio_t act = ops->cogito(tab, x, y);
 
-            if (act.mens[0])
+            if (act.mens[0]) {
                 memcpy(c->deus.mens, act.mens, MENS_MAX);
+                c->deus.mens_gradus = tab->gradus_num;
+            }
 
             if (act.modus == QUIESCE) { c->motum = 1; continue; }
 
@@ -479,8 +483,10 @@ void tabula_gradus(tabula_t *tab)
 
             actio_t act = ops->cogito(tab, x, y);
 
-            if (act.mens[0])
+            if (act.mens[0]) {
                 memcpy(c->animus.mens, act.mens, MENS_MAX);
+                c->animus.mens_gradus = tab->gradus_num;
+            }
 
             if (act.modus == QUIESCE)
                 continue;

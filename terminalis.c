@@ -304,6 +304,7 @@ void terminalis_pinge(const tabula_t *tab)
         const char *pictura;
         const char *nomen;
         const char *mens;
+        unsigned long mens_gradus;
     } visus_animi_t;
     int cap_animi = latus * latus;
     visus_animi_t *indices = malloc((size_t)cap_animi * sizeof *indices);
@@ -315,21 +316,25 @@ void terminalis_pinge(const tabula_t *tab)
             if (ph != ANIMA && ph != DEI)
                 continue;
             const char *nom, *men;
+            unsigned long mg;
             if (ph == DEI) {
                 nom = c->deus.nomen;
                 men = c->deus.mens;
+                mg  = c->deus.mens_gradus;
             } else {
                 nom = c->animus.nomen;
                 men = c->animus.mens;
+                mg  = c->animus.mens_gradus;
             }
             if (!nom[0])
                 continue;
             const char *pic = genera_ops[c->genus].pictura;
             if (!pic) pic = "??";
             indices[num_animi++] = (visus_animi_t){
-                .pictura = pic,
-                .nomen   = nom,
-                .mens    = men
+                .pictura     = pic,
+                .nomen       = nom,
+                .mens        = men,
+                .mens_gradus = mg
             };
         }
     }
@@ -349,9 +354,10 @@ void terminalis_pinge(const tabula_t *tab)
     for (int i = 0; i < num_animi; i++) {
         if (indices[i].mens[0]) {
             p += sprintf(p, "\033[%d;1H %s " ANSI_CYN "%-4s" ANSI_RST
-                         " " ANSI_DIM "%s" ANSI_RST "\033[K",
+                         " " ANSI_DIM "[%lu] %s" ANSI_RST "\033[K",
                          versus_animi++, indices[i].pictura,
-                         indices[i].nomen, indices[i].mens);
+                         indices[i].nomen, indices[i].mens_gradus,
+                         indices[i].mens);
         } else {
             p += sprintf(p, "\033[%d;1H %s " ANSI_CYN "%-4s" ANSI_RST
                          " " ANSI_DIM "—" ANSI_RST "\033[K",
