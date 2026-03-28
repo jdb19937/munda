@@ -96,7 +96,6 @@ static const provisor_t *resolve(const char *sapientum,
                                  char *conatus, size_t cmag)
 {
     const char *spec = sapientum;
-    if (!spec || !*spec) spec = getenv("MUNDA_SAPIENTIA");
     if (!spec || !*spec) spec = SAPIENTUM_PRAEFINITUM;
 
     char provisor[64];

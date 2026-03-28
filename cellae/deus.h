@@ -26,12 +26,7 @@ typedef struct {
     unsigned long mens_gradus;  /* gradus quo mens novissime mutata est */
 } deus_t;
 
-/*
- * deus_praepara — legit potentia ex paribus JSON.
- * vocatur post cella_praepara.
- */
 struct cella;
-struct json_par;
-void deus_praepara(struct cella *c, const struct json_par *pp, int n);
+void deus_praepara(struct cella *c);
 
 #endif /* DEUS_H */

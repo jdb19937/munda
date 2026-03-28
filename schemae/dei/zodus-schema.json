@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "titulus": "zodus — deus a lusore gubernatus",
+  "type": "object",
+  "properties": {
+    "nomen": {
+      "type": "string",
+      "descriptio": "nomen proprium zodi, e.g. Zodus"
+    },
+    "pondus": {
+      "type": "integer",
+      "descriptio": "pondus zodi",
+      "default": 50
+    },
+    "potentia": {
+      "type": "integer",
+      "descriptio": "vis divina zodi",
+      "default": 10
+    },
+    "mens": {
+      "type": "string",
+      "descriptio": "cogitationes initiales zodi",
+      "default": "expergiscor"
+    }
+  },
+  "required": [
+    "nomen"
+  ]
+}

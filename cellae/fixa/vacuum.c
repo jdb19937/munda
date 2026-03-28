@@ -3,10 +3,6 @@
  */
 
 #include "cella.h"
-#include "utilia.h"
-
-static json_par_t pp[8];
-static int pp_n;
 
 static actio_t vacuum_cogito(const struct tabula *tab, int x, int y)
 {
@@ -16,9 +12,8 @@ static actio_t vacuum_cogito(const struct tabula *tab, int x, int y)
 
 void vacuum_initia(void)
 {
-    pp_n = lege_parametra(__FILE__, pp, 8);
-    cella_initia_ops(VACUUM, pp, pp_n);
+    cella_initia_ops(VACUUM, "\xC2\xB7 ", '.');
 
-    genera_ops[VACUUM].phylum   = FIXUM;
-    genera_ops[VACUUM].cogito   = vacuum_cogito;
+    genera_ops[VACUUM].phylum = FIXUM;
+    genera_ops[VACUUM].cogito = vacuum_cogito;
 }

@@ -13,22 +13,21 @@
 static praecogitata_t praecogitata;
 static char *instructiones;
 
-static json_par_t pp[12];
-static int pp_n;
-
 static void ursus_praepara(cella_t *c)
 {
-    cella_praepara(c, URSUS, pp, pp_n);
-    animus_praepara(c, pp, pp_n);
+    c->pondus = 20;
+    animus_praepara(c);
 }
 
 void ursus_praecogita(tabula_t *tab)
 {
     if (!instructiones)
-        instructiones = lege_instructiones(__FILE__);
+        instructiones = lege_instructiones(tab->munda, "animae", "ursus");
+    const char *sap = tab->sapientum[URSUS][0] ?
+                      tab->sapientum[URSUS] : NULL;
     cogitatio_praecogita(tab, URSUS, 1, 1,
                          1, 1, 4,
-                         NULL, instructiones, &praecogitata);
+                         sap, instructiones, &praecogitata);
 }
 
 static actio_t ursus_cogito(const struct tabula *tab, int x, int y)
@@ -82,8 +81,7 @@ static void ursus_fictio(const char *nomen,
 
 void ursus_initia(void)
 {
-    pp_n = lege_parametra(__FILE__, pp, 12);
-    cella_initia_ops(URSUS, pp, pp_n);
+    cella_initia_ops(URSUS, "\xF0\x9F\x90\xBB", 'U');
 
     genera_ops[URSUS].phylum   = ANIMA;
     genera_ops[URSUS].praepara = ursus_praepara;

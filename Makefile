@@ -32,7 +32,7 @@ crispus/%.o: crispus/%.c $(CRISPUS_DEP)
 
 # --- omnia ---
 
-omnia: curre lude fare proba
+omnia: curre lude fare proba valida
 all: omnia
 
 # --- curre (sine terminali) ---
@@ -64,6 +64,14 @@ fare.o: fare.c oraculum.h
 fare: fare.o oraculum.o $(ORACULA_FARE) json.o utilia.o fictio.o $(CRISPUS_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
+# --- valida (validator schematum) ---
+
+valida.o: valida.c json.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+valida: valida.o json.o
+	$(CC) $(CFLAGS) -o $@ $^
+
 # --- probatio crispus ---
 
 proba: proba.o crispus/proba.o $(CRISPUS_OBJ)
@@ -82,7 +90,8 @@ mundus:
 	rm -f oraculum.o fare.o
 	rm -f $(ORACULA_OBJ) $(CRISPUS_OBJ)
 	rm -f crispus/proba.o proba.o
-	rm -f curre lude fare proba
+	rm -f valida.o
+	rm -f curre lude fare proba valida
 clean: mundus
 
 .PHONY: omnia all mundus clean

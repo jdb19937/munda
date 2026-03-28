@@ -196,24 +196,19 @@ char *lege_fasciculum(const char *via)
     return buf;
 }
 
-char *lege_instructiones(const char *fasciculus_c)
+char *lege_instructiones(const char *munda, const char *phylum,
+                         const char *genus)
 {
-    /* .c → .md */
-    size_t lon = strlen(fasciculus_c);
-    char *via = malloc(lon + 1);
-    if (!via) return strdup("");
-    memcpy(via, fasciculus_c, lon + 1);
-    if (lon >= 2 && via[lon-1] == 'c' && via[lon-2] == '.') {
-        via[lon-1] = 'm';
-        via[lon]   = 'd';
-        via[lon+1] = '\0';
-        /* realloc non necesse — .md idem longitudo quam .c + 1 */
-        char *novum = realloc(via, lon + 2);
-        if (novum) via = novum;
-    }
+    char via[256];
+    snprintf(via, sizeof(via), "%s/%s/%s.md", munda, phylum, genus);
     char *res = lege_fasciculum(via);
-    free(via);
-    return res ? res : strdup("");
+    if (!res) {
+        fprintf(stderr, "monitum: %s non inventum, praefinitum utor\n", via);
+        char praefinitum[64];
+        snprintf(praefinitum, sizeof(praefinitum), "age ut %s.", genus);
+        return strdup(praefinitum);
+    }
+    return res;
 }
 
 int lege_parametra(const char *fasciculus_c, json_par_t *pares, int max)

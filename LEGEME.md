@@ -8,22 +8,25 @@ Ludus simulationis tabularis in terminali, lingua C scriptus. Entia viva (feles,
 make
 ```
 
-Sine dependentiis externis (HTTPS per crispus). Duo binaria creantur:
+Sine dependentiis externis (HTTPS per crispus). Binaria creantur:
 
-- **munda** — ludus ipse
+- **curre** — cursus sine terminali
+- **lude** — ludus interactivus cum terminali
 - **fare** — imperativum oraculi (CLI ad LLM rogandum)
+- **valida** — validator schematum JSON
 
 ## Usus
 
 ```
-./munda [--obsidium] [latus [tempus_ms]]
+./lude [munda [tempus_ms]]
+./curre [munda [gradus]]
 ```
 
-| Argumentum    | Descriptio                                | Praefinitum |
-|---------------|-------------------------------------------|-------------|
-| `--obsidium`  | Modus obsidii: daleki ursum circumdant  | —           |
-| `latus`       | Longitudo lateris tabulae (4–128)         | 20          |
-| `tempus_ms`   | Intervallum inter gradus in ms            | 100         |
+| Argumentum    | Descriptio                                | Praefinitum         |
+|---------------|-------------------------------------------|---------------------|
+| `munda`       | Via ad directorium mundi                  | mundae/imperium     |
+| `tempus_ms`   | Intervallum inter gradus in ms (lude)     | 100                 |
+| `gradus`      | Numerus graduum simulationis (curre)      | 20                  |
 
 Claves in ludo:
 - **Sagittae** — guberna Zodum (deum lusoris)
@@ -33,12 +36,24 @@ Claves in ludo:
 ## Fare (Imperativum Oraculi)
 
 ```
-MUNDA_SAPIENTIA=openai/gpt-5.4 ./fare dic mihi fabulam
-MUNDA_SAPIENTIA=anthropic/claude-sonnet-4-6 ./fare -s "responde Latine" salve
-MUNDA_SAPIENTIA=xai/grok-3 ./fare quid est vita
+./fare -m openai/gpt-5.4 dic mihi fabulam
+./fare -m anthropic/claude-sonnet-4-6 -s "responde Latine" salve
+./fare -m xai/grok-3 quid est vita
 ```
 
-Forma: `[provisor/]sapientum[+effort]` ubi effort = `low`, `medium`, `high`.
+Forma: `-m [provisor/]sapientum[+effort]` ubi effort = `low`, `medium`, `high`.
+
+## Mundae (Configurationes Mundorum)
+
+Quisque mundus est directorium cum:
+- `tabula.json` — geometria, positiones, sapientum per genus
+- `{phylum}/{genus}.jsonl` — attributa individualia per cellam
+
+```
+mundae/
+  imperium/         — mundus plenus cum Zodo
+  obsidium/         — ursus ab X dalekis circumdatus
+```
 
 ## Genera Cellularum
 
@@ -53,6 +68,7 @@ Forma: `[provisor/]sapientum[+effort]` ubi effort = `low`, `medium`, `high`.
 | DALEKUS     | ANIMA  | Bot quod oraculum LLM groupnar rogat |
 | URSUS       | ANIMA  | Ursus venator                       |
 | ZODUS       | DEI    | Deus a lusore gubernatus            |
+| OCULUS      | DEI    | Deus omnividens                     |
 
 ## Modi Actionum
 
@@ -61,29 +77,27 @@ QUIESCE, MOVE, PELLE, CAPE, TRAHE, LOQUERE, CLAMA, OPPUGNA.
 ## Architectura
 
 ```
-main.c            — ansa principalis, initia, implendi tabula
-tabula.c/h        — tabula toroidalis, gradus simulationis
+curre.c           — cursus sine terminali
+lude.c            — ludus interactivus
+tabula.c/h        — tabula toroidalis, gradus simulationis, onerator mundi
 cella.h           — definitiones generum, phylorum, actionum
 terminalis.c/h    — redditio terminalis (ANSI)
 oraculum.c/h      — interfacies ad LLM (sync et async per crispus)
 crispus/           — bibliotheca HTTPS (TLS 1.2, AES-GCM, ECDHE, SHA-256)
 cogitatio.c/h     — praecogitatio generica per oraculum
 fare.c            — CLI imperativum oraculi
-json.c/h          — parser JSON
+json.c/h          — parser JSON, validator schematum
 utilia.c/h        — utilia communia
+valida.c          — instrumentum validationis schematum
 cellae/            — implementationes singulorum generum
   fixa/            — vacuum, saxum, murus
   cibi/            — rapum, fungus
   animae/          — feles, dalekus, ursus
-  dei/             — zodus
-oracula/           — provisores LLM (openai, anthropic, xai)
+  dei/             — zodus, oculus
+mundae/            — configurationes mundorum
+schemae/           — schemata JSON pro validatione
+oracula/           — provisores LLM (openai, anthropic, xai, fictus, munda)
 ```
-
-## Variabiles Ambientis
-
-| Variabilis         | Descriptio                              |
-|--------------------|-----------------------------------------|
-| `MUNDA_SAPIENTIA`  | Exemplar LLM (e.g. `openai/gpt-5.4`)  |
 
 ## Mundatio
 

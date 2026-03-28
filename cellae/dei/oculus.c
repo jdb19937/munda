@@ -14,24 +14,22 @@
 static praecogitata_t praecogitata;
 static char *instructiones;
 
-static json_par_t pp[12];
-static int pp_n;
-
 static void oculus_praepara_fn(cella_t *c)
 {
-    cella_praepara(c, OCULUS, pp, pp_n);
-    deus_praepara(c, pp, pp_n);
-    c->oculus.visus_radius = par_da_int(pp, pp_n, "visus_radius", 5);
-
+    c->pondus = 40;
+    deus_praepara(c);
+    c->oculus.visus_radius = 5;
 }
 
 void oculus_praecogita(tabula_t *tab)
 {
     if (!instructiones)
-        instructiones = lege_instructiones(__FILE__);
+        instructiones = lege_instructiones(tab->munda, "dei", "oculus");
+    const char *sap = tab->sapientum[OCULUS][0] ?
+                      tab->sapientum[OCULUS] : NULL;
     cogitatio_praecogita(tab, OCULUS, 1, 1,
                          PRAECOGITATA_MAX, 1, 5,
-                         NULL, instructiones, &praecogitata);
+                         sap, instructiones, &praecogitata);
 }
 
 static actio_t oculus_cogito(const struct tabula *tab, int x, int y)
@@ -76,8 +74,7 @@ static void oculus_fictio(const char *nomen,
 
 void oculus_initia(void)
 {
-    pp_n = lege_parametra(__FILE__, pp, 12);
-    cella_initia_ops(OCULUS, pp, pp_n);
+    cella_initia_ops(OCULUS, "I ", 'O');
 
     genera_ops[OCULUS].phylum   = DEI;
     genera_ops[OCULUS].praepara = oculus_praepara_fn;

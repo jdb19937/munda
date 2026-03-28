@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "titulus": "tabula — geometria et positiones mundi",
+  "type": "object",
+  "properties": {
+    "latus": {
+      "type": "integer",
+      "descriptio": "longitudo lateris tabulae quadratae",
+      "minimum": 4,
+      "maximum": 128
+    },
+    "murus": {
+      "type": "string",
+      "descriptio": "modus murorum — 'perimeter' pro muris circa margines",
+      "enum": [
+        "perimeter"
+      ]
+    },
+    "sapientum": {
+      "type": "object",
+      "descriptio": "sapientum oraculi per genus, e.g. {\"dalekus\": \"openai/gpt-5.4\"}",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "positiones": {
+      "type": "object",
+      "descriptio": "positiones cellarum per nomen, e.g. {\"U001\": [7, 7]}",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        },
+        "minItems": 2,
+        "maxItems": 2
+      }
+    }
+  },
+  "required": [
+    "latus",
+    "positiones"
+  ]
+}

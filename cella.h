@@ -5,7 +5,12 @@
  *   cellula_t            radix — genus, motum, pondus
  *   cella_t              cellula + unio phylorum
  *     fixum_t              phylum FIXUM — vacuum, saxum, murus
+ *       vacuum_t
+ *       saxum_t
+ *       murus_t
  *     cibus_t              phylum CIBUS — rapum, fungus
+ *       rapum_t
+ *       fungus_t
  *     animus_t             phylum ANIMA — feles, dalekus, ursus
  *       feles_t
  *       dalekus_t
@@ -23,7 +28,12 @@
 #include "cellula.h"
 #include <stddef.h>
 #include "cellae/fixum.h"
+#include "cellae/fixa/vacuum.h"
+#include "cellae/fixa/saxum.h"
+#include "cellae/fixa/murus.h"
 #include "cellae/cibus.h"
+#include "cellae/cibi/rapum.h"
+#include "cellae/cibi/fungus.h"
 #include "cellae/animus.h"
 #include "cellae/animae/feles.h"
 #include "cellae/animae/dalekus.h"
@@ -45,8 +55,21 @@ typedef struct cella {
     };
     /* unio phylorum — quisque ramus: basis phyli + unio generum */
     union {
-        fixum_t fixum;
-        cibus_t cibus;
+        struct {
+            fixum_t fixum;
+            union {
+                vacuum_t vacuum;
+                saxum_t saxum;
+                murus_t murus;
+            };
+        };
+        struct {
+            cibus_t cibus;
+            union {
+                rapum_t rapum;
+                fungus_t fungus;
+            };
+        };
         struct {
             animus_t animus;
             union {
@@ -95,19 +118,9 @@ void zodus_initia(void);
 void oculus_initia(void);
 
 /*
- * cella_praepara — legit attributa radicis (nomen, pictura, signum, pondus)
- * ex paribus JSON. scribit nomen/pictura/signum in genus_ops[genus]
- * (in buffers statos internos) et pondus in cellam.
- * vocatur a praepara() cuiusque generis.
+ * cella_initia_ops — scribit pictura/signum in genus_ops[genus].
+ * vocatur semel ab *_initia().
  */
-struct json_par;
-void cella_praepara(cella_t *c, genus_t genus,
-                    const struct json_par *pp, int n);
-
-/*
- * cella_initia_ops — legit nomen/pictura/signum ex paribus JSON
- * in genus_ops[genus]. vocatur semel ab *_initia().
- */
-void cella_initia_ops(genus_t genus, const struct json_par *pp, int n);
+void cella_initia_ops(genus_t genus, const char *pictura, char signum);
 
 #endif /* CELLA_H */

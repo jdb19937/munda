@@ -1,11 +1,11 @@
 /*
  * fare.c — imperativum oraculi
  *
- * Usus: ./fare [-s instructiones] rogatum ...
+ * Usus: ./fare [-m sapientum] [-s instructiones] rogatum ...
  *
- * MUNDA_SAPIENTIA=openai/gpt-5.4+high ./fare dic mihi fabulam
- * MUNDA_SAPIENTIA=anthropic/claude-sonnet-4-6 ./fare -s "responde Latine" salve
- * MUNDA_SAPIENTIA=xai/grok-3 ./fare quid est vita
+ * exempla:
+ *   ./fare -m openai/gpt-5.4+high dic mihi fabulam
+ *   ./fare -m anthropic/claude-sonnet-4-6 -s "responde Latine" salve
  */
 
 #include "oraculum.h"
@@ -37,33 +37,39 @@ static char *coniunge(int argc, char **argv, int ab)
 
 int main(int argc, char **argv)
 {
+    const char *sapientum = NULL;
     const char *instructiones = NULL;
-    int arg_initium = 1;
+    int argi = 1;
 
-    /* lege -s instructiones */
-    if (argc >= 3 && strcmp(argv[1], "-s") == 0) {
-        instructiones = argv[2];
-        arg_initium = 3;
+    while (argi < argc && argv[argi][0] == '-') {
+        if (strcmp(argv[argi], "-m") == 0 && argi + 1 < argc) {
+            sapientum = argv[++argi];
+            argi++;
+        } else if (strcmp(argv[argi], "-s") == 0 && argi + 1 < argc) {
+            instructiones = argv[++argi];
+            argi++;
+        } else {
+            break;
+        }
     }
 
-    if (arg_initium >= argc) {
+    if (argi >= argc) {
         fprintf(stderr,
-            "usus: %s [-s instructiones] rogatum ...\n"
+            "usus: %s [-m sapientum] [-s instructiones] rogatum ...\n"
             "\n"
-            "MUNDA_SAPIENTIA forma: [provisor/]sapientum[+effort]\n"
-            "  provisores: openai, anthropic, xai\n"
-            "  effort: low, medium, high\n"
+            "  -m forma: [provisor/]sapientum[+effort]\n"
+            "     provisores: openai, anthropic, xai\n"
+            "     effort: low, medium, high\n"
             "\n"
             "exempla:\n"
-            "  MUNDA_SAPIENTIA=gpt-5.4 %s salve\n"
-            "  MUNDA_SAPIENTIA=openai/gpt-5.4+high %s -s 'responde Latine' quid est\n"
-            "  MUNDA_SAPIENTIA=anthropic/claude-sonnet-4-6 %s dic fabulam\n"
-            "  MUNDA_SAPIENTIA=xai/grok-3 %s quid est vita\n",
-            argv[0], argv[0], argv[0], argv[0], argv[0]);
+            "  %s -m gpt-5.4 salve\n"
+            "  %s -m openai/gpt-5.4+high -s 'responde Latine' quid est\n"
+            "  %s -m anthropic/claude-sonnet-4-6 dic fabulam\n",
+            argv[0], argv[0], argv[0], argv[0]);
         return 1;
     }
 
-    char *rogatum = coniunge(argc, argv, arg_initium);
+    char *rogatum = coniunge(argc, argv, argi);
     if (!rogatum) {
         fprintf(stderr, "memoria defecit\n");
         return 1;
@@ -73,7 +79,7 @@ int main(int argc, char **argv)
     oraculum_initia();
 
     char *resp = NULL;
-    int rc = oraculum_roga(NULL, instructiones, rogatum, &resp);
+    int rc = oraculum_roga(sapientum, instructiones, rogatum, &resp);
 
     if (rc == 0 && resp)
         printf("%s\n", resp);

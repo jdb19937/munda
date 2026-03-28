@@ -3,7 +3,7 @@
  *
  * Non HTTP rogat — actiones programmatice generat delegando
  * ad genus_ops[g].fictio() cuiusque generis.
- * Usus: MUNDA_SAPIENTIA=fictus/probatio
+ * sapientum: fictus/probatio
  */
 
 #include "provisor.h"

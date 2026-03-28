@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "titulus": "saxum — lapis mobilis",
+  "type": "object",
+  "properties": {
+    "nomen": {
+      "type": "string",
+      "descriptio": "nomen proprium saxi, e.g. S001"
+    },
+    "pondus": {
+      "type": "integer",
+      "descriptio": "pondus saxi — quantum difficile sit pellere",
+      "default": 10
+    }
+  },
+  "required": [
+    "nomen"
+  ]
+}

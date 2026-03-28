@@ -60,4 +60,71 @@ char *json_da_crudum(const char *json, const char *via);
  */
 int json_claves(const char *json, char claves[][64], int max);
 
+/* --- fasciculi --- */
+
+/*
+ * json_lege_fasciculum — legit fasciculum integrum in memoriam.
+ * vocans liberet per free(). reddit NULL si error.
+ */
+char *json_lege_fasciculum(const char *via);
+
+/* --- JSONL --- */
+
+/*
+ * json_pro_quaque_linea — iterat per lineas JSONL.
+ * pro quaque linea non vacua, legit paria et vocat functorem.
+ * reddit numerum linearum processarum.
+ */
+typedef void (*json_linea_functor_t)(const json_par_t *pp, int n, void *ctx);
+int json_pro_quaque_linea(const char *jsonl, json_linea_functor_t f, void *ctx);
+
+/* --- schema --- */
+
+#define SCHEMA_CAMPI_MAX 32
+
+/* typus campi */
+typedef enum {
+    TYPUS_CHORDA = 0,
+    TYPUS_NUMERUS
+} typus_t;
+
+/* unus campus schematis */
+typedef struct {
+    char nomen[64];
+    typus_t typus;
+    int necessarium;        /* 1 si in "required" */
+} schema_campus_t;
+
+/* schema integrum */
+typedef struct {
+    char titulus[128];
+    schema_campus_t campi[SCHEMA_CAMPI_MAX];
+    int num_campi;
+} schema_t;
+
+/*
+ * schema_lege — legit schema ex chorda JSON.
+ * reddit 0 si bene, -1 si error.
+ */
+int schema_lege(const char *json, schema_t *s);
+
+/*
+ * schema_lege_fasciculum — legit schema ex fasciculo.
+ * reddit 0 si bene, -1 si error.
+ */
+int schema_lege_fasciculum(const char *via, schema_t *s);
+
+/*
+ * schema_valida — validat paria contra schema.
+ * reddit 0 si validum. si invalidum, scribit errorem in buf et reddit -1.
+ */
+int schema_valida(const schema_t *s, const json_par_t *pp, int n,
+                  char *error, size_t mag);
+
+/*
+ * schema_valida_jsonl — validat fasciculum JSONL contra schema.
+ * scribit errores ad stderr. reddit numerum errorum.
+ */
+int schema_valida_jsonl(const schema_t *s, const char *jsonl);
+
 #endif /* JSON_H */

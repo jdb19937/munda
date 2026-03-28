@@ -88,10 +88,11 @@ int lexicon_genera(const lexicon_t *lex, char genera[][64], int max_genera);
 char *lege_fasciculum(const char *via);
 
 /*
- * lege fasciculum .md iuxta fasciculum .c fontem.
- * e.g. si fasciculus_c = "cellae/animae/ursus.c", legit "cellae/animae/ursus.md"
+ * lege_instructiones — legit fasciculum .md ex mundo.
+ * construit "{munda}/{phylum}/{genus}.md", legit, monet si absens.
  */
-char *lege_instructiones(const char *fasciculus_c);
+char *lege_instructiones(const char *munda, const char *phylum,
+                         const char *genus);
 
 /*
  * lege fasciculum .json iuxta fasciculum .c fontem et extrahe parametra.

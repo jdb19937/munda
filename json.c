@@ -4,6 +4,7 @@
 
 #include "json.h"
 
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -483,6 +484,65 @@ char *json_da_crudum(const char *json, const char *via)
     return res;
 }
 
+/* ================================================================
+ * fasciculi
+ * ================================================================ */
+
+char *json_lege_fasciculum(const char *via)
+{
+    FILE *f = fopen(via, "rb");
+    if (!f) return NULL;
+    fseek(f, 0, SEEK_END);
+    long mag = ftell(f);
+    if (mag < 0) { fclose(f); return NULL; }
+    fseek(f, 0, SEEK_SET);
+    char *buf = malloc((size_t)mag + 1);
+    if (!buf) { fclose(f); return NULL; }
+    size_t lecta = fread(buf, 1, (size_t)mag, f);
+    fclose(f);
+    buf[lecta] = '\0';
+    return buf;
+}
+
+/* ================================================================
+ * JSONL
+ * ================================================================ */
+
+int json_pro_quaque_linea(const char *jsonl, json_linea_functor_t f, void *ctx)
+{
+    int n = 0;
+    const char *p = jsonl;
+    while (*p) {
+        /* transili spatia et lineas vacuas */
+        while (*p == '\n' || *p == '\r' || *p == ' ' || *p == '\t')
+            p++;
+        if (!*p) break;
+
+        /* inveni finem lineae */
+        const char *finis = p;
+        while (*finis && *finis != '\n' && *finis != '\r')
+            finis++;
+
+        /* copia lineae in buffer temporarium */
+        size_t lon = (size_t)(finis - p);
+        char *linea = malloc(lon + 1);
+        if (!linea) break;
+        memcpy(linea, p, lon);
+        linea[lon] = '\0';
+
+        /* lege paria */
+        json_par_t pares[32];
+        int np = json_lege(linea, pares, 32);
+        if (np > 0)
+            f(pares, np, ctx);
+        free(linea);
+        n++;
+
+        p = finis;
+    }
+    return n;
+}
+
 int json_claves(const char *json, char claves[][64], int max)
 {
     const char *p = transili_spatia(json);
@@ -506,4 +566,176 @@ int json_claves(const char *json, char claves[][64], int max)
         p = transili_spatia(p);
     }
     return n;
+}
+
+/* ================================================================
+ * schema — lector et validator
+ * ================================================================ */
+
+int schema_lege(const char *json, schema_t *s)
+{
+    memset(s, 0, sizeof(*s));
+
+    /* titulus */
+    char *tit = json_da_chordam(json, "titulus");
+    if (tit) {
+        snprintf(s->titulus, sizeof(s->titulus), "%s", tit);
+        free(tit);
+    }
+
+    /* proprietates — extrahe claves */
+    char *prop_crudum = json_da_crudum(json, "properties");
+    if (!prop_crudum)
+        return -1;
+
+    char nomina[SCHEMA_CAMPI_MAX][64];
+    int nc = json_claves(prop_crudum, nomina, SCHEMA_CAMPI_MAX);
+
+    for (int i = 0; i < nc && s->num_campi < SCHEMA_CAMPI_MAX; i++) {
+        schema_campus_t *c = &s->campi[s->num_campi];
+        snprintf(c->nomen, sizeof(c->nomen), "%s", nomina[i]);
+
+        /* typus campi */
+        char via[128];
+        snprintf(via, sizeof(via), "properties.%s.type", nomina[i]);
+        char *typ = json_da_chordam(json, via);
+        if (typ) {
+            if (strcmp(typ, "integer") == 0)
+                c->typus = TYPUS_NUMERUS;
+            else
+                c->typus = TYPUS_CHORDA;
+            free(typ);
+        }
+
+        s->num_campi++;
+    }
+    free(prop_crudum);
+
+    /* required — lege indicem */
+    char *req_crudum = json_da_crudum(json, "required");
+    if (req_crudum && req_crudum[0] == '[') {
+        for (int i = 0; i < s->num_campi; i++) {
+            const char *p = req_crudum + 1;
+            while (*p) {
+                while (*p && (*p == ' ' || *p == ',' || *p == '\n'))
+                    p++;
+                if (*p == ']') break;
+                if (*p == '"') {
+                    const char *ini = p + 1;
+                    const char *fin = strchr(ini, '"');
+                    if (!fin) break;
+                    size_t lon = (size_t)(fin - ini);
+                    if (lon == strlen(s->campi[i].nomen) &&
+                        memcmp(ini, s->campi[i].nomen, lon) == 0) {
+                        s->campi[i].necessarium = 1;
+                        break;
+                    }
+                    p = fin + 1;
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+    free(req_crudum);
+
+    return 0;
+}
+
+int schema_lege_fasciculum(const char *via, schema_t *s)
+{
+    char *json = json_lege_fasciculum(via);
+    if (!json) return -1;
+    int res = schema_lege(json, s);
+    free(json);
+    return res;
+}
+
+/* est valor numerus integer? */
+static int est_numerus(const char *v)
+{
+    if (!*v) return 0;
+    const char *p = v;
+    if (*p == '-') p++;
+    if (!*p) return 0;
+    while (*p) {
+        if (!isdigit((unsigned char)*p))
+            return 0;
+        p++;
+    }
+    return 1;
+}
+
+int schema_valida(const schema_t *s, const json_par_t *pp, int n,
+                  char *error, size_t mag)
+{
+    /* verifica campos necessarios */
+    for (int i = 0; i < s->num_campi; i++) {
+        if (!s->campi[i].necessarium)
+            continue;
+        int inventum = 0;
+        for (int j = 0; j < n; j++) {
+            if (strcmp(pp[j].clavis, s->campi[i].nomen) == 0) {
+                inventum = 1;
+                break;
+            }
+        }
+        if (!inventum) {
+            snprintf(error, mag, "campus necessarius deest: \"%s\"",
+                     s->campi[i].nomen);
+            return -1;
+        }
+    }
+
+    /* verifica typum cuiusque campi in dato */
+    for (int j = 0; j < n; j++) {
+        const schema_campus_t *c = NULL;
+        for (int i = 0; i < s->num_campi; i++) {
+            if (strcmp(s->campi[i].nomen, pp[j].clavis) == 0) {
+                c = &s->campi[i];
+                break;
+            }
+        }
+
+        if (!c) {
+            snprintf(error, mag, "campus ignotus: \"%s\"", pp[j].clavis);
+            return -1;
+        }
+
+        if (c->typus == TYPUS_NUMERUS && !est_numerus(pp[j].valor)) {
+            snprintf(error, mag,
+                     "campus \"%s\": expectatur numerus, datum \"%s\"",
+                     c->nomen, pp[j].valor);
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+/* validator JSONL */
+
+typedef struct {
+    const schema_t *schema;
+    int linea_num;
+    int errores;
+} validatio_ctx_t;
+
+static void valida_lineam(const json_par_t *pp, int n, void *ctx)
+{
+    validatio_ctx_t *v = ctx;
+    v->linea_num++;
+
+    char error[256];
+    if (schema_valida(v->schema, pp, n, error, sizeof(error)) < 0) {
+        fprintf(stderr, "  linea %d: %s\n", v->linea_num, error);
+        v->errores++;
+    }
+}
+
+int schema_valida_jsonl(const schema_t *s, const char *jsonl)
+{
+    validatio_ctx_t ctx = { .schema = s, .linea_num = 0, .errores = 0 };
+    json_pro_quaque_linea(jsonl, valida_lineam, &ctx);
+    return ctx.errores;
 }

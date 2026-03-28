@@ -4,17 +4,13 @@
 
 #include "cella.h"
 #include "tabula.h"
-#include "utilia.h"
 
 int zodus_imperium = 0;   /* DIR_NIHIL */
 
-static json_par_t pp[12];
-static int pp_n;
-
 static void zodus_praepara(cella_t *c)
 {
-    cella_praepara(c, ZODUS, pp, pp_n);
-    deus_praepara(c, pp, pp_n);
+    c->pondus = 50;
+    deus_praepara(c);
 }
 
 static actio_t zodus_cogito(const struct tabula *tab, int x, int y)
@@ -35,8 +31,7 @@ static actio_t zodus_cogito(const struct tabula *tab, int x, int y)
 
 void zodus_initia(void)
 {
-    pp_n = lege_parametra(__FILE__, pp, 12);
-    cella_initia_ops(ZODUS, pp, pp_n);
+    cella_initia_ops(ZODUS, "\xE2\x9A\xA1", 'Z');
 
     genera_ops[ZODUS].phylum   = DEI;
     genera_ops[ZODUS].praepara = zodus_praepara;

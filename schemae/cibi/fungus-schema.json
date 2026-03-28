@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "titulus": "fungus — fungus edibilis",
+  "type": "object",
+  "properties": {
+    "nomen": {
+      "type": "string",
+      "descriptio": "nomen proprium fungi, e.g. G001"
+    },
+    "pondus": {
+      "type": "integer",
+      "descriptio": "pondus fungi",
+      "default": 1
+    },
+    "nutritio": {
+      "type": "integer",
+      "descriptio": "quantum satietatis det edenti",
+      "default": 2
+    }
+  },
+  "required": [
+    "nomen"
+  ]
+}

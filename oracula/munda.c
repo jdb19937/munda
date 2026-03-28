@@ -2,7 +2,7 @@
  * oracula/munda.c — provisor programmatus (quasicogitatio)
  *
  * Non HTTP rogat — responsa programmatice generat ex vicinitate.
- * Usus: MUNDA_SAPIENTIA=munda/instinctus
+ * sapientum: munda/instinctus
  */
 
 #include "provisor.h"

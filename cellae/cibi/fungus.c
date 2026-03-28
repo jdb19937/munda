@@ -3,20 +3,15 @@
  */
 
 #include "cella.h"
-#include "utilia.h"
-
-static json_par_t pp[8];
-static int pp_n;
 
 static void fungus_praepara(cella_t *c)
 {
-    cella_praepara(c, FUNGUS, pp, pp_n);
+    c->pondus = 1;
 }
 
 void fungus_initia(void)
 {
-    pp_n = lege_parametra(__FILE__, pp, 8);
-    cella_initia_ops(FUNGUS, pp, pp_n);
+    cella_initia_ops(FUNGUS, "\xF0\x9F\x8D\x84", 'f');
 
     genera_ops[FUNGUS].phylum   = CIBUS;
     genera_ops[FUNGUS].praepara = fungus_praepara;

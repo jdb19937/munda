@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "titulus": "murus — murus immobilis",
+  "type": "object",
+  "properties": {
+    "nomen": {
+      "type": "string",
+      "descriptio": "nomen proprium muri, e.g. M001"
+    },
+    "pondus": {
+      "type": "integer",
+      "descriptio": "pondus muri — semper altum, non pellendus",
+      "default": 100
+    }
+  },
+  "required": [
+    "nomen"
+  ]
+}

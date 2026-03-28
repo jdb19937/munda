@@ -3,14 +3,10 @@
  */
 
 #include "cella.h"
-#include "utilia.h"
-
-static json_par_t pp[8];
-static int pp_n;
 
 static void saxum_praepara(cella_t *c)
 {
-    cella_praepara(c, SAXUM, pp, pp_n);
+    c->pondus = 10;
 }
 
 static actio_t saxum_cogito(const struct tabula *tab, int x, int y)
@@ -21,8 +17,7 @@ static actio_t saxum_cogito(const struct tabula *tab, int x, int y)
 
 void saxum_initia(void)
 {
-    pp_n = lege_parametra(__FILE__, pp, 8);
-    cella_initia_ops(SAXUM, pp, pp_n);
+    cella_initia_ops(SAXUM, "\xF0\x9F\xA7\xB1", '#');
 
     genera_ops[SAXUM].phylum   = FIXUM;
     genera_ops[SAXUM].praepara = saxum_praepara;

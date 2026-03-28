@@ -14,10 +14,15 @@ typedef struct tabula {
     int latus;                  /* longitudo lateris */
     cella_t *cellulae;          /* matrix latus × latus */
     unsigned long gradus_num;   /* numerus graduum peractorum */
+    const char *munda;          /* via ad directorium mundi, e.g. "mundae/imperium" */
+    char sapientum[GENERA_NUMERUS][64]; /* sapientum oraculi per genus */
 } tabula_t;
 
-/* crea tabulam novam — omnes cellulae VACUUM */
-tabula_t *tabula_crea(int latus);
+/* crea tabulam ex {munda}/tabula.json — legit latus, omnes cellulae VACUUM */
+tabula_t *tabula_crea(const char *munda);
+
+/* imple tabulam ex fasciculis JSONL in munda */
+void tabula_imple(tabula_t *tab);
 
 /* libera memoriam */
 void tabula_libera(tabula_t *tab);

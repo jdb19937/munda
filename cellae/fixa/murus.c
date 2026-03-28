@@ -3,20 +3,15 @@
  */
 
 #include "cella.h"
-#include "utilia.h"
-
-static json_par_t pp[8];
-static int pp_n;
 
 static void murus_praepara(cella_t *c)
 {
-    cella_praepara(c, MURUS, pp, pp_n);
+    c->pondus = 100;
 }
 
 void murus_initia(void)
 {
-    pp_n = lege_parametra(__FILE__, pp, 8);
-    cella_initia_ops(MURUS, pp, pp_n);
+    cella_initia_ops(MURUS, "\xE2\xAC\x9B", 'W');
 
     genera_ops[MURUS].phylum   = FIXUM;
     genera_ops[MURUS].praepara = murus_praepara;

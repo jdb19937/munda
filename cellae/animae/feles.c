@@ -4,29 +4,43 @@
 
 #include "cella.h"
 #include "fictio.h"
-#include "utilia.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #define QUIES_LIMEN 19
 #define QUIES_MODULUS 20
 
-static json_par_t pp[12];
-static int pp_n;
+static const char *mentes_felium[] = {
+    "esurio", "curiosa sum", "somnolenta", "quid est illud",
+    "mrrr", "prrr", "ubi cibus", "fugio", "ludens",
+    "vidi aliquid", "audivi sonum", "mus ubi est",
+    "calida sum", "frigida sum", "sola sum",
+};
 
 static void feles_praepara(cella_t *c)
 {
-    cella_praepara(c, FELES, pp, pp_n);
-    animus_praepara(c, pp, pp_n);
+    c->pondus = 3;
+    animus_praepara(c);
 }
 
 static actio_t feles_cogito(const struct tabula *tab, int x, int y)
 {
     (void)tab; (void)x; (void)y;
+    actio_t act = ACTIO_NIHIL;
+
+    /* fortuito muta mentem */
+    if (rand() % 5 == 0) {
+        int n = (int)(sizeof(mentes_felium) / sizeof(mentes_felium[0]));
+        snprintf(act.mens, MENS_MAX, "%s", mentes_felium[rand() % n]);
+    }
+
     if (rand() % QUIES_MODULUS < QUIES_LIMEN)
-        return ACTIO_NIHIL;
-    directio_t dir = (directio_t)(1 + rand() % 4);
-    return (actio_t){ CAPE, dir, {0}, {0} };
+        return act;
+
+    act.modus = CAPE;
+    act.directio = (directio_t)(1 + rand() % 4);
+    return act;
 }
 
 /* --- fictio: erra fortuito, ede cibum, fuge ursos --- */
@@ -40,7 +54,6 @@ static void feles_fictio(const char *nomen,
     /* fuge ursum vicinum */
     for (int d = SEPTENTRIO; d <= ORIENS; d++) {
         if (fictio_vicinum_est(vic, 'U', (directio_t)d)) {
-            /* move in directionem oppositam */
             directio_t fuga;
             switch ((directio_t)d) {
             case SEPTENTRIO: fuga = MERIDIES;   break;
@@ -74,8 +87,7 @@ static void feles_fictio(const char *nomen,
 
 void feles_initia(void)
 {
-    pp_n = lege_parametra(__FILE__, pp, 12);
-    cella_initia_ops(FELES, pp, pp_n);
+    cella_initia_ops(FELES, "\xF0\x9F\x90\xB1", 'F');
 
     genera_ops[FELES].phylum   = ANIMA;
     genera_ops[FELES].praepara = feles_praepara;

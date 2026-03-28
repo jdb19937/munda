@@ -38,7 +38,7 @@ int oraculum_roga(const char *sapientum, const char *instructiones,
 #define ORACULUM_PARATUM  1
 #define ORACULUM_ERRATUM -1
 
-/* sapientum potest esse NULL (utetur MUNDA_SAPIENTIA env var) */
+/* sapientum potest esse NULL (utetur praefinitum) */
 int oraculum_mitte(const char *sapientum, const char *instructiones,
                    const char *rogatum);
 

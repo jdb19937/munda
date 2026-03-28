@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "titulus": "ursus — ursus venator",
+  "type": "object",
+  "properties": {
+    "nomen": {
+      "type": "string",
+      "descriptio": "nomen proprium ursi, e.g. U001"
+    },
+    "pondus": {
+      "type": "integer",
+      "descriptio": "pondus ursi",
+      "default": 20
+    },
+    "vires": {
+      "type": "integer",
+      "descriptio": "quantum ponderis pellere possit",
+      "default": 50
+    },
+    "vitalitas": {
+      "type": "integer",
+      "descriptio": "quantum impetum sustinere possit",
+      "default": 60
+    },
+    "ferocitas": {
+      "type": "integer",
+      "descriptio": "ferocitatem ursi — adficit aggressionem",
+      "default": 5
+    },
+    "mens": {
+      "type": "string",
+      "descriptio": "cogitationes initiales ursi",
+      "default": "expergiscor"
+    }
+  },
+  "required": [
+    "nomen"
+  ]
+}
