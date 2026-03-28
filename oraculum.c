@@ -12,7 +12,7 @@
 #include "oracula/provisor.h"
 #include "utilia.h"
 
-#include "crispus/crispus.h"
+#include "crispus.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
