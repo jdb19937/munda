@@ -19,30 +19,51 @@ CAPITA  = cellula.h cella.h tabula.h terminalis.h oraculum.h json.h cogitatio.h 
           cellae/dei/zodus.h cellae/dei/oculus.h
 
 ORACULA_OBJ = oracula/openai.o oracula/xai.o oracula/anthropic.o oracula/fictus.o
-ORACULA_FARE = oracula/openai.o oracula/xai.o oracula/anthropic.o oracula/fictus.o
 ORACULA_DEP = oracula/provisor.h json.h
 
-# --- crispus (HTTPS sine dependentiis externis) ---
+# --- omnia (default target) ---
 
-CRISPUS_OBJ = crispus/crispus.o crispus/summa.o crispus/arca.o crispus/numerus.o crispus/velum.o
-CRISPUS_DEP = crispus/crispus.h crispus/internum.h
+omnia: curre lude fare proba valida daemonium coniunge specta fac_certificatum
+all: omnia
+
+# --- arcana (primitiva cryptographica communia) ---
+
+ARCANA_OBJ = arcana/summa.o arcana/arca.o arcana/numerus.o
+ARCANA_DEP = arcana/arcana.h
+
+arcana/%.o: arcana/%.c $(ARCANA_DEP)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# --- crispus (HTTPS, TLS — pendet ab arcana) ---
+
+CRISPUS_OBJ = crispus/crispus.o crispus/velum.o
+CRISPUS_DEP = crispus/crispus.h crispus/internum.h $(ARCANA_DEP)
 
 crispus/%.o: crispus/%.c $(CRISPUS_DEP)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# --- omnia ---
+# --- retis (protocollum TCP) ---
 
-omnia: curre lude fare proba valida
-all: omnia
+RETIS_OBJ = retis/retis.o retis/serializa.o retis/visus.o
+RETIS_DEP = retis/retis.h $(ARCANA_DEP)
+
+retis/retis.o: retis/retis.c $(RETIS_DEP) json.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+retis/serializa.o: retis/serializa.c retis/serializa.h $(RETIS_DEP) $(CAPITA) genera.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+retis/visus.o: retis/visus.c retis/visus.h genera.h cellula.h json.h
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # --- curre (sine terminali) ---
 
-curre: curre.o $(COMMUNES_OBJ) oraculum.o $(ORACULA_OBJ) $(CRISPUS_OBJ)
+curre: curre.o $(COMMUNES_OBJ) oraculum.o $(ORACULA_OBJ) $(CRISPUS_OBJ) $(ARCANA_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
 # --- lude (cum terminali) ---
 
-lude: lude.o terminalis.o $(COMMUNES_OBJ) oraculum.o $(ORACULA_OBJ) $(CRISPUS_OBJ)
+lude: lude.o terminalis.o $(COMMUNES_OBJ) oraculum.o $(ORACULA_OBJ) $(CRISPUS_OBJ) $(ARCANA_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
 %.o: %.c $(CAPITA)
@@ -61,7 +82,7 @@ oracula/%.o: oracula/%.c $(ORACULA_DEP)
 fare.o: fare.c oraculum.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-fare: fare.o oraculum.o $(ORACULA_FARE) json.o utilia.o fictio.o $(CRISPUS_OBJ)
+fare: fare.o oraculum.o $(ORACULA_OBJ) json.o utilia.o fictio.o $(CRISPUS_OBJ) $(ARCANA_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
 # --- valida (validator schematum) ---
@@ -74,7 +95,7 @@ valida: valida.o json.o
 
 # --- probatio crispus ---
 
-proba: proba.o crispus/proba.o $(CRISPUS_OBJ)
+proba: proba.o crispus/proba.o $(CRISPUS_OBJ) $(ARCANA_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
 proba.o: proba.c crispus/proba.h
@@ -83,15 +104,50 @@ proba.o: proba.c crispus/proba.h
 crispus/proba.o: crispus/proba.c crispus/proba.h $(CRISPUS_DEP)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# --- daemonium (servitor TCP) ---
+
+daemonium: daemonium.o retis/retis.o retis/serializa.o $(COMMUNES_OBJ) oraculum.o $(ORACULA_OBJ) $(CRISPUS_OBJ) $(ARCANA_OBJ)
+	$(CC) $(CFLAGS) -o $@ $^
+
+# --- coniunge (cliens interactivus — sine cella.h/tabula.h) ---
+
+CLIENS_OBJ = retis/retis.o retis/visus.o retis/crudus.o json.o $(ARCANA_OBJ)
+
+retis/crudus.o: retis/crudus.c retis/crudus.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+coniunge: coniunge.o $(CLIENS_OBJ)
+	$(CC) $(CFLAGS) -o $@ $^
+
+coniunge.o: coniunge.c retis/retis.h retis/visus.h retis/crudus.h genera.h cellula.h json.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# --- specta (cliens sine capite — sine cella.h/tabula.h) ---
+
+specta: specta.o $(CLIENS_OBJ)
+	$(CC) $(CFLAGS) -o $@ $^
+
+specta.o: specta.c retis/retis.h retis/visus.h genera.h cellula.h json.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# --- fac_certificatum ---
+
+fac_certificatum: fac_certificatum.o retis/retis.o json.o $(ARCANA_OBJ)
+	$(CC) $(CFLAGS) -o $@ $^
+
+fac_certificatum.o: fac_certificatum.c retis/retis.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
 # --- mundatio ---
 
 mundus:
 	rm -f curre.o lude.o terminalis.o $(COMMUNES_OBJ)
-	rm -f oraculum.o fare.o
-	rm -f $(ORACULA_OBJ) $(CRISPUS_OBJ)
-	rm -f crispus/proba.o proba.o
-	rm -f valida.o
+	rm -f oraculum.o fare.o daemonium.o coniunge.o specta.o fac_certificatum.o
+	rm -f $(ORACULA_OBJ) $(CRISPUS_OBJ) $(ARCANA_OBJ)
+	rm -f retis/retis.o retis/serializa.o retis/visus.o retis/crudus.o
+	rm -f crispus/proba.o proba.o valida.o
 	rm -f curre lude fare proba valida
+	rm -f daemonium coniunge specta fac_certificatum
 clean: mundus
 
 .PHONY: omnia all mundus clean

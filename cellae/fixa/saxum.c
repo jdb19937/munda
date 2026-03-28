@@ -19,7 +19,6 @@ void saxum_initia(void)
 {
     cella_initia_ops(SAXUM, "\xF0\x9F\xA7\xB1", '#');
 
-    genera_ops[SAXUM].phylum   = FIXUM;
     genera_ops[SAXUM].praepara = saxum_praepara;
     genera_ops[SAXUM].cogito   = saxum_cogito;
 }

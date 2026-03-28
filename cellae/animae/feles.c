@@ -89,8 +89,6 @@ void feles_initia(void)
 {
     cella_initia_ops(FELES, "\xF0\x9F\x90\xB1", 'F');
 
-    genera_ops[FELES].phylum       = ANIMA;
-    genera_ops[FELES].capacitates  = CAP_ANIMA;
     genera_ops[FELES].praepara     = feles_praepara;
     genera_ops[FELES].cogito       = feles_cogito;
     genera_ops[FELES].fictio   = feles_fictio;

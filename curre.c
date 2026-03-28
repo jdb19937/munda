@@ -82,6 +82,32 @@ int main(int argc, char **argv)
         MORIRE("memoria defecit");
     tabula_imple(tab);
 
+    /* crea zodum si nondum existit */
+    {
+        int habet_zodum = 0;
+        for (int y = 0; y < tab->latus && !habet_zodum; y++)
+            for (int x = 0; x < tab->latus && !habet_zodum; x++)
+                if (tabula_da_const(tab, x, y)->genus == ZODUS)
+                    habet_zodum = 1;
+        if (!habet_zodum) {
+            int zx = tab->latus / 2, zy = tab->latus / 2;
+            for (int r = 0; r < tab->latus && !habet_zodum; r++)
+                for (int dy = -r; dy <= r && !habet_zodum; dy++)
+                    for (int dx = -r; dx <= r && !habet_zodum; dx++) {
+                        if (abs(dx) != r && abs(dy) != r) continue;
+                        int x = (zx + dx + tab->latus) % tab->latus;
+                        int y = (zy + dy + tab->latus) % tab->latus;
+                        if (tabula_da_const(tab, x, y)->genus == VACUUM) {
+                            tabula_pone(tab, x, y, ZODUS);
+                            snprintf(tabula_da(tab, x, y)->deus.nomen,
+                                     sizeof(tabula_da(tab, x, y)->deus.nomen),
+                                     "Zodus");
+                            habet_zodum = 1;
+                        }
+                    }
+        }
+    }
+
     pinge(tab);
 
     for (int g = 0; g < gradus; g++) {

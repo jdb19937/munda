@@ -113,22 +113,6 @@ static int lege_plene(int fd, void *data, size_t mag)
     return 0;
 }
 
-/* --- alea ex /dev/urandom --- */
-
-int alea_imple(uint8_t *alveus, size_t mag)
-{
-    int fd = open("/dev/urandom", O_RDONLY);
-    if (fd < 0) return -1;
-    size_t lectum = 0;
-    while (lectum < mag) {
-        ssize_t r = read(fd, alveus + lectum, mag - lectum);
-        if (r <= 0) { close(fd); return -1; }
-        lectum += (size_t)r;
-    }
-    close(fd);
-    return 0;
-}
-
 /* --- scribere/legere big-endian --- */
 
 static void scr16(uint8_t *p, uint16_t v) { p[0] = v >> 8; p[1] = v; }

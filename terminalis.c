@@ -6,6 +6,8 @@
  */
 
 #include "terminalis.h"
+#include "cella.h"
+#include "tabula.h"
 #include "oraculum.h"
 #include "utilia.h"
 

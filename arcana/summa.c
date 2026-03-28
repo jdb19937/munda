@@ -1,10 +1,10 @@
 /*
- * crispus_summa.c — SHA-256 et HMAC-SHA-256
+ * summa.c — SHA-256 et HMAC-SHA-256
  *
  * Implementatio FIPS 180-4. Sine dependentiis externis.
  */
 
-#include "internum.h"
+#include "arcana.h"
 #include <string.h>
 
 /* --- constantiae rotundae SHA-256 --- */

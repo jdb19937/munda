@@ -13,7 +13,6 @@ void fungus_initia(void)
 {
     cella_initia_ops(FUNGUS, "\xF0\x9F\x8D\x84", 'f');
 
-    genera_ops[FUNGUS].phylum   = CIBUS;
     genera_ops[FUNGUS].praepara = fungus_praepara;
     genera_ops[FUNGUS].cogito   = NULL;
 }

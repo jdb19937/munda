@@ -47,8 +47,6 @@ void zodus_initia(void)
 {
     cella_initia_ops(ZODUS, "\xE2\x9A\xA1", 'Z');
 
-    genera_ops[ZODUS].phylum       = DEI;
-    genera_ops[ZODUS].capacitates  = CAP_DEI;
     genera_ops[ZODUS].praepara     = zodus_praepara;
     genera_ops[ZODUS].cogito       = zodus_cogito;
 }

@@ -8,7 +8,8 @@
 #define TERMINALIS_H
 
 #include <signal.h>
-#include "tabula.h"
+
+struct tabula;
 
 /* initia terminalem — modus crudus, cursor occultus */
 int terminalis_initia(void);
@@ -16,8 +17,8 @@ int terminalis_initia(void);
 /* restaura terminalem ad statum pristinum */
 void terminalis_fini(void);
 
-/* pinge tabulam in terminalem */
-void terminalis_pinge(const tabula_t *tab);
+/* pinge tabulam in terminalem (necessitat tabula.h) */
+void terminalis_pinge(const struct tabula *tab);
 
 /* lege unum characterem sine mora — reddit -1 si nihil */
 int terminalis_lege(void);

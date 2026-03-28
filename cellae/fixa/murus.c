@@ -13,7 +13,6 @@ void murus_initia(void)
 {
     cella_initia_ops(MURUS, "\xE2\xAC\x9B", 'W');
 
-    genera_ops[MURUS].phylum   = FIXUM;
     genera_ops[MURUS].praepara = murus_praepara;
     genera_ops[MURUS].cogito   = NULL;
 }

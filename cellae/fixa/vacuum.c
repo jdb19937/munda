@@ -14,6 +14,5 @@ void vacuum_initia(void)
 {
     cella_initia_ops(VACUUM, "\xC2\xB7 ", '.');
 
-    genera_ops[VACUUM].phylum = FIXUM;
     genera_ops[VACUUM].cogito = vacuum_cogito;
 }

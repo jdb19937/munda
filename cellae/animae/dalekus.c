@@ -81,8 +81,6 @@ void dalekus_initia(void)
 {
     cella_initia_ops(DALEKUS, "\xF0\x9F\xA4\x96", 'B');
 
-    genera_ops[DALEKUS].phylum       = ANIMA;
-    genera_ops[DALEKUS].capacitates  = CAP_ANIMA;
     genera_ops[DALEKUS].praepara     = dalekus_praepara;
     genera_ops[DALEKUS].cogito       = dalekus_cogito;
     genera_ops[DALEKUS].fictio   = dalekus_fictio;

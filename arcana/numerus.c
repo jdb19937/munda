@@ -1,6 +1,6 @@
 /*
- * crispus_numerus.c — arithmetica numeri magni, curva elliptica P-256,
- *                     verificatio RSA, resolutio ASN.1/X.509
+ * numerus.c — arithmetica numeri magni, curva elliptica P-256,
+ *             verificatio RSA, resolutio ASN.1/X.509, alea
  *
  * Numerus magnus: tabulatum verborum uint32_t, ordo minoris ponderis.
  *   v[0] = verbum minimi ponderis (least significant)
@@ -8,13 +8,29 @@
  * Sine dependentiis externis.
  */
 
-#include "internum.h"
+#include "arcana.h"
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
 
-/* ================================================================
- *  Numerus Magnus — operationes fundamentales
- * ================================================================ */
+/* --- alea --- */
+
+int alea_imple(uint8_t *alveus, size_t mag)
+{
+    int fd = open("/dev/urandom", O_RDONLY);
+    if (fd < 0) return -1;
+    size_t lectum = 0;
+    while (lectum < mag) {
+        ssize_t r = read(fd, alveus + lectum, mag - lectum);
+        if (r <= 0) { close(fd); return -1; }
+        lectum += (size_t)r;
+    }
+    close(fd);
+    return 0;
+}
+
+/* --- numerus magnus --- */
 
 void nm_ex_nihilo(nm_t *a)
 {
@@ -217,28 +233,149 @@ void nm_modmul(nm_t *r, const nm_t *a, const nm_t *b, const nm_t *m)
     nm_modulo(r, &prod, m);
 }
 
+/* --- Montgomery --- */
+
+typedef struct {
+    nm_t modulus;
+    int k;              /* verba in modulo */
+    uint32_t m_inv;     /* -m^(-1) mod 2^32 */
+    nm_t r_quadratum;   /* R^2 mod m, ubi R = 2^(k*32) */
+} mont_t;
+
+/* computa -m^(-1) mod 2^32 per iterationem Newtoni */
+static uint32_t mont_inv(uint32_t m0)
+{
+    uint32_t x = 1;
+    for (int i = 0; i < 5; i++)
+        x = x * (2 - m0 * x);
+    return (uint32_t)(-(int32_t)x);
+}
+
+static void mont_initia(mont_t *mt, const nm_t *m)
+{
+    mt->modulus = *m;
+    mt->k = m->n;
+    mt->m_inv = mont_inv(m->v[0]);
+
+    /* R^2 mod m: R = 2^(k*32), computamus R mod m, deinde R^2 mod m */
+    /* methodus: initia r = 1, dupla k*64 vices cum reductione */
+    nm_t r;
+    nm_ex_nihilo(&r);
+    r.v[0] = 1;
+    for (int i = 0; i < mt->k * 64; i++) {
+        nm_adde(&r, &r, &r);
+        if (nm_compara(&r, m) >= 0)
+            nm_subtrahe(&r, &r, m);
+    }
+    mt->r_quadratum = r;
+}
+
+/* REDC: T * R^(-1) mod m */
+static void mont_redc(const mont_t *mt, nm_t *T)
+{
+    int k = mt->k;
+    for (int i = 0; i < k; i++) {
+        uint32_t u = T->v[i] * mt->m_inv;
+        /* T += u * m * 2^(32*i) */
+        uint64_t portatio = 0;
+        for (int j = 0; j < k; j++) {
+            int idx = i + j;
+            if (idx >= NM_VERBA) break;
+            uint64_t prod = (uint64_t)u * mt->modulus.v[j]
+                            + T->v[idx] + portatio;
+            T->v[idx] = (uint32_t)prod;
+            portatio = prod >> 32;
+        }
+        for (int j = i + k; j < NM_VERBA && portatio; j++) {
+            uint64_t s = (uint64_t)T->v[j] + portatio;
+            T->v[j] = (uint32_t)s;
+            portatio = s >> 32;
+        }
+    }
+    /* T >>= k*32 */
+    for (int i = 0; i < NM_VERBA - k; i++)
+        T->v[i] = T->v[i + k];
+    for (int i = NM_VERBA - k; i < NM_VERBA; i++)
+        T->v[i] = 0;
+    T->n = k + 1;
+    if (T->n > NM_VERBA) T->n = NM_VERBA;
+    nm_normaliza(T);
+
+    if (nm_compara(T, &mt->modulus) >= 0)
+        nm_subtrahe(T, T, &mt->modulus);
+}
+
+/* a → ā = a * R mod m */
+static void mont_in(const mont_t *mt, nm_t *ar, const nm_t *a)
+{
+    nm_t prod;
+    nm_multiplica(&prod, a, &mt->r_quadratum);
+    *ar = prod;
+    mont_redc(mt, ar);
+}
+
+/* ā → a = ā * R^(-1) mod m */
+static void mont_ex(const mont_t *mt, nm_t *a, const nm_t *ar)
+{
+    *a = *ar;
+    mont_redc(mt, a);
+}
+
+/* ā * b̄ * R^(-1) mod m */
+static void mont_mul(const mont_t *mt, nm_t *r,
+                     const nm_t *a, const nm_t *b)
+{
+    nm_t prod;
+    nm_multiplica(&prod, a, b);
+    *r = prod;
+    mont_redc(mt, r);
+}
+
 void nm_modpot(nm_t *r, const nm_t *basis, const nm_t *exponens,
                const nm_t *modulus)
 {
+    /* moduli parvi vel pares: recidunt ad methodum veterem */
+    if (modulus->n < 2 || !(modulus->v[0] & 1)) {
+        nm_t base_mod;
+        nm_modulo(&base_mod, basis, modulus);
+        nm_ex_nihilo(r);
+        r->v[0] = 1;
+        int nbits = nm_summa_bitorum(exponens);
+        for (int i = nbits - 1; i >= 0; i--) {
+            nm_modmul(r, r, r, modulus);
+            if (nm_bitus(exponens, i))
+                nm_modmul(r, r, &base_mod, modulus);
+        }
+        return;
+    }
+
+    mont_t mt;
+    mont_initia(&mt, modulus);
+
+    /* converte in formam Montgomery */
+    nm_t base_mont, acc_mont;
     nm_t base_mod;
     nm_modulo(&base_mod, basis, modulus);
+    mont_in(&mt, &base_mont, &base_mod);
 
-    nm_ex_nihilo(r);
-    r->v[0] = 1;
+    /* acc = 1 in Montgomery = R mod m */
+    nm_t unum;
+    nm_ex_nihilo(&unum);
+    unum.v[0] = 1;
+    mont_in(&mt, &acc_mont, &unum);
 
     int nbits = nm_summa_bitorum(exponens);
     for (int i = nbits - 1; i >= 0; i--) {
-        /* r = r^2 mod m */
-        nm_modmul(r, r, r, modulus);
-        if (nm_bitus(exponens, i)) {
-            nm_modmul(r, r, &base_mod, modulus);
-        }
+        mont_mul(&mt, &acc_mont, &acc_mont, &acc_mont);
+        if (nm_bitus(exponens, i))
+            mont_mul(&mt, &acc_mont, &acc_mont, &base_mont);
     }
+
+    /* converte retro */
+    mont_ex(&mt, r, &acc_mont);
 }
 
-/* ================================================================
- *  Curva Elliptica P-256 (secp256r1)
- * ================================================================ */
+/* --- curva elliptica P-256 --- */
 
 /* primus campi: p = 2^256 - 2^224 + 2^192 + 2^96 - 1 */
 const nm_t EC_PRIMUS = {
@@ -388,11 +525,9 @@ void ec_multiplica(ec_punctum_t *r, const nm_t *k, const ec_punctum_t *P)
     *r = acc;
 }
 
-/* ================================================================
- *  RSA verificatio signaturae (PKCS#1 v1.5 cum SHA-256)
- * ================================================================ */
+/* --- RSA --- */
 
-/* DigestInfo pro SHA-256 (DER: SEQUENCE { SEQUENCE { OID sha256, NULL }, OCTET STRING }) */
+/* DigestInfo pro SHA-256 (DER) */
 static const uint8_t DIGESTINFO_SHA256[] = {
     0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86,
     0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05,
@@ -471,9 +606,7 @@ int rsa_occulta_pkcs1(const rsa_clavis_t *clavis,
     return 0;
 }
 
-/* ================================================================
- *  ASN.1 / X.509 — extractio clavis publicae RSA
- * ================================================================ */
+/* --- ASN.1 / X.509 --- */
 
 /* lege caput ASN.1 DER (tag + longitudo) */
 static int asn1_caput(const uint8_t **p, const uint8_t *finis,
@@ -527,10 +660,8 @@ int asn1_extrahe_rsa(const uint8_t *cert, size_t mag, rsa_clavis_t *clavis)
     if (asn1_caput(&temp, tbs_finis, &signum, &longitudo) < 0)
         return -1;
     if ((signum & 0xe0) == 0xa0) {
-        /* praetermitte versionem */
         p = temp + longitudo;
     }
-    /* aliter p manet, non est versio */
 
     /* praetermitte: numerusSerialis, algorithmus, emittens, validitas, subiectum */
     for (int i = 0; i < 5; i++) {
@@ -551,7 +682,7 @@ int asn1_extrahe_rsa(const uint8_t *cert, size_t mag, rsa_clavis_t *clavis)
     if (asn1_caput(&p, spki_finis, &signum, &longitudo) < 0 || signum != 0x03)
         return -1;
     if (longitudo < 1) return -1;
-    p++;            /* praetermitte octum bitorum non usorum */
+    p++;
     longitudo--;
 
     /* RSAPublicKey SEQUENCE interna */
@@ -564,7 +695,6 @@ int asn1_extrahe_rsa(const uint8_t *cert, size_t mag, rsa_clavis_t *clavis)
         return -1;
     const uint8_t *mod_data = p;
     size_t mod_mag = longitudo;
-    /* praetermitte nulum ducens */
     if (mod_mag > 0 && *mod_data == 0x00) { mod_data++; mod_mag--; }
     p += longitudo;
 

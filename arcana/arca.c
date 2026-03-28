@@ -1,11 +1,11 @@
 /*
- * crispus_arca.c — AES-128 et modus GCM
+ * arca.c — AES-128 et modus GCM
  *
  * Implementatio FIPS 197 (AES) et NIST SP 800-38D (GCM).
  * Sine dependentiis externis.
  */
 
-#include "internum.h"
+#include "arcana.h"
 #include <string.h>
 
 /* --- Tabula S (SubBytes) --- */
@@ -135,11 +135,9 @@ void arca128_occulta_truncum(const arca128_ctx_t *ctx,
     memcpy(out, status, 16);
 }
 
-/* ================================================================
- *  GCM (Galois/Counter Mode)
- * ================================================================ */
+/* --- GCM --- */
 
-/* multiplicatio in GF(2^128) cum polynomio x^128 + x^7 + x^2 + x + 1 */
+/* multiplicatio in GF(2^128) */
 static void gf128_multiplica(uint8_t r[16], const uint8_t x[16],
                               const uint8_t y[16])
 {
