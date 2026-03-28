@@ -39,6 +39,9 @@ para:
 	make -C ison
 	make -C crispus
 
+expara:
+	git submodule deinit -f ison crispus
+
 $(LIBISON):
 	make -C $(APOTHECA)/ison
 
@@ -161,4 +164,4 @@ purga:
 purga_omnia: purga
 	@if [ "$(APOTHECA)" = "." ]; then make -C ison purga; make -C crispus purga; fi
 
-.PHONY: omnia para purga purga_omnia
+.PHONY: omnia para expara purga purga_omnia
