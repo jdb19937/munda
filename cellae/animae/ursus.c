@@ -83,8 +83,9 @@ void ursus_initia(void)
 {
     cella_initia_ops(URSUS, "\xF0\x9F\x90\xBB", 'U');
 
-    genera_ops[URSUS].phylum   = ANIMA;
-    genera_ops[URSUS].praepara = ursus_praepara;
-    genera_ops[URSUS].cogito   = ursus_cogito;
+    genera_ops[URSUS].phylum       = ANIMA;
+    genera_ops[URSUS].capacitates  = CAP_ANIMA;
+    genera_ops[URSUS].praepara     = ursus_praepara;
+    genera_ops[URSUS].cogito       = ursus_cogito;
     genera_ops[URSUS].fictio   = ursus_fictio;
 }

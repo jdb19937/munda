@@ -15,7 +15,8 @@
 
 /* --- instructiones communes --- */
 
-static const char *INSTRUCTIONES_COMMUNES =
+/* caput: ante descriptiones modorum */
+static const char *INSTRUCTIONES_CAPUT =
     "Ludus tabulae es. Regis cellulas in tabula.\n\n"
     "Legenda: .=vacuum #=saxum W=murus F=feles B=dalekus U=ursus "
     "C=corvus r=rapum f=fungus Z=zodus O=oculus @=tu\n\n"
@@ -39,16 +40,24 @@ static const char *INSTRUCTIONES_COMMUNES =
     "- \"vicinitas\": array duplex ut supra\n"
     "- \"ultima_actio\": ultima actio tentata et exitus, si habetur\n"
     "- \"satietas\": saturitas ex cibis editis\n\n"
-    "Modi actionum:\n"
-    "- move DIRECTIO: move ad vacuum tantum\n"
-    "- pelle DIRECTIO: pelle obiectum ante te in ea directione\n"
-    "- cape DIRECTIO: cape (ede) cibum, move in locum eius\n"
-    "- trahe DIRECTIO: move ad vacuum, trahe obiectum a tergo tuo\n"
-    "- oppugna DIRECTIO: neca animum vicinum (vires > vitalitas requirit)\n"
-    "- loquere DIRECTIO verba: dic verba ad vicinum in ea directione "
-    "(non moveris)\n"
-    "- clama verba: clama ad omnes in vicinitate 3x3 "
-    "(non moveris, directio non requiritur)\n"
+    "Modi actionum:\n";
+
+/* descriptiones singulorum modorum — index per modus_t */
+static const char *modus_descriptio[] = {
+    [MOVE]      = "- move DIRECTIO: move ad vacuum tantum\n",
+    [PELLE]     = "- pelle DIRECTIO: pelle obiectum ante te in ea directione\n",
+    [CAPE]      = "- cape DIRECTIO: cape (ede) cibum, move in locum eius\n",
+    [TRAHE]     = "- trahe DIRECTIO: move ad vacuum, trahe obiectum a tergo tuo\n",
+    [OPPUGNA]   = "- oppugna DIRECTIO: neca animum vicinum (vires > vitalitas requirit)\n",
+    [LOQUERE]   = "- loquere DIRECTIO verba: dic verba ad vicinum in ea directione (non moveris)\n",
+    [CLAMA]     = "- clama verba: clama ad omnes in vicinitate 3x3 (non moveris, directio non requiritur)\n",
+    [TELEPORTA] = "- teleporta X Y: teleporta ad cellulam absolutam (X,Y)\n"
+                  "- teleporta +DX +DY: teleporta relative ab positione tua (e.g. teleporta +3 -2)\n",
+};
+#define MODUS_DESCRIPTIO_NUM (int)(sizeof(modus_descriptio) / sizeof(modus_descriptio[0]))
+
+/* cauda: post descriptiones modorum */
+static const char *INSTRUCTIONES_CAUDA =
     "- quiesce: nihil agere\n\n"
     "Si campo \"audita\" habes, continet verba quae alii tibi dixerunt.\n"
     "Campo \"mens\" continet cogitationes tuas priores.\n\n"
@@ -147,6 +156,17 @@ static actio_t parse_actionem(const char *val)
         }
     }
 
+    /* teleporta X Y vel teleporta +DX +DY */
+    {
+        char *p = strstr(minus, "teleporta");
+        if (p) {
+            size_t post = (size_t)(p - minus) + 9;
+            actio_t res = { TELEPORTA, DIR_NIHIL, {0}, {0} };
+            extrahe_sermonem(val, post, res.sermo);
+            return res;
+        }
+    }
+
     /* clama */
     {
         char *p = strstr(minus, "clama");
@@ -198,13 +218,41 @@ static int iam_in_processu(const praecogitata_t *res, int x, int y)
     return 0;
 }
 
-/* aedifica instructiones: communia + specifica */
-static char *aedifica_instructiones(const char *specifica)
+/* scribe descriptiones modorum permissorum in buferum */
+static size_t scribe_modos(char *buf, size_t mag, unsigned int capacitates)
 {
-    size_t mag = strlen(INSTRUCTIONES_COMMUNES) + strlen(specifica) + 1;
+    char *p = buf;
+    size_t reliquum = mag;
+    for (int m = 1; m < MODUS_DESCRIPTIO_NUM; m++) {
+        if (!(capacitates & (1u << m))) continue;
+        if (!modus_descriptio[m]) continue;
+        int n = snprintf(p, reliquum, "%s", modus_descriptio[m]);
+        p += n; reliquum -= (size_t)n;
+    }
+    return (size_t)(p - buf);
+}
+
+/* aedifica instructiones: caput + modi selecti + cauda + specifica */
+static char *aedifica_instructiones(const char *specifica,
+                                    unsigned int capacitates)
+{
+    size_t mag = strlen(INSTRUCTIONES_CAPUT) + 2048 +
+                 strlen(INSTRUCTIONES_CAUDA) + strlen(specifica) + 1;
     char *res = malloc(mag);
     if (!res) return NULL;
-    snprintf(res, mag, "%s%s", INSTRUCTIONES_COMMUNES, specifica);
+
+    char *p = res;
+    size_t reliquum = mag;
+    int n;
+
+    n = snprintf(p, reliquum, "%s", INSTRUCTIONES_CAPUT);
+    p += n; reliquum -= (size_t)n;
+
+    p += scribe_modos(p, reliquum, capacitates);
+    reliquum = mag - (size_t)(p - res);
+
+    n = snprintf(p, reliquum, "%s%s", INSTRUCTIONES_CAUDA, specifica);
+
     return res;
 }
 
@@ -218,7 +266,8 @@ static void aedifica_valorem(const tabula_t *tab,
         "nihil", "septentrio", "meridies", "occidens", "oriens"
     };
     static const char *modus_nomina[] = {
-        "quiesce", "move", "pelle", "cape", "trahe", "loquere", "clama"
+        "quiesce", "move", "pelle", "cape", "trahe",
+        "loquere", "clama", "oppugna", "teleporta"
     };
 
     char vic[2048];
@@ -434,7 +483,8 @@ void cogitatio_praecogita(tabula_t *tab, genus_t genus,
                    res->pendentes_gradus >= patientia);
 
     if (paratus) {
-        char *inst = aedifica_instructiones(instructiones);
+        char *inst = aedifica_instructiones(instructiones,
+                                            genera_ops[genus].capacitates);
         if (!inst) return;
 
         int missi = 0;
@@ -477,7 +527,8 @@ void cogitatio_praecogita(tabula_t *tab, genus_t genus,
  * cogitatio_praecogita_tabulam — mittit totam tabulam ut unam rogationem
  * ================================================================ */
 
-static const char *INSTRUCTIONES_TABULAE =
+/* caput instructionum tabulae — ante modi */
+static const char *INSTRUCTIONES_TABULAE_CAPUT =
     "Ludus tabulae es. Regis agmen cellularum in tabula.\n\n"
     "Legenda: .=vacuum #=saxum W=murus F=feles B=dalekus U=ursus "
     "r=rapum f=fungus Z=zodus O=oculus\n\n"
@@ -499,14 +550,10 @@ static const char *INSTRUCTIONES_TABULAE =
     "- \"satietas\": saturitas ex cibis editis\n"
     "- \"audita\": verba quae alii dixerunt\n"
     "- \"mens\": cogitationes priores\n\n"
-    "Modi actionum:\n"
-    "- move DIRECTIO: move ad vacuum tantum\n"
-    "- pelle DIRECTIO: pelle obiectum ante te in ea directione\n"
-    "- cape DIRECTIO: cape (ede) cibum, move in locum eius\n"
-    "- trahe DIRECTIO: move ad vacuum, trahe obiectum a tergo tuo\n"
-    "- oppugna DIRECTIO: neca animum vicinum (vires > vitalitas requirit)\n"
-    "- loquere DIRECTIO verba: dic verba ad vicinum in ea directione\n"
-    "- clama verba: clama ad omnes in vicinitate 3x3\n"
+    "Modi actionum:\n";
+
+/* cauda instructionum tabulae — post modi */
+static const char *INSTRUCTIONES_TABULAE_CAUDA =
     "- quiesce: nihil agere\n\n"
     "TU REGIS TOTUM AGMEN SIMUL. Decide actionem pro QUOQUE membro.\n"
     "Vide tabulam totam — cogita de strategia collectiva.\n"
@@ -594,7 +641,8 @@ static void aedifica_statum(const tabula_t *tab, int x, int y,
         "nihil", "septentrio", "meridies", "occidens", "oriens"
     };
     static const char *modus_nomina_s[] = {
-        "quiesce", "move", "pelle", "cape", "trahe", "loquere", "clama"
+        "quiesce", "move", "pelle", "cape", "trahe",
+        "loquere", "clama", "oppugna", "teleporta"
     };
 
     const cella_t *c = tabula_da_const(tab, x, y);
@@ -692,14 +740,24 @@ void cogitatio_praecogita_tabulam(tabula_t *tab, genus_t genus,
     if (res->num > 0) return;
 
     /* --- 2. aedifica et mitte tabulam totam --- */
-    char *inst = aedifica_instructiones(instructiones);
+    unsigned int cap = genera_ops[genus].capacitates;
+    char *inst = aedifica_instructiones(instructiones, cap);
     if (!inst) return;
 
-    /* praepone instructiones tabulae */
-    size_t imag = strlen(INSTRUCTIONES_TABULAE) + strlen(inst) + 1;
+    /* praepone instructiones tabulae cum modis selectis */
+    size_t imag = strlen(INSTRUCTIONES_TABULAE_CAPUT) + 2048 +
+                  strlen(INSTRUCTIONES_TABULAE_CAUDA) + strlen(inst) + 1;
     char *inst_totae = malloc(imag);
     if (!inst_totae) { free(inst); return; }
-    snprintf(inst_totae, imag, "%s%s", INSTRUCTIONES_TABULAE, inst);
+    {
+        char *p = inst_totae;
+        size_t reliquum = imag;
+        int n = snprintf(p, reliquum, "%s", INSTRUCTIONES_TABULAE_CAPUT);
+        p += n; reliquum -= (size_t)n;
+        p += scribe_modos(p, reliquum, cap);
+        reliquum = imag - (size_t)(p - inst_totae);
+        snprintf(p, reliquum, "%s%s", INSTRUCTIONES_TABULAE_CAUDA, inst);
+    }
     free(inst);
 
     /* aedifica rogatum */

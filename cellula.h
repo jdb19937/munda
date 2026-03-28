@@ -55,8 +55,23 @@ typedef enum {
     TRAHE,              /* move, trahe obiectum a tergo */
     LOQUERE,            /* loquere ad vicinum in directione — non moveris */
     CLAMA,              /* clama ad omnes in vicinitate 3×3 — non moveris */
-    OPPUGNA             /* oppugna animum vicinum — vires > vitalitas requirit */
+    OPPUGNA,            /* oppugna animum vicinum — vires > vitalitas requirit */
+    TELEPORTA           /* teleporta ad coordinatas — dei potentia > potentia, animi vires > vitalitas */
 } modus_t;
+
+/* larvae capacitatum — quos modos genus agere potest */
+#define CAP_MOVE      (1u << MOVE)
+#define CAP_PELLE     (1u << PELLE)
+#define CAP_CAPE      (1u << CAPE)
+#define CAP_TRAHE     (1u << TRAHE)
+#define CAP_LOQUERE   (1u << LOQUERE)
+#define CAP_CLAMA     (1u << CLAMA)
+#define CAP_OPPUGNA   (1u << OPPUGNA)
+#define CAP_TELEPORTA (1u << TELEPORTA)
+
+#define CAP_ANIMA (CAP_MOVE | CAP_PELLE | CAP_CAPE | CAP_TRAHE | \
+                   CAP_LOQUERE | CAP_CLAMA | CAP_OPPUGNA)
+#define CAP_DEI   (CAP_ANIMA | CAP_TELEPORTA)
 
 /* actio composita: modus + directio + sermo + mens */
 typedef struct {

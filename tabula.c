@@ -365,6 +365,30 @@ static void exsequi_pulsionem(tabula_t *tab, const struct propositum *p)
     memset(&orig->animus, 0, sizeof(orig->animus));
 }
 
+/* parse coordinatas teleportationis ex sermo.
+ * "X Y" = absolutae, "+DX +DY" = relativae ('+' detegit modum).
+ * reddit 1 si parsum successum, 0 si defectus. */
+static int parse_teleporta(const char *sermo, int cx, int cy, int latus,
+                           int *tx, int *ty)
+{
+    if (!sermo[0]) return 0;
+
+    int relativum = (strchr(sermo, '+') != NULL);
+
+    int a, b;
+    if (sscanf(sermo, "%d %d", &a, &b) != 2)
+        return 0;
+
+    if (relativum) {
+        *tx = modulus(cx + a, latus);
+        *ty = modulus(cy + b, latus);
+    } else {
+        *tx = modulus(a, latus);
+        *ty = modulus(b, latus);
+    }
+    return 1;
+}
+
 /* move unum animum simpliciter (in vacuum) */
 static void move_animum(tabula_t *tab, int x, int y, int vx, int vy)
 {
@@ -427,6 +451,39 @@ static void ursi_praegradum(tabula_t *tab)
                 c->animus.ultima_directio = DIR_NIHIL;
                 c->animus.ultima_permissa = 1;
                 c->motum = 1;
+                continue;
+            }
+
+            /* teleporta — coordinatis, non directione */
+            if (act.modus == TELEPORTA) {
+                c->animus.ultima_modus = TELEPORTA;
+                c->animus.ultima_directio = DIR_NIHIL;
+                int tx, ty;
+                if (parse_teleporta(act.sermo, x, y, latus, &tx, &ty)) {
+                    cella_t *dest = tabula_da(tab, tx, ty);
+                    if (genera_ops[dest->genus].phylum == DEI) {
+                        c->animus.ultima_permissa = 0;
+                        c->motum = 1;
+                    } else if (genera_ops[dest->genus].phylum == ANIMA &&
+                               c->animus.vires > dest->animus.vitalitas) {
+                        c->animus.ultima_permissa = 1;
+                        move_animum(tab, x, y, tx, ty);
+                    } else if (genera_ops[dest->genus].phylum == CIBUS) {
+                        c->animus.satietas +=
+                            (dest->genus == FUNGUS) ? 2 : 1;
+                        c->animus.ultima_permissa = 1;
+                        move_animum(tab, x, y, tx, ty);
+                    } else if (dest->genus == VACUUM) {
+                        c->animus.ultima_permissa = 1;
+                        move_animum(tab, x, y, tx, ty);
+                    } else {
+                        c->animus.ultima_permissa = 0;
+                        c->motum = 1;
+                    }
+                } else {
+                    c->animus.ultima_permissa = 0;
+                    c->motum = 1;
+                }
                 continue;
             }
 
@@ -574,6 +631,32 @@ static void dei_praegradum(tabula_t *tab)
                 continue;
             }
 
+            /* teleporta — coordinatis, non directione */
+            if (act.modus == TELEPORTA) {
+                c->deus.ultima_modus = TELEPORTA;
+                c->deus.ultima_directio = DIR_NIHIL;
+                int tx, ty;
+                if (parse_teleporta(act.sermo, x, y, latus, &tx, &ty)) {
+                    cella_t *dest = tabula_da(tab, tx, ty);
+                    if (genera_ops[dest->genus].phylum == DEI) {
+                        if (c->deus.potentia > dest->deus.potentia) {
+                            c->deus.ultima_permissa = 1;
+                            move_animum(tab, x, y, tx, ty);
+                        } else {
+                            c->deus.ultima_permissa = 0;
+                            c->motum = 1;
+                        }
+                    } else {
+                        c->deus.ultima_permissa = 1;
+                        move_animum(tab, x, y, tx, ty);
+                    }
+                } else {
+                    c->deus.ultima_permissa = 0;
+                    c->motum = 1;
+                }
+                continue;
+            }
+
             directio_t dir = act.directio;
             int vx, vy;
             tabula_vicinum(tab, x, y, dir, &vx, &vy);
@@ -675,6 +758,54 @@ void tabula_gradus(tabula_t *tab)
                 c->animus.ultima_modus = CLAMA;
                 c->animus.ultima_directio = DIR_NIHIL;
                 c->animus.ultima_permissa = 1;
+                continue;
+            }
+
+            /* teleporta — coordinatis, non directione */
+            if (act.modus == TELEPORTA) {
+                c->animus.ultima_modus = TELEPORTA;
+                c->animus.ultima_directio = DIR_NIHIL;
+                int tx, ty;
+                if (parse_teleporta(act.sermo, x, y, latus, &tx, &ty)) {
+                    cella_t *dest = tabula_da(tab, tx, ty);
+                    if (genera_ops[dest->genus].phylum == DEI) {
+                        c->animus.ultima_permissa = 0;
+                    } else if (genera_ops[dest->genus].phylum == ANIMA &&
+                               c->animus.vires > dest->animus.vitalitas) {
+                        c->animus.ultima_permissa = 1;
+                        cella_t movens = *c;
+                        *dest = movens;
+                        dest->motum = 1;
+                        c->genus = VACUUM;
+                        c->pondus = 0;
+                        c->motum = 1;
+                        memset(&c->animus, 0, sizeof(c->animus));
+                    } else if (genera_ops[dest->genus].phylum == CIBUS) {
+                        c->animus.satietas +=
+                            (dest->genus == FUNGUS) ? 2 : 1;
+                        c->animus.ultima_permissa = 1;
+                        cella_t movens = *c;
+                        *dest = movens;
+                        dest->motum = 1;
+                        c->genus = VACUUM;
+                        c->pondus = 0;
+                        c->motum = 1;
+                        memset(&c->animus, 0, sizeof(c->animus));
+                    } else if (dest->genus == VACUUM) {
+                        c->animus.ultima_permissa = 1;
+                        cella_t movens = *c;
+                        *dest = movens;
+                        dest->motum = 1;
+                        c->genus = VACUUM;
+                        c->pondus = 0;
+                        c->motum = 1;
+                        memset(&c->animus, 0, sizeof(c->animus));
+                    } else {
+                        c->animus.ultima_permissa = 0;
+                    }
+                } else {
+                    c->animus.ultima_permissa = 0;
+                }
                 continue;
             }
 

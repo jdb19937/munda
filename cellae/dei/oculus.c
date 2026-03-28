@@ -76,8 +76,9 @@ void oculus_initia(void)
 {
     cella_initia_ops(OCULUS, "I ", 'O');
 
-    genera_ops[OCULUS].phylum   = DEI;
-    genera_ops[OCULUS].praepara = oculus_praepara_fn;
-    genera_ops[OCULUS].cogito   = oculus_cogito;
+    genera_ops[OCULUS].phylum       = DEI;
+    genera_ops[OCULUS].capacitates  = CAP_DEI;
+    genera_ops[OCULUS].praepara     = oculus_praepara_fn;
+    genera_ops[OCULUS].cogito       = oculus_cogito;
     genera_ops[OCULUS].fictio   = oculus_fictio;
 }

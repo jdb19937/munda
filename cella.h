@@ -100,6 +100,7 @@ typedef struct {
     const char *pictura;    /* glyphus, II columnas latus */
     char signum;            /* signum unum pro graticula oraculi */
     phylum_t phylum;
+    unsigned int capacitates;  /* larva modorum permissorum (CAP_*) */
     void (*praepara)(struct cella *c);
     actio_t (*cogito)(const struct tabula *tab, int x, int y);
     /* fictio: genera actionem fictam pro probatione.

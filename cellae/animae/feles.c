@@ -30,7 +30,7 @@ static actio_t feles_cogito(const struct tabula *tab, int x, int y)
     actio_t act = ACTIO_NIHIL;
 
     /* fortuito muta mentem */
-    if (rand() % 5 == 0) {
+    if (rand() % 120 == 0) {
         int n = (int)(sizeof(mentes_felium) / sizeof(mentes_felium[0]));
         snprintf(act.mens, MENS_MAX, "%s", mentes_felium[rand() % n]);
     }
@@ -89,8 +89,9 @@ void feles_initia(void)
 {
     cella_initia_ops(FELES, "\xF0\x9F\x90\xB1", 'F');
 
-    genera_ops[FELES].phylum   = ANIMA;
-    genera_ops[FELES].praepara = feles_praepara;
-    genera_ops[FELES].cogito   = feles_cogito;
+    genera_ops[FELES].phylum       = ANIMA;
+    genera_ops[FELES].capacitates  = CAP_ANIMA;
+    genera_ops[FELES].praepara     = feles_praepara;
+    genera_ops[FELES].cogito       = feles_cogito;
     genera_ops[FELES].fictio   = feles_fictio;
 }

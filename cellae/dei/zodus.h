@@ -12,6 +12,9 @@ typedef struct {
 /* directio imperata a lusore (directio_t = int enum) */
 extern int zodus_imperium;
 
+/* vexillum teleportationis fortuitae — 1 = teleporta fortuito */
+extern int zodus_teleporta;
+
 struct tabula;
 void zodus_initia(void);
 

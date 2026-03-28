@@ -109,6 +109,8 @@ int main(int argc, char **argv)
                     finis = 1;
                     break;
                 }
+                if (ch == 't' || ch == 'T')
+                    zodus_teleporta = 1;
                 if (ch == 12) {
                     write(STDOUT_FILENO, "\033[2J", 4);
                     terminalis_pinge(tab);

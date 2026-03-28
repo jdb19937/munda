@@ -97,8 +97,9 @@ void corvus_initia(void)
 {
     cella_initia_ops(CORVUS, "\xF0\x9F\x90\xA6", 'C');
 
-    genera_ops[CORVUS].phylum   = ANIMA;
-    genera_ops[CORVUS].praepara = corvus_praepara;
-    genera_ops[CORVUS].cogito   = corvus_cogito;
+    genera_ops[CORVUS].phylum       = ANIMA;
+    genera_ops[CORVUS].capacitates  = CAP_ANIMA;
+    genera_ops[CORVUS].praepara     = corvus_praepara;
+    genera_ops[CORVUS].cogito       = corvus_cogito;
     genera_ops[CORVUS].fictio   = corvus_fictio;
 }
