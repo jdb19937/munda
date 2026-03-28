@@ -18,7 +18,7 @@
 static const char *INSTRUCTIONES_COMMUNES =
     "Ludus tabulae es. Regis cellulas in tabula.\n\n"
     "Legenda: .=vacuum #=saxum W=murus F=feles B=dalekus U=ursus "
-    "r=rapum f=fungus Z=zodus O=oculus @=tu\n\n"
+    "C=corvus r=rapum f=fungus Z=zodus O=oculus @=tu\n\n"
     "VICINITAS ET DIRECTIONES:\n"
     "Campo \"vicinitas\" est JSON array duplex: vicinitas[series][columna].\n"
     "  series 0 = septentrio (sursum), ultima series = meridies (deorsum)\n"

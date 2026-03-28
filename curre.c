@@ -42,9 +42,9 @@ static void pinge(const tabula_t *tab)
         for (int x = 0; x < latus; x++)
             census[tabula_da_const(tab, x, y)->genus]++;
 
-    printf("F:%d U:%d B:%d r:%d f:%d\n\n",
+    printf("F:%d U:%d B:%d C:%d r:%d f:%d\n\n",
            census[FELES], census[URSUS], census[DALEKUS],
-           census[RAPUM], census[FUNGUS]);
+           census[CORVUS], census[RAPUM], census[FUNGUS]);
 }
 
 int main(int argc, char **argv)
@@ -69,6 +69,7 @@ int main(int argc, char **argv)
     fungus_initia();
     zodus_initia();
     oculus_initia();
+    corvus_initia();
 
     if (oraculum_initia() < 0)
         MORIRE("oraculum initiari non potuit");
@@ -86,6 +87,7 @@ int main(int argc, char **argv)
     for (int g = 0; g < gradus; g++) {
         dalekus_praecogita(tab);
         ursus_praecogita(tab);
+        corvus_praecogita(tab);
         tabula_gradus(tab);
         pinge(tab);
     }

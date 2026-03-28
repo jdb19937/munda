@@ -63,6 +63,7 @@ static const struct {
     { FELES,   "animae", "feles"   },
     { DALEKUS, "animae", "dalekus" },
     { URSUS,   "animae", "ursus"   },
+    { CORVUS,  "animae", "corvus"  },
     { ZODUS,   "dei",    "zodus"   },
     { OCULUS,  "dei",    "oculus"  },
 };
@@ -103,6 +104,8 @@ static void applica_attributa(cella_t *c, genus_t genus,
         c->dalekus.energia = par_da_int(pp, n, "energia", 100);
     else if (genus == URSUS)
         c->ursus.ferocitas = par_da_int(pp, n, "ferocitas", 5);
+    else if (genus == CORVUS)
+        c->corvus.audacia = par_da_int(pp, n, "audacia", 3);
     else if (genus == OCULUS)
         c->oculus.visus_radius = par_da_int(pp, n, "visus_radius", 5);
     else if (genus == RAPUM || genus == FUNGUS)

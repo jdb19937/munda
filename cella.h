@@ -11,10 +11,11 @@
  *     cibus_t              phylum CIBUS — rapum, fungus
  *       rapum_t
  *       fungus_t
- *     animus_t             phylum ANIMA — feles, dalekus, ursus
+ *     animus_t             phylum ANIMA — feles, dalekus, ursus, corvus
  *       feles_t
  *       dalekus_t
  *       ursus_t
+ *       corvus_t
  *     deus_t               phylum DEI — zodus, oculus
  *       zodus_t
  *       oculus_t
@@ -38,6 +39,7 @@
 #include "cellae/animae/feles.h"
 #include "cellae/animae/dalekus.h"
 #include "cellae/animae/ursus.h"
+#include "cellae/animae/corvus.h"
 #include "cellae/deus.h"
 #include "cellae/dei/zodus.h"
 #include "cellae/dei/oculus.h"
@@ -76,6 +78,7 @@ typedef struct cella {
                 feles_t feles;
                 dalekus_t dalekus;
                 ursus_t ursus;
+                corvus_t corvus;
             };
         };
         struct {
@@ -116,6 +119,7 @@ void rapum_initia(void);
 void fungus_initia(void);
 void zodus_initia(void);
 void oculus_initia(void);
+void corvus_initia(void);
 
 /*
  * cella_initia_ops — scribit pictura/signum in genus_ops[genus].

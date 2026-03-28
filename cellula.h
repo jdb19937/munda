@@ -28,6 +28,7 @@ typedef enum {
     FUNGUS,             /* fungus — satietas +2 */
     ZODUS,              /* zodus — lusor, PELLE solum */
     OCULUS,             /* oculus — deus omnividens */
+    CORVUS,             /* corvus — avis callida et rapax */
     GENERA_NUMERUS
 } genus_t;
 

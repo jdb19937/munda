@@ -48,6 +48,7 @@ int main(int argc, char **argv)
     fungus_initia();
     zodus_initia();
     oculus_initia();
+    corvus_initia();
 
     /* initia oraculum (crispus) pro dalekis et ursis */
     if (oraculum_initia() < 0)
@@ -133,6 +134,7 @@ int main(int argc, char **argv)
         /* praecogita dalekos et ursos ante gradum */
         dalekus_praecogita(tab);
         ursus_praecogita(tab);
+        corvus_praecogita(tab);
 
         /* gradus simulationis */
         tabula_gradus(tab);

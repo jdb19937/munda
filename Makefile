@@ -7,14 +7,14 @@ CFLAGS  = -Wall -Wextra -O2 -I.
 COMMUNES = tabula.c \
           cellae/fixa/vacuum.c cellae/fixa/saxum.c cellae/fixa/murus.c \
           cellae/cibi/rapum.c cellae/cibi/fungus.c \
-          cellae/animae/feles.c cellae/animae/dalekus.c cellae/animae/ursus.c \
+          cellae/animae/feles.c cellae/animae/dalekus.c cellae/animae/ursus.c cellae/animae/corvus.c \
           cellae/dei/zodus.c cellae/dei/oculus.c cellae/deus.c \
           cella_ops.c cellae/fixum.c cellae/cibus.c cellae/animus.c \
           cogitatio.c json.c utilia.c fictio.c
 COMMUNES_OBJ = $(COMMUNES:.c=.o)
 
 CAPITA  = cellula.h cella.h tabula.h terminalis.h oraculum.h json.h cogitatio.h utilia.h fictio.h \
-          cellae/animae/feles.h cellae/animae/dalekus.h cellae/animae/ursus.h \
+          cellae/animae/feles.h cellae/animae/dalekus.h cellae/animae/ursus.h cellae/animae/corvus.h \
           cellae/fixum.h cellae/cibus.h cellae/animus.h cellae/deus.h \
           cellae/dei/zodus.h cellae/dei/oculus.h
 

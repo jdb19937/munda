@@ -67,6 +67,7 @@ mundae/
 | FELES       | ANIMA  | Feles errans                        |
 | DALEKUS     | ANIMA  | Bot quod oraculum LLM groupnar rogat |
 | URSUS       | ANIMA  | Ursus venator                       |
+| CORVUS      | ANIMA  | Corvus, avis callida et rapax       |
 | ZODUS       | DEI    | Deus a lusore gubernatus            |
 | OCULUS      | DEI    | Deus omnividens                     |
 
@@ -92,7 +93,7 @@ valida.c          — instrumentum validationis schematum
 cellae/            — implementationes singulorum generum
   fixa/            — vacuum, saxum, murus
   cibi/            — rapum, fungus
-  animae/          — feles, dalekus, ursus
+  animae/          — feles, dalekus, ursus, corvus
   dei/             — zodus, oculus
 mundae/            — configurationes mundorum
 schemae/           — schemata JSON pro validatione
