@@ -1,35 +1,35 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "titulus": "feles — feles errans",
+  "$schema": "https://ison-schema.org/draft/2020-12/schema",
+  "titulus": "dalekus — bot quod oraculum rogat",
   "type": "object",
   "properties": {
     "nomen": {
       "type": "string",
-      "descriptio": "nomen proprium felis, e.g. F001"
+      "descriptio": "nomen proprium daleki, e.g. A001"
     },
     "pondus": {
       "type": "integer",
-      "descriptio": "pondus felis",
-      "default": 3
+      "descriptio": "pondus daleki",
+      "default": 5
     },
     "vires": {
       "type": "integer",
       "descriptio": "quantum ponderis pellere possit",
-      "default": 5
+      "default": 15
     },
     "vitalitas": {
       "type": "integer",
       "descriptio": "quantum impetum sustinere possit",
-      "default": 8
+      "default": 20
     },
-    "vagatio": {
+    "energia": {
       "type": "integer",
-      "descriptio": "gradus sine cibo peracti",
-      "default": 0
+      "descriptio": "energia daleki — exhausto quiescit",
+      "default": 100
     },
     "mens": {
       "type": "string",
-      "descriptio": "cogitationes initiales felis",
+      "descriptio": "cogitationes initiales daleki",
       "default": "expergiscor"
     }
   },

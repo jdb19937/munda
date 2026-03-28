@@ -9,7 +9,7 @@
 #include "provisor.h"
 #include "../cella.h"
 #include "../fictio.h"
-#include "../json.h"
+#include "../ison.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,8 +18,8 @@
 /* definitio debilis — fare non habet genera_ops, lude/curre habent */
 __attribute__((weak)) genus_ops_t genera_ops[GENERA_NUMERUS];
 
-/* lege vicinitatem ex JSON crudo array in graticulam */
-static void lege_vicinitatem(const char *vic_json,
+/* lege vicinitatem ex ISON crudo array in graticulam */
+static void lege_vicinitatem(const char *vic_ison,
                              fictio_vicinitas_t *vic)
 {
     memset(vic, '.', sizeof(vic->graticula));
@@ -28,13 +28,13 @@ static void lege_vicinitatem(const char *vic_json,
     vic->cx = 0;
     vic->cy = 0;
 
-    if (!vic_json) return;
+    if (!vic_ison) return;
 
-    const char *p = vic_json;
+    const char *p = vic_ison;
     int r = 0, col = 0;
     while (*p) {
         if (*p == '[') {
-            if (p > vic_json && *(p - 1) == ',') { r++; col = 0; }
+            if (p > vic_ison && *(p - 1) == ',') { r++; col = 0; }
         } else if (*p == '"') {
             p++;
             if (*p && *p != '"') {
@@ -95,16 +95,16 @@ static const char *const sententiae[] = {
 };
 #define SENTENTIAE_NUM (int)(sizeof(sententiae) / sizeof(sententiae[0]))
 
-static char *extrahe(const char *json)
+static char *extrahe(const char *ison)
 {
-    /* proba an sit rogatum ludi (JSON cum clavibus animorum) */
+    /* proba an sit rogatum ludi (ISON cum clavibus animorum) */
     char claves[256][64];
-    int nc = json_claves(json, claves, 256);
+    int nc = ison_claves(ison, claves, 256);
 
-    /* si non JSON ludi, redde sententiam */
-    if (nc <= 0 || !json_da_crudum(json, claves[0][0] ?
+    /* si non ISON ludi, redde sententiam */
+    if (nc <= 0 || !ison_da_crudum(ison, claves[0][0] ?
                     (char[]){claves[0][0], '\0'} : ".")) {
-        /* nc <= 0: non JSON objectum, vel nc > 0 sed sine vicinitate */
+        /* nc <= 0: non ISON objectum, vel nc > 0 sed sine vicinitate */
         return strdup(sententiae[rand() % SENTENTIAE_NUM]);
     }
 
@@ -112,13 +112,13 @@ static char *extrahe(const char *json)
     {
         char via[128];
         snprintf(via, sizeof(via), "%s.vicinitas", claves[0]);
-        char *vic = json_da_crudum(json, via);
+        char *vic = ison_da_crudum(ison, via);
         if (!vic)
             return strdup(sententiae[rand() % SENTENTIAE_NUM]);
         free(vic);
     }
 
-    json_scriptor_t *js = json_scriptor_crea();
+    ison_scriptor_t *js = ison_scriptor_crea();
     if (!js) return strdup("{}");
 
     for (int i = 0; i < nc; i++) {
@@ -127,31 +127,31 @@ static char *extrahe(const char *json)
 
         char via[128];
         snprintf(via, sizeof(via), "%s.vicinitas", claves[i]);
-        char *vic_json = json_da_crudum(json, via);
+        char *vic_ison = ison_da_crudum(ison, via);
 
         if (genera_ops[genus].fictio) {
             fictio_vicinitas_t vic;
-            lege_vicinitatem(vic_json, &vic);
+            lege_vicinitatem(vic_ison, &vic);
 
             char actio[128];
             actio[0] = '\0';
             genera_ops[genus].fictio(claves[i], &vic,
                                      actio, sizeof(actio));
-            json_scriptor_adde(js, claves[i], actio);
+            ison_scriptor_adde(js, claves[i], actio);
         } else {
-            json_scriptor_adde(js, claves[i], "quiesce");
+            ison_scriptor_adde(js, claves[i], "quiesce");
         }
 
-        free(vic_json);
+        free(vic_ison);
     }
 
-    return json_scriptor_fini(js);
+    return ison_scriptor_fini(js);
 }
 
-static void signa(const char *json, long *accepta, long *recondita,
+static void signa(const char *ison, long *accepta, long *recondita,
                    long *emissa, long *cogitata)
 {
-    (void)json;
+    (void)ison;
     *accepta = 0; *recondita = 0; *emissa = 0; *cogitata = 0;
 }
 

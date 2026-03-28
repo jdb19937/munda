@@ -14,7 +14,7 @@
 #include "utilia.h"
 #include "retis/retis.h"
 #include "retis/serializa.h"
-#include "json.h"
+#include "ison.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -169,13 +169,13 @@ static void genera_nomen(genus_t genus, char *nomen, size_t mag)
 
 /* --- tracta handshake SALVE clientis --- */
 
-static int tracta_salve(cliens_t *cl, const char *json, size_t mag,
+static int tracta_salve(cliens_t *cl, const char *ison, size_t mag,
                         tabula_t *tab)
 {
     (void)mag;
 
     /* extrahe clavis publica clientis */
-    char *hex = json_da_chordam(json, "clavis");
+    char *hex = ison_da_chordam(ison, "clavis");
     if (!hex) return -1;
 
     if (retis_hex_ad_punctum(hex, &cl->E_c) < 0) {
@@ -185,7 +185,7 @@ static int tracta_salve(cliens_t *cl, const char *json, size_t mag,
     free(hex);
 
     /* extrahe genus */
-    char *genus_str = json_da_chordam(json, "genus");
+    char *genus_str = ison_da_chordam(ison, "genus");
     if (!genus_str) return -1;
     if (strcmp(genus_str, "ZODUS") == 0)
         cl->genus = ZODUS;
@@ -255,24 +255,24 @@ static int tracta_salve(cliens_t *cl, const char *json, size_t mag,
 
 /* --- tracta nuntium clientis (post handshake) --- */
 
-static void tracta_nuntium(cliens_t *cl, const char *json, size_t mag)
+static void tracta_nuntium(cliens_t *cl, const char *ison, size_t mag)
 {
     (void)mag;
 
-    char *typus = json_da_chordam(json, "typus");
+    char *typus = ison_da_chordam(ison, "typus");
     if (!typus) return;
 
     if (strcmp(typus, "actio") == 0) {
         actio_t actio = ACTIO_NIHIL;
-        actio.modus    = (modus_t)json_da_numerum(json, "modus");
-        actio.directio = (directio_t)json_da_numerum(json, "directio");
+        actio.modus    = (modus_t)ison_da_numerum(ison, "modus");
+        actio.directio = (directio_t)ison_da_numerum(ison, "directio");
 
-        char *sermo = json_da_chordam(json, "sermo");
+        char *sermo = ison_da_chordam(ison, "sermo");
         if (sermo) {
             snprintf(actio.sermo, SERMO_MAX, "%s", sermo);
             free(sermo);
         }
-        char *mens = json_da_chordam(json, "mens");
+        char *mens = ison_da_chordam(ison, "mens");
         if (mens) {
             snprintf(actio.mens, MENS_MAX, "%s", mens);
             free(mens);
@@ -370,7 +370,7 @@ int main(int argc, char **argv)
     const char *munda = "mundae/imperium";
     int portus = RETIS_PORTUS;
     int tempus_ms = TEMPUS_PRAEFINITUM;
-    const char *via_clavis = "clavis_daemoni.json";
+    const char *via_clavis = "clavis_daemoni.ison";
     int argi = 1;
 
     if (argi < argc) munda     = argv[argi++];
@@ -511,14 +511,14 @@ int main(int argc, char **argv)
             while (retis_lege_frame(&cl->alveus, &payload, &payload_mag) == 1) {
                 if (cl->activus == 0) {
                     /* handshake */
-                    /* NUL-terminat pro JSON */
-                    char *json = malloc(payload_mag + 1);
-                    if (json) {
-                        memcpy(json, payload, payload_mag);
-                        json[payload_mag] = '\0';
-                        if (tracta_salve(cl, json, payload_mag, tab) < 0)
+                    /* NUL-terminat pro ISON */
+                    char *ison = malloc(payload_mag + 1);
+                    if (ison) {
+                        memcpy(ison, payload, payload_mag);
+                        ison[payload_mag] = '\0';
+                        if (tracta_salve(cl, ison, payload_mag, tab) < 0)
                             cl->activus = -1;
-                        free(json);
+                        free(ison);
                     }
                 } else if (cl->activus == 1) {
                     /* decrypta et processa */
@@ -527,12 +527,12 @@ int main(int argc, char **argv)
                     if (retis_revela(&cl->sessio, payload, payload_mag,
                                      &clarus, &clar_mag) == 0) {
                         /* NUL-terminat */
-                        char *json = malloc(clar_mag + 1);
-                        if (json) {
-                            memcpy(json, clarus, clar_mag);
-                            json[clar_mag] = '\0';
-                            tracta_nuntium(cl, json, clar_mag);
-                            free(json);
+                        char *ison = malloc(clar_mag + 1);
+                        if (ison) {
+                            memcpy(ison, clarus, clar_mag);
+                            ison[clar_mag] = '\0';
+                            tracta_nuntium(cl, ison, clar_mag);
+                            free(ison);
                         }
                     } else {
                         cl->activus = -1;
@@ -569,18 +569,18 @@ int main(int argc, char **argv)
         renova_positiones(tab);
 
         /* serializa et broadcast */
-        char *json = tabula_ad_json(tab, tab->gradus_num);
-        if (json) {
-            size_t json_mag = strlen(json);
+        char *ison = tabula_ad_ison(tab, tab->gradus_num);
+        if (ison) {
+            size_t ison_mag = strlen(ison);
             for (int i = 0; i < clienti_num; i++) {
                 if (clienti[i].activus == 1) {
                     if (retis_mitte(clienti[i].fd, &clienti[i].sessio,
-                                    json, json_mag) < 0) {
+                                    ison, ison_mag) < 0) {
                         clienti[i].activus = -1;
                     }
                 }
             }
-            free(json);
+            free(ison);
         }
 
         pinge_statum(tab);

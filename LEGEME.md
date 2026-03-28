@@ -15,7 +15,7 @@ Sine dependentiis externis (HTTPS per crispus). Binaria creantur:
 - **curre** — cursus sine terminali
 - **lude** — ludus interactivus cum terminali
 - **fare** — imperativum oraculi (CLI ad LLM rogandum)
-- **valida** — validator schematum JSON
+- **valida** — validator schematum ISON
 - **daemonium** — servitor TCP, currit simulationem per retiam
 - **coniunge** — cliens interactivus cum terminali (ut lude, per retiam)
 - **specta** — cliens sine capite (ut curre, per retiam)
@@ -52,8 +52,8 @@ Forma: `-m [provisor/]sapientum[+effort]` ubi effort = `low`, `medium`, `high`.
 ## Mundae (Configurationes Mundorum)
 
 Quisque mundus est directorium cum:
-- `tabula.json` — geometria, positiones, sapientum per genus
-- `{phylum}/{genus}.jsonl` — attributa individualia per cellam
+- `tabula.ison` — geometria, positiones, sapientum per genus
+- `{phylum}/{genus}.isonl` — attributa individualia per cellam
 
 ```
 mundae/
@@ -84,7 +84,7 @@ QUIESCE, MOVE, PELLE, CAPE, TRAHE, LOQUERE, CLAMA, OPPUGNA.
 ## Daemonium
 
 Servitor TCP qui simulationem currit et statum tabulae ad clientes transmittit.
-Securitas per ECDHE P-256 + AES-128-GCM cum certificato JSON.
+Securitas per ECDHE P-256 + AES-128-GCM cum certificato ISON.
 
 ```
 ./fac_certificatum
@@ -113,7 +113,7 @@ crispus/           — bibliotheca HTTPS (TLS 1.2, pendet ab arcana/)
 retis/             — protocollum TCP bespoke (framing, ECDHE sessio, serialisatio)
 cogitatio.c/h     — praecogitatio generica per oraculum
 fare.c            — CLI imperativum oraculi
-json.c/h          — parser JSON, validator schematum
+ison.c/h          — parser ISON, validator schematum
 utilia.c/h        — utilia communia
 valida.c          — instrumentum validationis schematum
 cellae/            — implementationes singulorum generum
@@ -122,7 +122,7 @@ cellae/            — implementationes singulorum generum
   animae/          — feles, dalekus, ursus, corvus
   dei/             — zodus, oculus
 mundae/            — configurationes mundorum
-schemae/           — schemata JSON pro validatione
+schemae/           — schemata ISON pro validatione
 oracula/           — provisores LLM (openai, anthropic, xai, fictus)
 ```
 

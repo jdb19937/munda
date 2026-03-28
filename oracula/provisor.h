@@ -21,7 +21,7 @@ typedef struct provisor {
      *   clavis_api   — valor clavis API
      *   instructiones — instructiones (potest esse NULL)
      *   rogatum      — rogatum usoris
-     *   corpus       — *corpus allocatur (JSON body)
+     *   corpus       — *corpus allocatur (ISON body)
      *   capita       — *capita allocatur (HTTP headers)
      * reddit 0 si successum.
      */
@@ -30,11 +30,11 @@ typedef struct provisor {
                 const char *instructiones, const char *rogatum,
                 char **corpus, struct crispus_slist **capita);
 
-    /* extrahe textum responsi ex JSON crudo API */
-    char *(*extrahe)(const char *json);
+    /* extrahe textum responsi ex ISON crudo API */
+    char *(*extrahe)(const char *ison);
 
-    /* extrahe numeros signorum ex JSON crudo API */
-    void (*signa)(const char *json, long *accepta, long *recondita,
+    /* extrahe numeros signorum ex ISON crudo API */
+    void (*signa)(const char *ison, long *accepta, long *recondita,
                   long *emissa, long *cogitata);
 } provisor_t;
 

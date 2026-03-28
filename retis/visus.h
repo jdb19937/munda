@@ -2,7 +2,7 @@
  * visus.h — imago tabulae pro clientibus
  *
  * Structura levis sine dependentia a cella.h vel tabula.h.
- * Cliens recipit JSON, populat visus_t, pingit ex ea.
+ * Cliens recipit ISON, populat visus_t, pingit ex ea.
  */
 
 #ifndef VISUS_H
@@ -52,8 +52,8 @@ typedef struct {
 void visus_initia(visus_t *v);
 void visus_libera(visus_t *v);
 
-/* populat visum ex JSON; reddit 0 = success */
-int visus_ex_json(visus_t *v, const char *json, size_t mag);
+/* populat visum ex ISON; reddit 0 = success */
+int visus_ex_ison(visus_t *v, const char *ison, size_t mag);
 
 /* pinge visum ad terminalem (ANSI, ut terminalis_pinge) */
 void visus_pinge(const visus_t *v);

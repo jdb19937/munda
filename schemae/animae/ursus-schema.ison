@@ -1,35 +1,35 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "titulus": "dalekus — bot quod oraculum rogat",
+  "$schema": "https://ison-schema.org/draft/2020-12/schema",
+  "titulus": "ursus — ursus venator",
   "type": "object",
   "properties": {
     "nomen": {
       "type": "string",
-      "descriptio": "nomen proprium daleki, e.g. A001"
+      "descriptio": "nomen proprium ursi, e.g. U001"
     },
     "pondus": {
       "type": "integer",
-      "descriptio": "pondus daleki",
-      "default": 5
+      "descriptio": "pondus ursi",
+      "default": 20
     },
     "vires": {
       "type": "integer",
       "descriptio": "quantum ponderis pellere possit",
-      "default": 15
+      "default": 50
     },
     "vitalitas": {
       "type": "integer",
       "descriptio": "quantum impetum sustinere possit",
-      "default": 20
+      "default": 60
     },
-    "energia": {
+    "ferocitas": {
       "type": "integer",
-      "descriptio": "energia daleki — exhausto quiescit",
-      "default": 100
+      "descriptio": "ferocitatem ursi — adficit aggressionem",
+      "default": 5
     },
     "mens": {
       "type": "string",
-      "descriptio": "cogitationes initiales daleki",
+      "descriptio": "cogitationes initiales ursi",
       "default": "expergiscor"
     }
   },

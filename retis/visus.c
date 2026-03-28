@@ -1,12 +1,12 @@
 /*
  * visus.c — imago tabulae pro clientibus
  *
- * Deserializatio JSON et pictura terminalis.
+ * Deserializatio ISON et pictura terminalis.
  * Sine dependentia a cella.h, tabula.h, oraculum.h.
  */
 
 #include "visus.h"
-#include "json.h"
+#include "ison.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,11 +45,11 @@ void visus_libera(visus_t *v)
 
 /* --- deserializatio --- */
 
-/* iteremus per JSON array objectorum */
-static void lege_entia(visus_t *v, const char *entia_json)
+/* iteremus per ISON array objectorum */
+static void lege_entia(visus_t *v, const char *entia_ison)
 {
     v->entia_num = 0;
-    const char *p = entia_json;
+    const char *p = entia_ison;
 
     while (*p && *p != '[') p++;
     if (*p == '[') p++;
@@ -88,11 +88,11 @@ static void lege_entia(visus_t *v, const char *entia_json)
         visus_ens_t *ve = &v->entia[v->entia_num];
         memset(ve, 0, sizeof(*ve));
 
-        ve->x     = (int)json_da_numerum(ens, "x");
-        ve->y     = (int)json_da_numerum(ens, "y");
-        ve->genus = (genus_t)json_da_numerum(ens, "g");
+        ve->x     = (int)ison_da_numerum(ens, "x");
+        ve->y     = (int)ison_da_numerum(ens, "y");
+        ve->genus = (genus_t)ison_da_numerum(ens, "g");
 
-        char *nomen = json_da_chordam(ens, "n");
+        char *nomen = ison_da_chordam(ens, "n");
         if (nomen) {
             snprintf(ve->nomen, VISUS_NOMEN_MAX, "%s", nomen);
             free(nomen);
@@ -100,23 +100,23 @@ static void lege_entia(visus_t *v, const char *entia_json)
 
         phylum_t ph = GENERA[ve->genus].phylum;
         if (ph == ANIMA) {
-            ve->satietas  = (int)json_da_numerum(ens, "sa");
-            ve->vires     = (int)json_da_numerum(ens, "vi");
-            ve->vitalitas = (int)json_da_numerum(ens, "vt");
+            ve->satietas  = (int)ison_da_numerum(ens, "sa");
+            ve->vires     = (int)ison_da_numerum(ens, "vi");
+            ve->vitalitas = (int)ison_da_numerum(ens, "vt");
         } else if (ph == DEI) {
-            ve->potentia  = (int)json_da_numerum(ens, "po");
+            ve->potentia  = (int)ison_da_numerum(ens, "po");
         }
 
-        ve->ultima_modus    = (int)json_da_numerum(ens, "um");
-        ve->ultima_directio = (int)json_da_numerum(ens, "ud");
-        ve->ultima_permissa = (int)json_da_numerum(ens, "up");
+        ve->ultima_modus    = (int)ison_da_numerum(ens, "um");
+        ve->ultima_directio = (int)ison_da_numerum(ens, "ud");
+        ve->ultima_permissa = (int)ison_da_numerum(ens, "up");
 
-        char *audita = json_da_chordam(ens, "au");
+        char *audita = ison_da_chordam(ens, "au");
         if (audita) {
             snprintf(ve->audita, VISUS_AUDITA_MAX, "%s", audita);
             free(audita);
         }
-        char *mens = json_da_chordam(ens, "me");
+        char *mens = ison_da_chordam(ens, "me");
         if (mens) {
             snprintf(ve->mens, VISUS_MENS_MAX, "%s", mens);
             free(mens);
@@ -128,11 +128,11 @@ static void lege_entia(visus_t *v, const char *entia_json)
     }
 }
 
-int visus_ex_json(visus_t *v, const char *json, size_t mag)
+int visus_ex_ison(visus_t *v, const char *ison, size_t mag)
 {
     (void)mag;
 
-    int latus = (int)json_da_numerum(json, "latus");
+    int latus = (int)ison_da_numerum(ison, "latus");
     if (latus <= 0 || latus > 256) return -1;
 
     /* realloca si latus mutat */
@@ -143,10 +143,10 @@ int visus_ex_json(visus_t *v, const char *json, size_t mag)
         if (!v->genera) return -1;
     }
 
-    v->gradus = (unsigned long)json_da_numerum(json, "gradus");
+    v->gradus = (unsigned long)ison_da_numerum(ison, "gradus");
 
     /* genera chorda */
-    char *genera_str = json_da_chordam(json, "genera");
+    char *genera_str = ison_da_chordam(ison, "genera");
     if (!genera_str) return -1;
 
     int cellulae_num = latus * latus;
@@ -160,10 +160,10 @@ int visus_ex_json(visus_t *v, const char *json, size_t mag)
     free(genera_str);
 
     /* entia */
-    char *entia_json = json_da_crudum(json, "entia");
-    if (entia_json) {
-        lege_entia(v, entia_json);
-        free(entia_json);
+    char *entia_ison = ison_da_crudum(ison, "entia");
+    if (entia_ison) {
+        lege_entia(v, entia_ison);
+        free(entia_ison);
     } else {
         v->entia_num = 0;
     }

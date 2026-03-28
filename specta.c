@@ -7,7 +7,7 @@
 #include "retis/retis.h"
 #include "retis/cliens.h"
 #include "retis/visus.h"
-#include "json.h"
+#include "ison.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 {
     const char *hospes = "127.0.0.1";
     int portus = RETIS_PORTUS;
-    const char *via_cert = "certificatum.json";
+    const char *via_cert = "certificatum.ison";
     const char *genus_str = "OCULUS";
     int gradus_max = 0;
     int argi = 1;
@@ -80,26 +80,26 @@ int main(int argc, char **argv)
                 goto finis;
             }
 
-            char *json = malloc(clar_mag + 1);
-            if (!json) goto finis;
-            memcpy(json, clarus, clar_mag);
-            json[clar_mag] = '\0';
+            char *ison = malloc(clar_mag + 1);
+            if (!ison) goto finis;
+            memcpy(ison, clarus, clar_mag);
+            ison[clar_mag] = '\0';
 
-            char *typus = json_da_chordam(json, "typus");
+            char *typus = ison_da_chordam(ison, "typus");
             if (typus && strcmp(typus, "tabula") == 0) {
-                visus_ex_json(&visus, json, clar_mag);
+                visus_ex_ison(&visus, ison, clar_mag);
                 visus_pinge_simplex(&visus);
                 gradus_recepti++;
             } else if (typus && strcmp(typus, "reiectum") == 0) {
-                char *causa = json_da_chordam(json, "causa");
+                char *causa = ison_da_chordam(ison, "causa");
                 fprintf(stderr, "reiectum: %s\n", causa ? causa : "?");
                 free(causa);
                 free(typus);
-                free(json);
+                free(ison);
                 goto finis;
             }
             free(typus);
-            free(json);
+            free(ison);
             retis_alveus_consume(&alv, payload_mag);
         }
     }

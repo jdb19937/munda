@@ -4,7 +4,7 @@
 
 #include "tabula.h"
 #include "utilia.h"
-#include "json.h"
+#include "ison.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -18,17 +18,17 @@ static int modulus(int a, int n)
 
 tabula_t *tabula_crea(const char *munda)
 {
-    /* lege tabula.json */
+    /* lege tabula.ison */
     char via[256];
-    snprintf(via, sizeof(via), "%s/tabula.json", munda);
-    char *json = json_lege_fasciculum(via);
-    if (!json) {
+    snprintf(via, sizeof(via), "%s/tabula.ison", munda);
+    char *ison = ison_lege_plicam(via);
+    if (!ison) {
         fprintf(stderr, "error: %s legi non potuit\n", via);
         return NULL;
     }
 
-    int latus = (int)json_da_numerum(json, "latus");
-    free(json);
+    int latus = (int)ison_da_numerum(ison, "latus");
+    free(ison);
     if (latus < 4) latus = 4;
     if (latus > 128) latus = 128;
 
@@ -48,15 +48,15 @@ tabula_t *tabula_crea(const char *munda)
 }
 
 /* ================================================================
- * tabula_imple — popula tabulam ex fasciculis mundi
+ * tabula_imple — popula tabulam ex plicis mundi
  * ================================================================ */
 
-/* genera quae ex JSONL onerantur */
+/* genera quae ex ISONL onerantur */
 static const struct {
     genus_t genus;
     const char *phylum;
     const char *nomen;
-} genera_jsonl[] = {
+} genera_isonl[] = {
     { SAXUM,   "fixa",   "saxum"   },
     { MURUS,   "fixa",   "murus"   },
     { RAPUM,   "cibi",   "rapum"   },
@@ -68,18 +68,18 @@ static const struct {
     { ZODUS,   "dei",    "zodus"   },
     { OCULUS,  "dei",    "oculus"  },
 };
-#define GENERA_JSONL_NUM (int)(sizeof(genera_jsonl) / sizeof(genera_jsonl[0]))
+#define GENERA_ISONL_NUM (int)(sizeof(genera_isonl) / sizeof(genera_isonl[0]))
 
-/* contextus pro JSONL iteratione */
+/* contextus pro ISONL iteratione */
 typedef struct {
     tabula_t *tab;
-    const char *tabula_json;  /* JSON crudus pro positiones */
+    const char *tabula_ison;  /* ISON crudus pro positiones */
     genus_t genus;
 } imple_ctx_t;
 
-/* applica attributa individualia ex paribus JSON */
+/* applica attributa individualia ex paribus ISON */
 static void applica_attributa(cella_t *c, genus_t genus,
-                              const json_par_t *pp, int n)
+                              const ison_par_t *pp, int n)
 {
     c->pondus = par_da_int(pp, n, "pondus", c->pondus);
 
@@ -113,18 +113,18 @@ static void applica_attributa(cella_t *c, genus_t genus,
         c->cibus.nutritio = par_da_int(pp, n, "nutritio", c->cibus.nutritio);
 }
 
-static void imple_lineam(const json_par_t *pp, int n, void *ctx)
+static void imple_lineam(const ison_par_t *pp, int n, void *ctx)
 {
     imple_ctx_t *ic = ctx;
     const char *nomen = par_da_chordam(pp, n, "nomen", "");
     if (!nomen[0]) return;
 
-    /* quaere positionem in tabula.json */
+    /* quaere positionem in tabula.ison */
     char via_x[128], via_y[128];
     snprintf(via_x, sizeof(via_x), "positiones.%s[0]", nomen);
     snprintf(via_y, sizeof(via_y), "positiones.%s[1]", nomen);
-    int x = (int)json_da_numerum(ic->tabula_json, via_x);
-    int y = (int)json_da_numerum(ic->tabula_json, via_y);
+    int x = (int)ison_da_numerum(ic->tabula_ison, via_x);
+    int y = (int)ison_da_numerum(ic->tabula_ison, via_y);
 
     /* pone cellam */
     tabula_pone(ic->tab, x, y, ic->genus);
@@ -143,14 +143,14 @@ static void imple_lineam(const json_par_t *pp, int n, void *ctx)
 
 void tabula_imple(tabula_t *tab)
 {
-    /* lege tabula.json */
+    /* lege tabula.ison */
     char via[256];
-    snprintf(via, sizeof(via), "%s/tabula.json", tab->munda);
-    char *tabula_json = json_lege_fasciculum(via);
-    if (!tabula_json) return;
+    snprintf(via, sizeof(via), "%s/tabula.ison", tab->munda);
+    char *tabula_ison = ison_lege_plicam(via);
+    if (!tabula_ison) return;
 
     /* murus perimeter */
-    char *murus_val = json_da_chordam(tabula_json, "murus");
+    char *murus_val = ison_da_chordam(tabula_ison, "murus");
     if (murus_val && strcmp(murus_val, "perimeter") == 0) {
         int l = tab->latus;
         for (int x = 0; x < l; x++) {
@@ -165,12 +165,12 @@ void tabula_imple(tabula_t *tab)
     free(murus_val);
 
     /* sapientum per genus */
-    char *sap_crudum = json_da_crudum(tabula_json, "sapientum");
+    char *sap_crudum = ison_da_crudum(tabula_ison, "sapientum");
     if (sap_crudum) {
-        for (int g = 0; g < GENERA_JSONL_NUM; g++) {
-            char *val = json_da_chordam(sap_crudum, genera_jsonl[g].nomen);
+        for (int g = 0; g < GENERA_ISONL_NUM; g++) {
+            char *val = ison_da_chordam(sap_crudum, genera_isonl[g].nomen);
             if (val) {
-                snprintf(tab->sapientum[genera_jsonl[g].genus],
+                snprintf(tab->sapientum[genera_isonl[g].genus],
                          sizeof(tab->sapientum[0]), "%s", val);
                 free(val);
             }
@@ -178,24 +178,24 @@ void tabula_imple(tabula_t *tab)
         free(sap_crudum);
     }
 
-    /* onera genera ex JSONL */
-    for (int g = 0; g < GENERA_JSONL_NUM; g++) {
-        char jsonl_via[256];
-        snprintf(jsonl_via, sizeof(jsonl_via), "%s/%s/%s.jsonl",
-                 tab->munda, genera_jsonl[g].phylum, genera_jsonl[g].nomen);
-        char *jsonl = json_lege_fasciculum(jsonl_via);
-        if (!jsonl) continue;
+    /* onera genera ex ISONL */
+    for (int g = 0; g < GENERA_ISONL_NUM; g++) {
+        char isonl_via[256];
+        snprintf(isonl_via, sizeof(isonl_via), "%s/%s/%s.isonl",
+                 tab->munda, genera_isonl[g].phylum, genera_isonl[g].nomen);
+        char *isonl = ison_lege_plicam(isonl_via);
+        if (!isonl) continue;
 
         imple_ctx_t ctx = {
             .tab = tab,
-            .tabula_json = tabula_json,
-            .genus = genera_jsonl[g].genus,
+            .tabula_ison = tabula_ison,
+            .genus = genera_isonl[g].genus,
         };
-        json_pro_quaque_linea(jsonl, imple_lineam, &ctx);
-        free(jsonl);
+        ison_pro_quaque_linea(isonl, imple_lineam, &ctx);
+        free(isonl);
     }
 
-    free(tabula_json);
+    free(tabula_ison);
 }
 
 void tabula_libera(tabula_t *tab)

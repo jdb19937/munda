@@ -1,14 +1,14 @@
 /*
  * serializa.c — serialisatio tabulae pro transmissione retiali
  *
- * tabula_ad_json: tabula_t → JSON chorda
- * json_ad_tabulam: JSON chorda → tabula_t
+ * tabula_ad_ison: tabula_t → ISON chorda
+ * ison_ad_tabulam: ISON chorda → tabula_t
  */
 
 #include "serializa.h"
 #include "retis.h"
 #include "genera.h"
-#include "json.h"
+#include "ison.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,7 +22,7 @@ static char genus_ad_hex(genus_t g)
     return 'a' + (char)(g - 10);
 }
 
-/* --- effuge chordam JSON in alveo --- */
+/* --- effuge chordam ISON in alveo --- */
 
 static int effuge_in_alveum(char *dest, size_t dest_mag, const char *src)
 {
@@ -46,9 +46,9 @@ static int effuge_in_alveum(char *dest, size_t dest_mag, const char *src)
     return (int)pos;
 }
 
-/* --- tabula_ad_json --- */
+/* --- tabula_ad_ison --- */
 
-char *tabula_ad_json(const tabula_t *tab, unsigned long gradus)
+char *tabula_ad_ison(const tabula_t *tab, unsigned long gradus)
 {
     int latus = tab->latus;
     int cellulae_num = latus * latus;

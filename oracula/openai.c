@@ -3,7 +3,7 @@
  */
 
 #include "provisor.h"
-#include "../json.h"
+#include "../ison.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,12 +14,12 @@ static int para(const char *nomen, const char *conatus,
                 const char *instructiones, const char *rogatum,
                 char **corpus, struct crispus_slist **capita)
 {
-    char *eff_input = json_effuge(rogatum);
+    char *eff_input = ison_effuge(rogatum);
     if (!eff_input) return -1;
 
     char *eff_inst = NULL;
     if (instructiones) {
-        eff_inst = json_effuge(instructiones);
+        eff_inst = ison_effuge(instructiones);
         if (!eff_inst) { free(eff_input); return -1; }
     }
 
@@ -53,24 +53,24 @@ static int para(const char *nomen, const char *conatus,
     return 0;
 }
 
-static char *extrahe(const char *json)
+static char *extrahe(const char *ison)
 {
-    char *textus = json_da_chordam(json, "output[0].content[0].text");
+    char *textus = ison_da_chordam(ison, "output[0].content[0].text");
     if (textus) return textus;
 
-    char *error = json_da_chordam(json, "error.message");
+    char *error = ison_da_chordam(ison, "error.message");
     if (error) return error;
 
-    return strdup(json);
+    return strdup(ison);
 }
 
-static void signa(const char *json, long *accepta, long *recondita,
+static void signa(const char *ison, long *accepta, long *recondita,
                    long *emissa, long *cogitata)
 {
-    *accepta   = json_da_numerum(json, "usage.input_tokens");
-    *emissa    = json_da_numerum(json, "usage.output_tokens");
-    *recondita = json_da_numerum(json, "usage.input_tokens_details.cached_tokens");
-    *cogitata  = json_da_numerum(json, "usage.output_tokens_details.reasoning_tokens");
+    *accepta   = ison_da_numerum(ison, "usage.input_tokens");
+    *emissa    = ison_da_numerum(ison, "usage.output_tokens");
+    *recondita = ison_da_numerum(ison, "usage.input_tokens_details.cached_tokens");
+    *cogitata  = ison_da_numerum(ison, "usage.output_tokens_details.reasoning_tokens");
 }
 
 const provisor_t provisor_openai = {

@@ -8,7 +8,7 @@
 #include "retis/cliens.h"
 #include "retis/visus.h"
 #include "retis/crudus.h"
-#include "json.h"
+#include "ison.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,24 +19,24 @@
 static int mitte_actio(int fd, sessio_t *ses,
                        int modus, int directio, const char *sermo)
 {
-    char json[256];
+    char ison[256];
     if (sermo && sermo[0]) {
-        snprintf(json, sizeof(json),
+        snprintf(ison, sizeof(ison),
                  "{\"typus\":\"actio\",\"modus\":%d,\"directio\":%d,\"sermo\":\"%s\"}",
                  modus, directio, sermo);
     } else {
-        snprintf(json, sizeof(json),
+        snprintf(ison, sizeof(ison),
                  "{\"typus\":\"actio\",\"modus\":%d,\"directio\":%d}",
                  modus, directio);
     }
-    return retis_mitte(fd, ses, json, strlen(json));
+    return retis_mitte(fd, ses, ison, strlen(ison));
 }
 
 int main(int argc, char **argv)
 {
     const char *hospes = "127.0.0.1";
     int portus = RETIS_PORTUS;
-    const char *via_cert = "certificatum.json";
+    const char *via_cert = "certificatum.ison";
     const char *genus_str = "ZODUS";
     int argi = 1;
 
@@ -162,26 +162,26 @@ int main(int argc, char **argv)
                     break;
                 }
 
-                char *json = malloc(clar_mag + 1);
-                if (!json) { currens = 0; break; }
-                memcpy(json, clarus, clar_mag);
-                json[clar_mag] = '\0';
+                char *ison = malloc(clar_mag + 1);
+                if (!ison) { currens = 0; break; }
+                memcpy(ison, clarus, clar_mag);
+                ison[clar_mag] = '\0';
 
-                char *typus = json_da_chordam(json, "typus");
+                char *typus = ison_da_chordam(ison, "typus");
                 if (typus && strcmp(typus, "tabula") == 0) {
-                    visus_ex_json(&visus, json, clar_mag);
+                    visus_ex_ison(&visus, ison, clar_mag);
                     visus_pinge(&visus);
                 } else if (typus && strcmp(typus, "reiectum") == 0) {
-                    char *causa = json_da_chordam(json, "causa");
+                    char *causa = ison_da_chordam(ison, "causa");
                     crudus_fini();
                     fprintf(stderr, "reiectum: %s\n", causa ? causa : "?");
                     free(causa);
                     free(typus);
-                    free(json);
+                    free(ison);
                     goto finis;
                 }
                 free(typus);
-                free(json);
+                free(ison);
                 retis_alveus_consume(&alv, payload_mag);
             }
         }

@@ -104,7 +104,7 @@ typedef struct {
     void (*praepara)(struct cella *c);
     actio_t (*cogito)(const struct tabula *tab, int x, int y);
     /* fictio: genera actionem fictam pro probatione.
-     * logica in fasciculis generum ipsis definitur. */
+     * logica in plicis generum ipsis definitur. */
     void (*fictio)(const char *nomen, const struct fictio_vicinitas *vic,
                    char *actio, size_t mag);
 } genus_ops_t;

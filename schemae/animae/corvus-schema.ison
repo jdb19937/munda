@@ -1,36 +1,36 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "titulus": "ursus — ursus venator",
+  "$schema": "https://ison-schema.org/draft/2020-12/schema",
+  "titulus": "corvus — avis callida et rapax",
   "type": "object",
   "properties": {
     "nomen": {
       "type": "string",
-      "descriptio": "nomen proprium ursi, e.g. U001"
+      "descriptio": "nomen proprium corvi, e.g. C001"
     },
     "pondus": {
       "type": "integer",
-      "descriptio": "pondus ursi",
-      "default": 20
+      "descriptio": "pondus corvi",
+      "default": 2
     },
     "vires": {
       "type": "integer",
       "descriptio": "quantum ponderis pellere possit",
-      "default": 50
+      "default": 2
     },
     "vitalitas": {
       "type": "integer",
       "descriptio": "quantum impetum sustinere possit",
-      "default": 60
+      "default": 2
     },
-    "ferocitas": {
+    "audacia": {
       "type": "integer",
-      "descriptio": "ferocitatem ursi — adficit aggressionem",
-      "default": 5
+      "descriptio": "audacia corvi — quanto audacior, tanto minus fugit",
+      "default": 3
     },
     "mens": {
       "type": "string",
-      "descriptio": "cogitationes initiales ursi",
-      "default": "expergiscor"
+      "descriptio": "cogitationes initiales corvi",
+      "default": "esurio"
     }
   },
   "required": [

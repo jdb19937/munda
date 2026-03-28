@@ -12,7 +12,7 @@ typedef struct {
 } cibus_t;
 
 struct cella;
-struct json_par;
-void cibus_praepara(struct cella *c, const struct json_par *pp, int n);
+struct ison_par;
+void cibus_praepara(struct cella *c, const struct ison_par *pp, int n);
 
 #endif /* CIBUS_H */

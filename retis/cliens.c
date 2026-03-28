@@ -5,7 +5,7 @@
  */
 
 #include "cliens.h"
-#include "json.h"
+#include "ison.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,13 +78,13 @@ int retis_saluta(int fd, const char *genus_str, const char *via_cert,
         int res = retis_lege_frame(&alv, &payload, &payload_mag);
         if (res < 0) return -1;
         if (res == 1) {
-            char *json = malloc(payload_mag + 1);
-            if (!json) return -1;
-            memcpy(json, payload, payload_mag);
-            json[payload_mag] = '\0';
+            char *ison = malloc(payload_mag + 1);
+            if (!ison) return -1;
+            memcpy(ison, payload, payload_mag);
+            ison[payload_mag] = '\0';
 
-            char *hex_s = json_da_chordam(json, "clavis");
-            free(json);
+            char *hex_s = ison_da_chordam(ison, "clavis");
+            free(ison);
             if (!hex_s) return -1;
 
             ec_punctum_t E_s;

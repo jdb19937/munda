@@ -2,7 +2,7 @@
  * cogitatio.h — praecogitatio generica per oraculum (asynchrona)
  *
  * Instructiones (instructiones systematis) = communia + specifica calleris.
- * Rogatum (rogatum usoris) = solum objectum JSON structuratum.
+ * Rogatum (rogatum usoris) = solum objectum ISON structuratum.
  */
 
 #ifndef COGITATIO_H
@@ -11,7 +11,7 @@
 #include "cella.h"
 
 #define PRAECOGITATA_MAX 256
-#define FASCICULUS_MAX   256
+#define PLICA_MAX   256
 #define VOLANTES_MAX      32
 
 typedef struct {
@@ -21,9 +21,9 @@ typedef struct {
 
 typedef struct {
     int fossa;
-    int xx[FASCICULUS_MAX];
-    int yy[FASCICULUS_MAX];
-    char nomina[FASCICULUS_MAX][8];
+    int xx[PLICA_MAX];
+    int yy[PLICA_MAX];
+    char nomina[PLICA_MAX][8];
     int num;
 } cogitatio_volans_t;
 
@@ -50,7 +50,7 @@ typedef struct {
  */
 void cogitatio_praecogita(struct tabula *tab, genus_t genus,
                           int limen, int modulus,
-                          int fasciculus_mag, int patientia,
+                          int plica_mag, int patientia,
                           int radius,
                           const char *sapientum,
                           const char *instructiones,
@@ -59,7 +59,7 @@ void cogitatio_praecogita(struct tabula *tab, genus_t genus,
 actio_t cogitatio_quaere(praecogitata_t *res, int x, int y);
 
 /*
- * cogitatio_praecogita_tabulam — mittit totam tabulam ut JSON array.
+ * cogitatio_praecogita_tabulam — mittit totam tabulam ut ISON array.
  * cellulae generis dati ostenduntur per nomen, ceterae per signum generis.
  * rogatum continet: "tabula" (array duplex), "nomina" (lista nominum),
  * et statum cuiusque cellulae (ultima_actio, satietas, audita, mens).

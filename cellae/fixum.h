@@ -12,7 +12,7 @@ typedef struct {
 } fixum_t;
 
 struct cella;
-struct json_par;
-void fixum_praepara(struct cella *c, const struct json_par *pp, int n);
+struct ison_par;
+void fixum_praepara(struct cella *c, const struct ison_par *pp, int n);
 
 #endif /* FIXUM_H */

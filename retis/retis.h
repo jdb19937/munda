@@ -63,7 +63,7 @@ void retis_deriva_claves(const ec_punctum_t *eph_communis,
                          const ec_punctum_t *E_s,
                          sessio_t *ses_c, sessio_t *ses_s);
 
-/* --- certificatum (JSON) --- */
+/* --- certificatum (ISON) --- */
 
 int retis_lege_certificatum(const char *via, ec_punctum_t *publica);
 int retis_scribe_certificatum(const char *via, const ec_punctum_t *publica);

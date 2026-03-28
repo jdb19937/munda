@@ -2,11 +2,11 @@
  * retis.c — protocollum TCP tabulae mundae
  *
  * framing, sessio AES-128-GCM, handshake ECDHE,
- * certificatum I/O in JSON.
+ * certificatum I/O in ISON.
  */
 
 #include "retis.h"
-#include "json.h"
+#include "ison.h"
 #include "utilia.h"
 
 #include <stdio.h>
@@ -214,11 +214,11 @@ void retis_deriva_claves(const ec_punctum_t *eph_communis,
 
 int retis_lege_certificatum(const char *via, ec_punctum_t *publica)
 {
-    char *json = json_lege_fasciculum(via);
-    if (!json) return -1;
+    char *ison = ison_lege_plicam(via);
+    if (!ison) return -1;
 
-    char *hex = json_da_chordam(json, "clavis");
-    free(json);
+    char *hex = ison_da_chordam(ison, "clavis");
+    free(ison);
     if (!hex) return -1;
 
     int res = retis_hex_ad_punctum(hex, publica);
@@ -231,13 +231,13 @@ int retis_scribe_certificatum(const char *via, const ec_punctum_t *publica)
     char hex[131];
     retis_punctum_ad_hex(publica, hex);
 
-    char json[256];
-    snprintf(json, sizeof(json),
+    char ison[256];
+    snprintf(ison, sizeof(ison),
              "{\"clavis\":\"%s\",\"algorithmus\":\"EC-P256\"}", hex);
 
     FILE *f = fopen(via, "w");
     if (!f) return -1;
-    fputs(json, f);
+    fputs(ison, f);
     fputc('\n', f);
     fclose(f);
     return 0;
@@ -246,12 +246,12 @@ int retis_scribe_certificatum(const char *via, const ec_punctum_t *publica)
 int retis_lege_clavem_secretam(const char *via, nm_t *privata,
                                ec_punctum_t *publica)
 {
-    char *json = json_lege_fasciculum(via);
-    if (!json) return -1;
+    char *ison = ison_lege_plicam(via);
+    if (!ison) return -1;
 
-    char *sec_hex = json_da_chordam(json, "secreta");
-    char *pub_hex = json_da_chordam(json, "clavis");
-    free(json);
+    char *sec_hex = ison_da_chordam(ison, "secreta");
+    char *pub_hex = ison_da_chordam(ison, "clavis");
+    free(ison);
     if (!sec_hex || !pub_hex) {
         free(sec_hex);
         free(pub_hex);
@@ -283,13 +283,13 @@ int retis_scribe_clavem_secretam(const char *via, const nm_t *privata,
     octeti_ad_hex(octeti, 32, sec_hex);
     sec_hex[64] = '\0';
 
-    char json[512];
-    snprintf(json, sizeof(json),
+    char ison[512];
+    snprintf(ison, sizeof(ison),
              "{\"secreta\":\"%s\",\"clavis\":\"%s\"}", sec_hex, pub_hex);
 
     FILE *f = fopen(via, "w");
     if (!f) return -1;
-    fputs(json, f);
+    fputs(ison, f);
     fputc('\n', f);
     fclose(f);
     return 0;

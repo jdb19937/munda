@@ -18,10 +18,10 @@ typedef struct tabula {
     char sapientum[GENERA_NUMERUS][64]; /* sapientum oraculi per genus */
 } tabula_t;
 
-/* crea tabulam ex {munda}/tabula.json — legit latus, omnes cellulae VACUUM */
+/* crea tabulam ex {munda}/tabula.ison — legit latus, omnes cellulae VACUUM */
 tabula_t *tabula_crea(const char *munda);
 
-/* imple tabulam ex fasciculis JSONL in munda */
+/* imple tabulam ex plicis ISONL in munda */
 void tabula_imple(tabula_t *tab);
 
 /* libera memoriam */

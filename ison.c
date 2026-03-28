@@ -1,8 +1,8 @@
 /*
- * json.c — implementatio JSON auxiliarium
+ * ison.c — implementatio ISON auxiliarium
  */
 
-#include "json.h"
+#include "ison.h"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -13,14 +13,14 @@
  * scriptor
  * ================================================================ */
 
-struct json_scriptor {
+struct ison_scriptor {
     char  *data;
     size_t mag;     /* bytes scripti (sine NUL terminali) */
     size_t cap;     /* capacitas allocata */
     int    numerus; /* paria addita */
 };
 
-static int scriptor_cresc(json_scriptor_t *js, size_t opus)
+static int scriptor_cresc(ison_scriptor_t *js, size_t opus)
 {
     if (js->mag + opus + 1 <= js->cap)
         return 0;
@@ -34,7 +34,7 @@ static int scriptor_cresc(json_scriptor_t *js, size_t opus)
     return 0;
 }
 
-static void scriptor_cat(json_scriptor_t *js, const char *s, size_t n)
+static void scriptor_cat(ison_scriptor_t *js, const char *s, size_t n)
 {
     if (scriptor_cresc(js, n) < 0) return;
     memcpy(js->data + js->mag, s, n);
@@ -42,7 +42,7 @@ static void scriptor_cat(json_scriptor_t *js, const char *s, size_t n)
     js->data[js->mag] = '\0';
 }
 
-static void scriptor_chordam(json_scriptor_t *js, const char *s)
+static void scriptor_chordam(ison_scriptor_t *js, const char *s)
 {
     scriptor_cat(js, "\"", 1);
     for (const char *p = s; *p; p++) {
@@ -68,9 +68,9 @@ static void scriptor_chordam(json_scriptor_t *js, const char *s)
     scriptor_cat(js, "\"", 1);
 }
 
-json_scriptor_t *json_scriptor_crea(void)
+ison_scriptor_t *ison_scriptor_crea(void)
 {
-    json_scriptor_t *js = calloc(1, sizeof(*js));
+    ison_scriptor_t *js = calloc(1, sizeof(*js));
     if (!js) return NULL;
     js->cap = 256;
     js->data = malloc(js->cap);
@@ -81,7 +81,7 @@ json_scriptor_t *json_scriptor_crea(void)
     return js;
 }
 
-void json_scriptor_adde(json_scriptor_t *js, const char *clavis,
+void ison_scriptor_adde(ison_scriptor_t *js, const char *clavis,
                          const char *valor)
 {
     if (!js) return;
@@ -93,7 +93,7 @@ void json_scriptor_adde(json_scriptor_t *js, const char *clavis,
     js->numerus++;
 }
 
-void json_scriptor_adde_crudum(json_scriptor_t *js, const char *clavis,
+void ison_scriptor_adde_crudum(ison_scriptor_t *js, const char *clavis,
                                const char *valor)
 {
     if (!js) return;
@@ -105,7 +105,7 @@ void json_scriptor_adde_crudum(json_scriptor_t *js, const char *clavis,
     js->numerus++;
 }
 
-char *json_scriptor_fini(json_scriptor_t *js)
+char *ison_scriptor_fini(ison_scriptor_t *js)
 {
     if (!js) return NULL;
     scriptor_cat(js, "}", 1);
@@ -129,7 +129,7 @@ static const char *transili_spatia(const char *p)
 }
 
 /*
- * lege chordam JSON (p ad '"' initialem).
+ * lege chordam ISON (p ad '"' initialem).
  * scribit in buf[mag], reddit indicem post '"' terminalem.
  */
 static const char *lege_chordam(const char *p, char *buf, size_t mag)
@@ -172,9 +172,9 @@ static const char *lege_chordam(const char *p, char *buf, size_t mag)
     return p;
 }
 
-int json_lege(const char *json, json_par_t *pares, int max_pares)
+int ison_lege(const char *ison, ison_par_t *pares, int max_pares)
 {
-    const char *p = transili_spatia(json);
+    const char *p = transili_spatia(ison);
     if (*p != '{') return -1;
     p++;
 
@@ -232,7 +232,7 @@ int json_lege(const char *json, json_par_t *pares, int max_pares)
  * auxiliaria: effugere, extrahere, quaerere
  * ================================================================ */
 
-char *json_effuge(const char *textus)
+char *ison_effuge(const char *textus)
 {
     size_t mag = 1;
     for (const char *p = textus; *p; p++) {
@@ -268,10 +268,10 @@ char *json_effuge(const char *textus)
 }
 
 /* ================================================================
- * navigator: proprius JSON parser cum recursivo descensu
+ * navigator: proprius ISON parser cum recursivo descensu
  * ================================================================ */
 
-/* transili chordam JSON (p ad '"' initialem). reddit post '"' terminalem. */
+/* transili chordam ISON (p ad '"' initialem). reddit post '"' terminalem. */
 static const char *nav_transili_chordam(const char *p)
 {
     if (*p != '"') return p;
@@ -284,7 +284,7 @@ static const char *nav_transili_chordam(const char *p)
     return p;
 }
 
-/* transili quemlibet valorem JSON. reddit post valorem. */
+/* transili quemlibet valorem ISON. reddit post valorem. */
 static const char *nav_transili_valorem(const char *p)
 {
     p = transili_spatia(p);
@@ -378,9 +378,9 @@ static const char *nav_in_indice(const char *p, int index)
 }
 
 /* naviga per viam punctatam: "a.b[0].c" */
-static const char *json_naviga(const char *json, const char *via)
+static const char *ison_naviga(const char *ison, const char *via)
 {
-    const char *p = transili_spatia(json);
+    const char *p = transili_spatia(ison);
 
     while (*via) {
         if (*via == '.') { via++; continue; }
@@ -453,25 +453,25 @@ static char *nav_extrahe_chordam(const char *p)
     return res;
 }
 
-char *json_da_chordam(const char *json, const char *via)
+char *ison_da_chordam(const char *ison, const char *via)
 {
-    const char *p = json_naviga(json, via);
+    const char *p = ison_naviga(ison, via);
     if (!p) return NULL;
     p = transili_spatia(p);
     return nav_extrahe_chordam(p);
 }
 
-long json_da_numerum(const char *json, const char *via)
+long ison_da_numerum(const char *ison, const char *via)
 {
-    const char *p = json_naviga(json, via);
+    const char *p = ison_naviga(ison, via);
     if (!p) return 0;
     p = transili_spatia(p);
     return strtol(p, NULL, 10);
 }
 
-char *json_da_crudum(const char *json, const char *via)
+char *ison_da_crudum(const char *ison, const char *via)
 {
-    const char *p = json_naviga(json, via);
+    const char *p = ison_naviga(ison, via);
     if (!p) return NULL;
     p = transili_spatia(p);
     const char *finis = nav_transili_valorem(p);
@@ -485,10 +485,10 @@ char *json_da_crudum(const char *json, const char *via)
 }
 
 /* ================================================================
- * fasciculi
+ * plicae
  * ================================================================ */
 
-char *json_lege_fasciculum(const char *via)
+char *ison_lege_plicam(const char *via)
 {
     FILE *f = fopen(via, "rb");
     if (!f) return NULL;
@@ -505,13 +505,13 @@ char *json_lege_fasciculum(const char *via)
 }
 
 /* ================================================================
- * JSONL
+ * ISONL
  * ================================================================ */
 
-int json_pro_quaque_linea(const char *jsonl, json_linea_functor_t f, void *ctx)
+int ison_pro_quaque_linea(const char *isonl, ison_linea_functor_t f, void *ctx)
 {
     int n = 0;
-    const char *p = jsonl;
+    const char *p = isonl;
     while (*p) {
         /* transili spatia et lineas vacuas */
         while (*p == '\n' || *p == '\r' || *p == ' ' || *p == '\t')
@@ -531,8 +531,8 @@ int json_pro_quaque_linea(const char *jsonl, json_linea_functor_t f, void *ctx)
         linea[lon] = '\0';
 
         /* lege paria */
-        json_par_t pares[32];
-        int np = json_lege(linea, pares, 32);
+        ison_par_t pares[32];
+        int np = ison_lege(linea, pares, 32);
         if (np > 0)
             f(pares, np, ctx);
         free(linea);
@@ -543,9 +543,9 @@ int json_pro_quaque_linea(const char *jsonl, json_linea_functor_t f, void *ctx)
     return n;
 }
 
-int json_claves(const char *json, char claves[][64], int max)
+int ison_claves(const char *ison, char claves[][64], int max)
 {
-    const char *p = transili_spatia(json);
+    const char *p = transili_spatia(ison);
     if (*p != '{') return 0;
     p = transili_spatia(p + 1);
 
@@ -572,24 +572,24 @@ int json_claves(const char *json, char claves[][64], int max)
  * schema — lector et validator
  * ================================================================ */
 
-int schema_lege(const char *json, schema_t *s)
+int schema_lege(const char *ison, schema_t *s)
 {
     memset(s, 0, sizeof(*s));
 
     /* titulus */
-    char *tit = json_da_chordam(json, "titulus");
+    char *tit = ison_da_chordam(ison, "titulus");
     if (tit) {
         snprintf(s->titulus, sizeof(s->titulus), "%s", tit);
         free(tit);
     }
 
     /* proprietates — extrahe claves */
-    char *prop_crudum = json_da_crudum(json, "properties");
+    char *prop_crudum = ison_da_crudum(ison, "properties");
     if (!prop_crudum)
         return -1;
 
     char nomina[SCHEMA_CAMPI_MAX][64];
-    int nc = json_claves(prop_crudum, nomina, SCHEMA_CAMPI_MAX);
+    int nc = ison_claves(prop_crudum, nomina, SCHEMA_CAMPI_MAX);
 
     for (int i = 0; i < nc && s->num_campi < SCHEMA_CAMPI_MAX; i++) {
         schema_campus_t *c = &s->campi[s->num_campi];
@@ -598,7 +598,7 @@ int schema_lege(const char *json, schema_t *s)
         /* typus campi */
         char via[128];
         snprintf(via, sizeof(via), "properties.%s.type", nomina[i]);
-        char *typ = json_da_chordam(json, via);
+        char *typ = ison_da_chordam(ison, via);
         if (typ) {
             if (strcmp(typ, "integer") == 0)
                 c->typus = TYPUS_NUMERUS;
@@ -612,7 +612,7 @@ int schema_lege(const char *json, schema_t *s)
     free(prop_crudum);
 
     /* required — lege indicem */
-    char *req_crudum = json_da_crudum(json, "required");
+    char *req_crudum = ison_da_crudum(ison, "required");
     if (req_crudum && req_crudum[0] == '[') {
         for (int i = 0; i < s->num_campi; i++) {
             const char *p = req_crudum + 1;
@@ -642,12 +642,12 @@ int schema_lege(const char *json, schema_t *s)
     return 0;
 }
 
-int schema_lege_fasciculum(const char *via, schema_t *s)
+int schema_lege_plicam(const char *via, schema_t *s)
 {
-    char *json = json_lege_fasciculum(via);
-    if (!json) return -1;
-    int res = schema_lege(json, s);
-    free(json);
+    char *ison = ison_lege_plicam(via);
+    if (!ison) return -1;
+    int res = schema_lege(ison, s);
+    free(ison);
     return res;
 }
 
@@ -666,7 +666,7 @@ static int est_numerus(const char *v)
     return 1;
 }
 
-int schema_valida(const schema_t *s, const json_par_t *pp, int n,
+int schema_valida(const schema_t *s, const ison_par_t *pp, int n,
                   char *error, size_t mag)
 {
     /* verifica campos necessarios */
@@ -713,7 +713,7 @@ int schema_valida(const schema_t *s, const json_par_t *pp, int n,
     return 0;
 }
 
-/* validator JSONL */
+/* validator ISONL */
 
 typedef struct {
     const schema_t *schema;
@@ -721,7 +721,7 @@ typedef struct {
     int errores;
 } validatio_ctx_t;
 
-static void valida_lineam(const json_par_t *pp, int n, void *ctx)
+static void valida_lineam(const ison_par_t *pp, int n, void *ctx)
 {
     validatio_ctx_t *v = ctx;
     v->linea_num++;
@@ -733,9 +733,9 @@ static void valida_lineam(const json_par_t *pp, int n, void *ctx)
     }
 }
 
-int schema_valida_jsonl(const schema_t *s, const char *jsonl)
+int schema_valida_isonl(const schema_t *s, const char *isonl)
 {
     validatio_ctx_t ctx = { .schema = s, .linea_num = 0, .errores = 0 };
-    json_pro_quaque_linea(jsonl, valida_lineam, &ctx);
+    ison_pro_quaque_linea(isonl, valida_lineam, &ctx);
     return ctx.errores;
 }

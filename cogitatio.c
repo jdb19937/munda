@@ -5,7 +5,7 @@
 #include "cogitatio.h"
 #include "tabula.h"
 #include "oraculum.h"
-#include "json.h"
+#include "ison.h"
 #include "utilia.h"
 
 #include <stdlib.h>
@@ -21,7 +21,7 @@ static const char *INSTRUCTIONES_CAPUT =
     "Legenda: .=vacuum #=saxum W=murus F=feles B=dalekus U=ursus "
     "C=corvus r=rapum f=fungus Z=zodus O=oculus @=tu\n\n"
     "VICINITAS ET DIRECTIONES:\n"
-    "Campo \"vicinitas\" est JSON array duplex: vicinitas[series][columna].\n"
+    "Campo \"vicinitas\" est ISON array duplex: vicinitas[series][columna].\n"
     "  series 0 = septentrio (sursum), ultima series = meridies (deorsum)\n"
     "  columna 0 = occidens (sinistrorsum), ultima columna = oriens (dextrorsum)\n"
     "  @ in centro es tu.\n"
@@ -35,7 +35,7 @@ static const char *INSTRUCTIONES_CAPUT =
     "U est ad meridies, r est ad meridies-oriens.\n"
     "DIRECTIO actionum = septentrio, meridies, oriens, occidens "
     "(solum quattuor cardinales, non diagonales).\n\n"
-    "Rogatum est objectum JSON. Cuiusque clavis est nomen cellulae tuae. "
+    "Rogatum est objectum ISON. Cuiusque clavis est nomen cellulae tuae. "
     "Valor est objectum cum:\n"
     "- \"vicinitas\": array duplex ut supra\n"
     "- \"ultima_actio\": ultima actio tentata et exitus, si habetur\n"
@@ -61,7 +61,7 @@ static const char *INSTRUCTIONES_CAUDA =
     "- quiesce: nihil agere\n\n"
     "Si campo \"audita\" habes, continet verba quae alii tibi dixerunt.\n"
     "Campo \"mens\" continet cogitationes tuas priores.\n\n"
-    "Responde objecto JSON: {\"nomen\": \"actio\", \"nomen.mens\": \"cogitationes\"}\n"
+    "Responde objecto ISON: {\"nomen\": \"actio\", \"nomen.mens\": \"cogitationes\"}\n"
     "Clavis .mens est voluntaria. Si data, mentem tuam novam continet.\n"
     "Exempla: {\"U001\": \"oppugna septentrio\", \"U001.mens\": \"felem video\"}, "
     "{\"A001\": \"move oriens\"}, "
@@ -77,7 +77,7 @@ static char genus_signum(genus_t g)
     return '?';
 }
 
-/* aedifica vicinitatem ut JSON array duplex: [[".","."],["@","#"]] */
+/* aedifica vicinitatem ut ISON array duplex: [[".","."],["@","#"]] */
 static void aedifica_vicinitatem(const tabula_t *tab, int cx, int cy,
                                  int radius, char *buf, size_t mag)
 {
@@ -256,7 +256,7 @@ static char *aedifica_instructiones(const char *specifica,
     return res;
 }
 
-/* aedifica valorem structuratum JSON pro una cellula:
+/* aedifica valorem structuratum ISON pro una cellula:
  * {"vicinitas": [[...]], "ultimus_motus": "..., ..."} */
 static void aedifica_valorem(const tabula_t *tab,
                              int x, int y, int radius,
@@ -327,7 +327,7 @@ static void aedifica_valorem(const tabula_t *tab,
     snprintf(p, r, "}");
 }
 
-/* mitte fasciculum asynchrone. reddit 1 si missum. */
+/* mitte plicam asynchrone. reddit 1 si missum. */
 static int mitte_pendentes(const tabula_t *tab, praecogitata_t *res,
                            int initium, int fm, int radius,
                            const char *sapientum,
@@ -335,7 +335,7 @@ static int mitte_pendentes(const tabula_t *tab, praecogitata_t *res,
 {
     if (res->volantes_num >= VOLANTES_MAX) return 0;
 
-    json_scriptor_t *js = json_scriptor_crea();
+    ison_scriptor_t *js = ison_scriptor_crea();
     if (!js) return 0;
 
     int vi = res->volantes_num;
@@ -350,10 +350,10 @@ static int mitte_pendentes(const tabula_t *tab, praecogitata_t *res,
 
         char val[4096];
         aedifica_valorem(tab, p->x, p->y, radius, val, sizeof(val));
-        json_scriptor_adde_crudum(js, p->nomen, val);
+        ison_scriptor_adde_crudum(js, p->nomen, val);
     }
 
-    char *rogatum = json_scriptor_fini(js);
+    char *rogatum = ison_scriptor_fini(js);
     if (!rogatum) return 0;
 
     int fossa = oraculum_mitte(sapientum, instructiones_completae, rogatum);
@@ -371,11 +371,11 @@ static void collige_responsum(const char *responsum,
                               const cogitatio_volans_t *vl,
                               praecogitata_t *res)
 {
-    const char *json_initium = strchr(responsum, '{');
-    if (!json_initium) return;
+    const char *ison_initium = strchr(responsum, '{');
+    if (!ison_initium) return;
 
-    json_par_t pares[FASCICULUS_MAX];
-    int np = json_lege(json_initium, pares, FASCICULUS_MAX);
+    ison_par_t pares[PLICA_MAX];
+    int np = ison_lege(ison_initium, pares, PLICA_MAX);
     if (np <= 0) return;
 
     for (int i = 0; i < np; i++) {
@@ -420,7 +420,7 @@ static void collige_responsum(const char *responsum,
 
 void cogitatio_praecogita(tabula_t *tab, genus_t genus,
                           int limen, int modulus,
-                          int fasciculus_mag, int patientia,
+                          int plica_mag, int patientia,
                           int radius,
                           const char *sapientum,
                           const char *instructiones,
@@ -477,8 +477,8 @@ void cogitatio_praecogita(tabula_t *tab, genus_t genus,
     if (res->pendentes_num > 0)
         res->pendentes_gradus++;
 
-    /* --- 3. mitte fasciculos quando parati --- */
-    int paratus = (res->pendentes_num >= fasciculus_mag) ||
+    /* --- 3. mitte plicas quando parati --- */
+    int paratus = (res->pendentes_num >= plica_mag) ||
                   (res->pendentes_num > 0 &&
                    res->pendentes_gradus >= patientia);
 
@@ -492,7 +492,7 @@ void cogitatio_praecogita(tabula_t *tab, genus_t genus,
             if (res->volantes_num >= VOLANTES_MAX)
                 break;
             int fm = res->pendentes_num - missi;
-            if (fm > fasciculus_mag) fm = fasciculus_mag;
+            if (fm > plica_mag) fm = plica_mag;
 
             if (!mitte_pendentes(tab, res, missi, fm, radius, sapientum, inst))
                 break;
@@ -533,7 +533,7 @@ static const char *INSTRUCTIONES_TABULAE_CAPUT =
     "Legenda: .=vacuum #=saxum W=murus F=feles B=dalekus U=ursus "
     "r=rapum f=fungus Z=zodus O=oculus\n\n"
     "TABULA:\n"
-    "Campo \"tabula\" est JSON array duplex: tabula[series][columna].\n"
+    "Campo \"tabula\" est ISON array duplex: tabula[series][columna].\n"
     "  series 0 = septentrio (sursum), ultima series = meridies (deorsum)\n"
     "  columna 0 = occidens (sinistrorsum), ultima columna = oriens (dextrorsum)\n"
     "Cellulae agminis tui ostenduntur per NOMEN (e.g. \"B001\") "
@@ -558,13 +558,13 @@ static const char *INSTRUCTIONES_TABULAE_CAUDA =
     "TU REGIS TOTUM AGMEN SIMUL. Decide actionem pro QUOQUE membro.\n"
     "Vide tabulam totam — cogita de strategia collectiva.\n"
     "Membra debent cooperari et coordinare motus ut unam unitatem.\n\n"
-    "Responde objecto JSON: {\"nomen\": \"actio\", \"nomen.mens\": \"cogitationes\"}\n"
+    "Responde objecto ISON: {\"nomen\": \"actio\", \"nomen.mens\": \"cogitationes\"}\n"
     "Clavis .mens est voluntaria. Da actionem pro quoque nomine.\n"
     "Exemplum: {\"B001\": \"move oriens\", \"B001.mens\": \"circumdo ursum\", "
     "\"B002\": \"oppugna septentrio\"}\n\n";
 
-/* aedifica tabulam JSON: [[".", "B001", "F"], ...] */
-static void aedifica_tabulam_json(const tabula_t *tab, genus_t genus,
+/* aedifica tabulam ISON: [[".", "B001", "F"], ...] */
+static void aedifica_tabulam_ison(const tabula_t *tab, genus_t genus,
                                    char *buf, size_t mag)
 {
     char *p = buf;
@@ -597,7 +597,7 @@ static void aedifica_tabulam_json(const tabula_t *tab, genus_t genus,
 }
 
 /* aedifica listam nominum: ["B001","B002",...] */
-static void aedifica_nomina_json(const tabula_t *tab, genus_t genus,
+static void aedifica_nomina_ison(const tabula_t *tab, genus_t genus,
                                   int *xx, int *yy, char nomina[][8],
                                   int *num_out,
                                   char *buf, size_t mag)
@@ -612,7 +612,7 @@ static void aedifica_nomina_json(const tabula_t *tab, genus_t genus,
         for (int x = 0; x < latus; x++) {
             const cella_t *c = tabula_da_const(tab, x, y);
             if (c->genus != genus) continue;
-            if (n >= FASCICULUS_MAX) break;
+            if (n >= PLICA_MAX) break;
 
             const char *nom = (genera_ops[genus].phylum == DEI)
                               ? c->deus.nomen : c->animus.nomen;
@@ -773,37 +773,37 @@ void cogitatio_praecogita_tabulam(tabula_t *tab, genus_t genus,
     free(inst);
 
     /* aedifica rogatum */
-    json_scriptor_t *js = json_scriptor_crea();
+    ison_scriptor_t *js = ison_scriptor_crea();
     if (!js) { free(inst_totae); return; }
 
-    /* tabula JSON */
+    /* tabula ISON */
     size_t tab_mag = (size_t)tab->latus * tab->latus * 12 + 256;
     char *tab_buf = malloc(tab_mag);
-    if (!tab_buf) { free(inst_totae); json_scriptor_fini(js); return; }
-    aedifica_tabulam_json(tab, genus, tab_buf, tab_mag);
-    json_scriptor_adde_crudum(js, "tabula", tab_buf);
+    if (!tab_buf) { free(inst_totae); ison_scriptor_fini(js); return; }
+    aedifica_tabulam_ison(tab, genus, tab_buf, tab_mag);
+    ison_scriptor_adde_crudum(js, "tabula", tab_buf);
     free(tab_buf);
 
-    /* nomina JSON + collige positiones */
+    /* nomina ISON + collige positiones */
     cogitatio_volans_t *vl = &res->volantes[0];
     vl->num = 0;
 
-    size_t nom_mag = FASCICULUS_MAX * 12 + 64;
+    size_t nom_mag = PLICA_MAX * 12 + 64;
     char *nom_buf = malloc(nom_mag);
-    if (!nom_buf) { free(inst_totae); json_scriptor_fini(js); return; }
-    aedifica_nomina_json(tab, genus, vl->xx, vl->yy, vl->nomina,
+    if (!nom_buf) { free(inst_totae); ison_scriptor_fini(js); return; }
+    aedifica_nomina_ison(tab, genus, vl->xx, vl->yy, vl->nomina,
                           &vl->num, nom_buf, nom_mag);
-    json_scriptor_adde_crudum(js, "nomina", nom_buf);
+    ison_scriptor_adde_crudum(js, "nomina", nom_buf);
     free(nom_buf);
 
     /* status cuiusque membri */
     for (int i = 0; i < vl->num; i++) {
         char stat[1024];
         aedifica_statum(tab, vl->xx[i], vl->yy[i], stat, sizeof(stat));
-        json_scriptor_adde_crudum(js, vl->nomina[i], stat);
+        ison_scriptor_adde_crudum(js, vl->nomina[i], stat);
     }
 
-    char *rogatum = json_scriptor_fini(js);
+    char *rogatum = ison_scriptor_fini(js);
     if (!rogatum) { free(inst_totae); return; }
 
     int fossa = oraculum_mitte(sapientum, inst_totae, rogatum);

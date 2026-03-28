@@ -3,7 +3,7 @@
  */
 
 #include "utilia.h"
-#include "json.h"
+#include "ison.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -182,7 +182,7 @@ void lege_sapientum(const char *spec,
     }
 }
 
-char *lege_fasciculum(const char *via)
+char *lege_plicam(const char *via)
 {
     FILE *f = fopen(via, "r");
     if (!f) return NULL;
@@ -203,7 +203,7 @@ char *lege_instructiones(const char *munda, const char *phylum,
 {
     char via[256];
     snprintf(via, sizeof(via), "%s/%s/%s.md", munda, phylum, genus);
-    char *res = lege_fasciculum(via);
+    char *res = lege_plicam(via);
     if (!res) {
         fprintf(stderr, "monitum: %s non inventum, praefinitum utor\n", via);
         char praefinitum[64];
@@ -213,26 +213,26 @@ char *lege_instructiones(const char *munda, const char *phylum,
     return res;
 }
 
-int lege_parametra(const char *fasciculus_c, json_par_t *pares, int max)
+int lege_parametra(const char *plica_c, ison_par_t *pares, int max)
 {
-    /* .c → .json */
-    size_t lon = strlen(fasciculus_c);
+    /* .c → .ison */
+    size_t lon = strlen(plica_c);
     if (lon < 2) return 0;
-    char *via = malloc(lon + 4);   /* .c → .json = +3 */
+    char *via = malloc(lon + 4);   /* .c → .ison = +3 */
     if (!via) return 0;
-    memcpy(via, fasciculus_c, lon + 1);
+    memcpy(via, plica_c, lon + 1);
     if (via[lon-1] == 'c' && via[lon-2] == '.') {
-        memcpy(via + lon - 1, "json", 5);
+        memcpy(via + lon - 1, "ison", 5);
     }
-    char *json = lege_fasciculum(via);
+    char *ison = lege_plicam(via);
     free(via);
-    if (!json) return 0;
-    int n = json_lege(json, pares, max);
-    free(json);
+    if (!ison) return 0;
+    int n = ison_lege(ison, pares, max);
+    free(ison);
     return n;
 }
 
-int par_da_int(const json_par_t *pares, int num,
+int par_da_int(const ison_par_t *pares, int num,
                const char *clavis, int praefinitum)
 {
     for (int i = 0; i < num; i++) {
@@ -242,7 +242,7 @@ int par_da_int(const json_par_t *pares, int num,
     return praefinitum;
 }
 
-const char *par_da_chordam(const json_par_t *pares, int num,
+const char *par_da_chordam(const ison_par_t *pares, int num,
                            const char *clavis, const char *praefinitum)
 {
     for (int i = 0; i < num; i++) {
@@ -318,10 +318,10 @@ int hex_ad_octetos(const char *hex, size_t hex_mag,
     return 0;
 }
 
-noreturn void morire(const char *fasciculus, int linea,
+noreturn void morire(const char *plica, int linea,
                      const char *fmt, ...)
 {
-    fprintf(stderr, "%s:%d: ", fasciculus, linea);
+    fprintf(stderr, "%s:%d: ", plica, linea);
     va_list ap;
     va_start(ap, fmt);
     vfprintf(stderr, fmt, ap);

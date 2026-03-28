@@ -3,7 +3,7 @@
  */
 
 #include "provisor.h"
-#include "../json.h"
+#include "../ison.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,12 +14,12 @@ static int para(const char *nomen, const char *conatus,
                 const char *instructiones, const char *rogatum,
                 char **corpus, struct crispus_slist **capita)
 {
-    char *eff_user = json_effuge(rogatum);
+    char *eff_user = ison_effuge(rogatum);
     if (!eff_user) return -1;
 
     char *eff_sys = NULL;
     if (instructiones) {
-        eff_sys = json_effuge(instructiones);
+        eff_sys = ison_effuge(instructiones);
         if (!eff_sys) { free(eff_user); return -1; }
     }
 
@@ -58,23 +58,23 @@ static int para(const char *nomen, const char *conatus,
     return 0;
 }
 
-static char *extrahe(const char *json)
+static char *extrahe(const char *ison)
 {
-    char *textus = json_da_chordam(json, "content[0].text");
+    char *textus = ison_da_chordam(ison, "content[0].text");
     if (textus) return textus;
 
-    char *error = json_da_chordam(json, "error.message");
+    char *error = ison_da_chordam(ison, "error.message");
     if (error) return error;
 
-    return strdup(json);
+    return strdup(ison);
 }
 
-static void signa(const char *json, long *accepta, long *recondita,
+static void signa(const char *ison, long *accepta, long *recondita,
                    long *emissa, long *cogitata)
 {
-    *accepta   = json_da_numerum(json, "usage.input_tokens");
-    *emissa    = json_da_numerum(json, "usage.output_tokens");
-    *recondita = json_da_numerum(json, "usage.cache_read_input_tokens");
+    *accepta   = ison_da_numerum(ison, "usage.input_tokens");
+    *emissa    = ison_da_numerum(ison, "usage.output_tokens");
+    *recondita = ison_da_numerum(ison, "usage.cache_read_input_tokens");
     /* Anthropic: cogitata intra emissa continentur, sed non separatim dantur */
     *cogitata  = 0;
 }

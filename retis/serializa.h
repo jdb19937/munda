@@ -9,7 +9,7 @@
 
 #include "tabula.h"
 
-/* serializa tabulam ad JSON; vocans debet liberare reditum */
-char *tabula_ad_json(const tabula_t *tab, unsigned long gradus);
+/* serializa tabulam ad ISON; vocans debet liberare reditum */
+char *tabula_ad_ison(const tabula_t *tab, unsigned long gradus);
 
 #endif /* SERIALIZA_H */

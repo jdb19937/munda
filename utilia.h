@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <stdnoreturn.h>
 
-struct json_par;
+struct ison_par;
 
 /* --- ANSI colores et stili --- */
 
@@ -31,9 +31,9 @@ int prima_occurrentia(const char *textus,
 
 /*
  * scribe nuntium erroris ad stderr et exi.
- * includit nomen fasciculi et numerum lineae.
+ * includit nomen plicae et numerum lineae.
  */
-noreturn void morire(const char *fasciculus, int linea,
+noreturn void morire(const char *plica, int linea,
                      const char *fmt, ...);
 
 /* macro: morire cum __FILE__ et __LINE__ automatice */
@@ -52,7 +52,7 @@ void lege_sapientum(const char *spec,
                     char *conatus,  size_t cmag);
 
 /*
- * lege totum fasciculum in memoriam. vocans liberet per free().
+ * lege totum plicam in memoriam. vocans liberet per free().
  * reddit NULL si error.
  */
 /* --- lexicon: dictionarium clavis(chorda) → valor(long) --- */
@@ -85,30 +85,30 @@ long lexicon_da_compositam(const lexicon_t *lex, const char *prima,
 /* enumera genera unica (partes primas ante ':') in tabulam */
 int lexicon_genera(const lexicon_t *lex, char genera[][64], int max_genera);
 
-/* --- fasciculi --- */
+/* --- plicae --- */
 
-char *lege_fasciculum(const char *via);
+char *lege_plicam(const char *via);
 
 /*
- * lege_instructiones — legit fasciculum .md ex mundo.
+ * lege_instructiones — legit plicam .md ex mundo.
  * construit "{munda}/{phylum}/{genus}.md", legit, monet si absens.
  */
 char *lege_instructiones(const char *munda, const char *phylum,
                          const char *genus);
 
 /*
- * lege fasciculum .json iuxta fasciculum .c fontem et extrahe parametra.
- * reddit numerum parium lectorum. pares scribitur in struct json_par tabulam.
- * e.g. si fasciculus_c = "cellae/animae/ursus.c", legit "cellae/animae/ursus.json"
+ * lege plicam .ison iuxta plicam .c fontem et extrahe parametra.
+ * reddit numerum parium lectorum. pares scribitur in struct ison_par tabulam.
+ * e.g. si plica_c = "cellae/animae/ursus.c", legit "cellae/animae/ursus.ison"
  */
-int lege_parametra(const char *fasciculus_c, struct json_par *pares, int max);
+int lege_parametra(const char *plica_c, struct ison_par *pares, int max);
 
 /* da valorem numericam ex paribus per clavem, vel praefinitum si non inventa */
-int par_da_int(const struct json_par *pares, int num,
+int par_da_int(const struct ison_par *pares, int num,
                const char *clavis, int praefinitum);
 
 /* da valorem chordae ex paribus — reddit in pulvinar statum, vel praefinitum */
-const char *par_da_chordam(const struct json_par *pares, int num,
+const char *par_da_chordam(const struct ison_par *pares, int num,
                            const char *clavis, const char *praefinitum);
 
 /* --- I/O plena (cum retry) --- */

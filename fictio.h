@@ -2,7 +2,7 @@
  * fictio.h — typi et adiutores pro probatione ficta
  *
  * Provisor fictus vocat genus_ops[g].fictio() pro quaque cellula.
- * Logica ficta in fasciculis generum ipsis definitur.
+ * Logica ficta in plicis generum ipsis definitur.
  */
 
 #ifndef FICTIO_H
