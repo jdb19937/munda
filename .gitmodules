@@ -1,8 +1,6 @@
 [submodule "ison"]
 	path = ison
 	url = git@github.com:jdb19937/ison.git
-	branch = refs/tags/III
 [submodule "crispus"]
 	path = crispus
 	url = git@github.com:jdb19937/crispus.git
-	branch = refs/tags/I
