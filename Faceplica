@@ -25,6 +25,10 @@ CAPITA  = cellula.h cella.h tabula.h terminalis.h oraculum.h cogitatio.h utilia.
 ORACULA_OBJ = oracula/openai.o oracula/xai.o oracula/anthropic.o oracula/fictus.o
 ORACULA_DEP = oracula/provisor.h
 
+# --- omnia (default target) ---
+
+omnia: curre lude fare proba valida daemonium coniunge specta fac_certificatum
+
 # --- submoduli ---
 
 $(LIBISON):
@@ -34,10 +38,6 @@ $(LIBISON):
 $(LIBCRISPUS):
 	git submodule update --init crispus
 	make -C crispus # faciendae
-
-# --- omnia (default target) ---
-
-omnia: curre lude fare proba valida daemonium coniunge specta fac_certificatum
 
 # --- retis (protocollum TCP) ---
 
