@@ -1,11 +1,14 @@
 # Faceplica — TABULA MUNDA
 
 CC      = cc
-CFLAGS  = -Wall -Wextra -O2 -I. -Iison -Icrispus
+
+APOTHECA ?= .
+
+CFLAGS  = -Wall -Wextra -O2 -I. -I$(APOTHECA)/ison -I$(APOTHECA)/crispus
 
 # bibliothecae externae
-LIBISON    = ison/libison.a
-LIBCRISPUS = crispus/libcrispus.a
+LIBISON    = $(APOTHECA)/ison/libison.a
+LIBCRISPUS = $(APOTHECA)/crispus/libcrispus.a
 
 # fontes communes
 COMMUNES = tabula.c \
@@ -29,15 +32,18 @@ ORACULA_DEP = oracula/provisor.h
 
 omnia: curre lude fare proba valida daemonium coniunge specta fac_certificatum
 
-# --- submoduli ---
+# --- para (submoduli) ---
+
+para:
+	git submodule update --init ison crispus
+	make -C ison
+	make -C crispus
 
 $(LIBISON):
-	git submodule update --init ison
-	make -C ison # faciendae
+	make -C $(APOTHECA)/ison
 
 $(LIBCRISPUS):
-	git submodule update --init crispus
-	make -C crispus # faciendae
+	make -C $(APOTHECA)/crispus
 
 # --- retis (protocollum TCP) ---
 
@@ -92,13 +98,15 @@ valida: valida.o $(LIBISON)
 
 # --- probatio crispus ---
 
-proba: proba.o crispus/proba.o $(LIBCRISPUS) utilia.o $(LIBISON)
+proba: proba.o $(CRISPUS_PROBA_OBJ) $(LIBCRISPUS) utilia.o $(LIBISON)
 	$(CC) $(CFLAGS) -o $@ $^
 
-proba.o: proba.c crispus/proba.h
+CRISPUS_PROBA_OBJ = $(APOTHECA)/crispus/proba.o
+
+proba.o: proba.c $(APOTHECA)/crispus/proba.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-crispus/proba.o: crispus/proba.c crispus/proba.h crispus/crispus.h crispus/internum.h crispus/arcana.h
+$(CRISPUS_PROBA_OBJ): $(APOTHECA)/crispus/proba.c $(APOTHECA)/crispus/proba.h $(APOTHECA)/crispus/crispus.h $(APOTHECA)/crispus/internum.h $(APOTHECA)/crispus/arcana.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # --- daemonium (servitor TCP) ---
@@ -145,12 +153,12 @@ purga:
 	rm -f oraculum.o fare.o daemonium.o coniunge.o specta.o fac_certificatum.o
 	rm -f $(ORACULA_OBJ)
 	rm -f retis/retis.o retis/serializa.o retis/visus.o retis/crudus.o retis/cliens.o
-	rm -f crispus/proba.o proba.o valida.o
+	rm -f proba.o valida.o
+	@if [ "$(APOTHECA)" = "." ]; then rm -f crispus/proba.o; fi
 	rm -f curre lude fare proba valida
 	rm -f daemonium coniunge specta fac_certificatum
 
 purga_omnia: purga
-	-make -C ison purga
-	-make -C crispus purga
+	@if [ "$(APOTHECA)" = "." ]; then make -C ison purga; make -C crispus purga; fi
 
-.PHONY: omnia purga purga_omnia
+.PHONY: omnia para purga purga_omnia
