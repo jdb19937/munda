@@ -4,6 +4,7 @@
 
 #include "tabula.h"
 #include "utilia.h"
+#include "json.h"
 
 #include <stdlib.h>
 #include <string.h>

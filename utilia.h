@@ -6,8 +6,10 @@
 #define UTILIA_H
 
 #include <stddef.h>
+#include <stdint.h>
 #include <stdnoreturn.h>
-#include "json.h"
+
+struct json_par;
 
 /* --- ANSI colores et stili --- */
 
@@ -96,17 +98,35 @@ char *lege_instructiones(const char *munda, const char *phylum,
 
 /*
  * lege fasciculum .json iuxta fasciculum .c fontem et extrahe parametra.
- * reddit numerum parium lectorum. pares scribitur in json_par_t tabulam.
+ * reddit numerum parium lectorum. pares scribitur in struct json_par tabulam.
  * e.g. si fasciculus_c = "cellae/animae/ursus.c", legit "cellae/animae/ursus.json"
  */
-int lege_parametra(const char *fasciculus_c, json_par_t *pares, int max);
+int lege_parametra(const char *fasciculus_c, struct json_par *pares, int max);
 
 /* da valorem numericam ex paribus per clavem, vel praefinitum si non inventa */
-int par_da_int(const json_par_t *pares, int num,
+int par_da_int(const struct json_par *pares, int num,
                const char *clavis, int praefinitum);
 
 /* da valorem chordae ex paribus — reddit in pulvinar statum, vel praefinitum */
-const char *par_da_chordam(const json_par_t *pares, int num,
+const char *par_da_chordam(const struct json_par *pares, int num,
                            const char *clavis, const char *praefinitum);
+
+/* --- I/O plena (cum retry) --- */
+
+int mitte_plene(int fd, const void *data, size_t mag);
+int lege_plene(int fd, void *data, size_t mag);
+
+/* --- big-endian codificatio --- */
+
+void scr16(uint8_t *p, uint16_t v);
+void scr24(uint8_t *p, uint32_t v);
+uint16_t leg16(const uint8_t *p);
+uint32_t leg24(const uint8_t *p);
+
+/* --- hex codificatio --- */
+
+void octeti_ad_hex(const uint8_t *src, size_t mag, char *dest);
+int  hex_ad_octetos(const char *hex, size_t hex_mag,
+                    uint8_t *dest, size_t dest_mag);
 
 #endif /* UTILIA_H */

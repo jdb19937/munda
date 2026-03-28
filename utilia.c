@@ -3,11 +3,13 @@
  */
 
 #include "utilia.h"
+#include "json.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <unistd.h>
 
 /* --- lexicon --- */
 
@@ -248,6 +250,72 @@ const char *par_da_chordam(const json_par_t *pares, int num,
             return pares[i].valor;
     }
     return praefinitum;
+}
+
+/* --- I/O plena --- */
+
+int mitte_plene(int fd, const void *data, size_t mag)
+{
+    const uint8_t *p = data;
+    size_t missum = 0;
+    while (missum < mag) {
+        ssize_t r = write(fd, p + missum, mag - missum);
+        if (r <= 0) return -1;
+        missum += (size_t)r;
+    }
+    return 0;
+}
+
+int lege_plene(int fd, void *data, size_t mag)
+{
+    uint8_t *p = data;
+    size_t lectum = 0;
+    while (lectum < mag) {
+        ssize_t r = read(fd, p + lectum, mag - lectum);
+        if (r <= 0) return -1;
+        lectum += (size_t)r;
+    }
+    return 0;
+}
+
+/* --- big-endian codificatio --- */
+
+void scr16(uint8_t *p, uint16_t v) { p[0] = (uint8_t)(v >> 8); p[1] = (uint8_t)v; }
+void scr24(uint8_t *p, uint32_t v) { p[0] = (uint8_t)(v >> 16); p[1] = (uint8_t)(v >> 8); p[2] = (uint8_t)v; }
+uint16_t leg16(const uint8_t *p) { return ((uint16_t)p[0] << 8) | p[1]; }
+uint32_t leg24(const uint8_t *p) { return ((uint32_t)p[0] << 16) | ((uint32_t)p[1] << 8) | p[2]; }
+
+/* --- hex codificatio --- */
+
+void octeti_ad_hex(const uint8_t *src, size_t mag, char *dest)
+{
+    static const char tabulae[] = "0123456789abcdef";
+    for (size_t i = 0; i < mag; i++) {
+        dest[2*i]     = tabulae[(src[i] >> 4) & 0xf];
+        dest[2*i + 1] = tabulae[src[i] & 0xf];
+    }
+}
+
+int hex_ad_octetos(const char *hex, size_t hex_mag,
+                   uint8_t *dest, size_t dest_mag)
+{
+    if (hex_mag != dest_mag * 2) return -1;
+    for (size_t i = 0; i < dest_mag; i++) {
+        unsigned hi, lo;
+        char c;
+        c = hex[2*i];
+        if      (c >= '0' && c <= '9') hi = (unsigned)(c - '0');
+        else if (c >= 'a' && c <= 'f') hi = (unsigned)(c - 'a' + 10);
+        else if (c >= 'A' && c <= 'F') hi = (unsigned)(c - 'A' + 10);
+        else return -1;
+        c = hex[2*i + 1];
+        if      (c >= '0' && c <= '9') lo = (unsigned)(c - '0');
+        else if (c >= 'a' && c <= 'f') lo = (unsigned)(c - 'a' + 10);
+        else if (c >= 'A' && c <= 'F') lo = (unsigned)(c - 'A' + 10);
+        else return -1;
+        dest[i] = (uint8_t)((hi << 4) | lo);
+    }
+    return 0;
 }
 
 noreturn void morire(const char *fasciculus, int linea,

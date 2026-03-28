@@ -7,6 +7,7 @@
 
 #include "retis.h"
 #include "json.h"
+#include "utilia.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,18 +15,6 @@
 #include <unistd.h>
 
 /* --- framing --- */
-
-static int mitte_plene(int fd, const void *data, size_t mag)
-{
-    const uint8_t *p = data;
-    size_t missum = 0;
-    while (missum < mag) {
-        ssize_t r = write(fd, p + missum, mag - missum);
-        if (r <= 0) return -1;
-        missum += (size_t)r;
-    }
-    return 0;
-}
 
 int retis_mitte_nudum(int fd, const void *data, size_t mag)
 {
@@ -127,40 +116,6 @@ int retis_revela(sessio_t *ses, uint8_t *frame, size_t frame_mag,
     ses->seq_leg++;
     *clarus = textus_occultus;
     *clar_mag = textus_mag;
-    return 0;
-}
-
-/* --- hex codificatio punctorum EC --- */
-
-static const char HEX_TABULAE[] = "0123456789abcdef";
-
-static void octeti_ad_hex(const uint8_t *src, size_t mag, char *dest)
-{
-    for (size_t i = 0; i < mag; i++) {
-        dest[2*i]     = HEX_TABULAE[(src[i] >> 4) & 0xf];
-        dest[2*i + 1] = HEX_TABULAE[src[i] & 0xf];
-    }
-}
-
-static int hex_ad_octetos(const char *hex, size_t hex_mag,
-                          uint8_t *dest, size_t dest_mag)
-{
-    if (hex_mag != dest_mag * 2) return -1;
-    for (size_t i = 0; i < dest_mag; i++) {
-        unsigned hi, lo;
-        char c;
-        c = hex[2*i];
-        if      (c >= '0' && c <= '9') hi = (unsigned)(c - '0');
-        else if (c >= 'a' && c <= 'f') hi = (unsigned)(c - 'a' + 10);
-        else if (c >= 'A' && c <= 'F') hi = (unsigned)(c - 'A' + 10);
-        else return -1;
-        c = hex[2*i + 1];
-        if      (c >= '0' && c <= '9') lo = (unsigned)(c - '0');
-        else if (c >= 'a' && c <= 'f') lo = (unsigned)(c - 'a' + 10);
-        else if (c >= 'A' && c <= 'F') lo = (unsigned)(c - 'A' + 10);
-        else return -1;
-        dest[i] = (uint8_t)((hi << 4) | lo);
-    }
     return 0;
 }
 

@@ -9,6 +9,7 @@
 
 #include "internum.h"
 #include "crispus.h"
+#include "utilia.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -87,40 +88,6 @@ struct velum {
     size_t app_mag;
 };
 
-/* --- utilitates retis --- */
-
-static int mitte_plene(int fd, const void *data, size_t mag)
-{
-    const uint8_t *p = data;
-    size_t missum = 0;
-    while (missum < mag) {
-        ssize_t r = write(fd, p + missum, mag - missum);
-        if (r <= 0) return -1;
-        missum += (size_t)r;
-    }
-    return 0;
-}
-
-static int lege_plene(int fd, void *data, size_t mag)
-{
-    uint8_t *p = data;
-    size_t lectum = 0;
-    while (lectum < mag) {
-        ssize_t r = read(fd, p + lectum, mag - lectum);
-        if (r <= 0) return -1;
-        lectum += (size_t)r;
-    }
-    return 0;
-}
-
-/* --- scribere/legere big-endian --- */
-
-static void scr16(uint8_t *p, uint16_t v) { p[0] = v >> 8; p[1] = v; }
-static uint16_t leg16(const uint8_t *p) { return ((uint16_t)p[0] << 8) | p[1]; }
-static void scr24(uint8_t *p, uint32_t v)
-{ p[0] = (v >> 16); p[1] = (v >> 8); p[2] = v; }
-static uint32_t leg24(const uint8_t *p)
-{ return ((uint32_t)p[0] << 16) | ((uint32_t)p[1] << 8) | p[2]; }
 
 /* --- TLS record mittere --- */
 

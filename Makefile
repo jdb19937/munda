@@ -94,7 +94,7 @@ valida: valida.o json.o
 
 # --- probatio crispus ---
 
-proba: proba.o crispus/proba.o $(CRISPUS_OBJ) $(ARCANA_OBJ)
+proba: proba.o crispus/proba.o $(CRISPUS_OBJ) $(ARCANA_OBJ) utilia.o json.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 proba.o: proba.c crispus/proba.h
@@ -110,7 +110,10 @@ daemonium: daemonium.o retis/retis.o retis/serializa.o $(COMMUNES_OBJ) oraculum.
 
 # --- coniunge (cliens interactivus — sine cella.h/tabula.h) ---
 
-CLIENS_OBJ = retis/retis.o retis/visus.o retis/crudus.o json.o $(ARCANA_OBJ)
+CLIENS_OBJ = retis/retis.o retis/cliens.o retis/visus.o retis/crudus.o json.o utilia.o $(ARCANA_OBJ)
+
+retis/cliens.o: retis/cliens.c retis/cliens.h $(RETIS_DEP) json.h
+	$(CC) $(CFLAGS) -c $< -o $@
 
 retis/crudus.o: retis/crudus.c retis/crudus.h
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -118,7 +121,7 @@ retis/crudus.o: retis/crudus.c retis/crudus.h
 coniunge: coniunge.o $(CLIENS_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
-coniunge.o: coniunge.c retis/retis.h retis/visus.h retis/crudus.h genera.h cellula.h json.h
+coniunge.o: coniunge.c retis/retis.h retis/cliens.h retis/visus.h retis/crudus.h genera.h cellula.h json.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # --- specta (cliens sine capite — sine cella.h/tabula.h) ---
@@ -126,12 +129,12 @@ coniunge.o: coniunge.c retis/retis.h retis/visus.h retis/crudus.h genera.h cellu
 specta: specta.o $(CLIENS_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
-specta.o: specta.c retis/retis.h retis/visus.h genera.h cellula.h json.h
+specta.o: specta.c retis/retis.h retis/cliens.h retis/visus.h genera.h cellula.h json.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # --- fac_certificatum ---
 
-fac_certificatum: fac_certificatum.o retis/retis.o json.o $(ARCANA_OBJ)
+fac_certificatum: fac_certificatum.o retis/retis.o json.o utilia.o $(ARCANA_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
 fac_certificatum.o: fac_certificatum.c retis/retis.h
@@ -143,7 +146,7 @@ purga:
 	rm -f curre.o lude.o terminalis.o $(COMMUNES_OBJ)
 	rm -f oraculum.o fare.o daemonium.o coniunge.o specta.o fac_certificatum.o
 	rm -f $(ORACULA_OBJ) $(CRISPUS_OBJ) $(ARCANA_OBJ)
-	rm -f retis/retis.o retis/serializa.o retis/visus.o retis/crudus.o
+	rm -f retis/retis.o retis/serializa.o retis/visus.o retis/crudus.o retis/cliens.o
 	rm -f crispus/proba.o proba.o valida.o
 	rm -f curre lude fare proba valida
 	rm -f daemonium coniunge specta fac_certificatum
