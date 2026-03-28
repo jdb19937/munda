@@ -9,7 +9,7 @@
 #include "provisor.h"
 #include "../cella.h"
 #include "../fictio.h"
-#include "../ison.h"
+#include "ison.h"
 
 #include <stdio.h>
 #include <stdlib.h>

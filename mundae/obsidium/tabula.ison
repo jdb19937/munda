@@ -80,7 +80,7 @@
     ]
   },
   "sapientum": {
-    "dalekus": "openai/gpt-5.4",
-    "ursus": "openai/gpt-5.4"
+    "dalekus": "fictus/default",
+    "ursus": "fictus/default"
   }
 }

@@ -132,7 +132,7 @@
     ]
   },
   "sapientum": {
-    "dalekus": "anthropic/claude-haiku-4-5",
-    "ursus": "xai/grok-4.20",
+    "dalekus": "fictus/default"
+    "ursus": "fictus/default"
   }
 }

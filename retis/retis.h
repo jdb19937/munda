@@ -13,7 +13,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include "../arcana/arcana.h"
+#include "arcana.h"
 
 #define RETIS_PORTUS       7777
 #define RETIS_NUNTIUS_MAX  131072
