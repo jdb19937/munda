@@ -99,7 +99,7 @@ cellae/            — implementationes singulorum generum
   dei/             — zodus, oculus
 mundae/            — configurationes mundorum
 schemae/           — schemata JSON pro validatione
-oracula/           — provisores LLM (openai, anthropic, xai, fictus, munda)
+oracula/           — provisores LLM (openai, anthropic, xai, fictus)
 ```
 
 ## Mundatio
