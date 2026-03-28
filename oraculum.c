@@ -26,7 +26,6 @@ static const provisor_t *provisores[8] = {
     &provisor_openai,
     &provisor_xai,
     &provisor_anthropic,
-    &provisor_munda,
     &provisor_fictus,
     NULL
 };

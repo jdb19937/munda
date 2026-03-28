@@ -10,7 +10,7 @@
 #include "../crispus/crispus.h"
 
 typedef struct provisor {
-    const char *nomen;          /* "openai", "xai", "anthropic", "munda", "fictus" */
+    const char *nomen;          /* "openai", "xai", "anthropic", "fictus" */
     const char *clavis_env;     /* nomen env var pro clave API */
     const char *finis_url;      /* URL finis API */
 
@@ -41,7 +41,6 @@ typedef struct provisor {
 extern const provisor_t provisor_openai;
 extern const provisor_t provisor_xai;
 extern const provisor_t provisor_anthropic;
-extern const provisor_t provisor_munda;
 extern const provisor_t provisor_fictus;
 
 #endif /* PROVISOR_H */

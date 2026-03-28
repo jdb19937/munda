@@ -18,8 +18,8 @@ CAPITA  = cellula.h cella.h tabula.h terminalis.h oraculum.h json.h cogitatio.h 
           cellae/fixum.h cellae/cibus.h cellae/animus.h cellae/deus.h \
           cellae/dei/zodus.h cellae/dei/oculus.h
 
-ORACULA_OBJ = oracula/openai.o oracula/xai.o oracula/anthropic.o oracula/munda.o oracula/fictus.o
-ORACULA_FARE = oracula/openai.o oracula/xai.o oracula/anthropic.o oracula/munda.o oracula/fictus.o
+ORACULA_OBJ = oracula/openai.o oracula/xai.o oracula/anthropic.o oracula/fictus.o
+ORACULA_FARE = oracula/openai.o oracula/xai.o oracula/anthropic.o oracula/fictus.o
 ORACULA_DEP = oracula/provisor.h json.h
 
 # --- crispus (HTTPS sine dependentiis externis) ---

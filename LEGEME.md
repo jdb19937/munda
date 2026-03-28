@@ -1,4 +1,4 @@
-# Munda
+# Tabula Munda
 
 Ludus simulationis tabularis in terminali, lingua C scriptus. Entia viva (feles, daleki, ursi) per oraculum LLM cogitant et agunt in tabula toroidali.
 
