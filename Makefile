@@ -24,7 +24,6 @@ ORACULA_DEP = oracula/provisor.h json.h
 # --- omnia (default target) ---
 
 omnia: curre lude fare proba valida daemonium coniunge specta fac_certificatum
-all: omnia
 
 # --- arcana (primitiva cryptographica communia) ---
 
@@ -140,7 +139,7 @@ fac_certificatum.o: fac_certificatum.c retis/retis.h
 
 # --- mundatio ---
 
-mundus:
+purga:
 	rm -f curre.o lude.o terminalis.o $(COMMUNES_OBJ)
 	rm -f oraculum.o fare.o daemonium.o coniunge.o specta.o fac_certificatum.o
 	rm -f $(ORACULA_OBJ) $(CRISPUS_OBJ) $(ARCANA_OBJ)
@@ -148,6 +147,5 @@ mundus:
 	rm -f crispus/proba.o proba.o valida.o
 	rm -f curre lude fare proba valida
 	rm -f daemonium coniunge specta fac_certificatum
-clean: mundus
 
-.PHONY: omnia all mundus clean
+.PHONY: omnia purga
