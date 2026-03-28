@@ -736,6 +736,18 @@ void cogitatio_praecogita_tabulam(tabula_t *tab, genus_t genus,
     /* si iam volans est, expecta */
     if (res->volantes_num > 0) return;
 
+    /* purga acta obsoleta (dalekus mortuus vel motus) */
+    {
+        int dest = 0;
+        for (int i = 0; i < res->num; i++) {
+            cella_t *c = tabula_da(tab, res->acta[i].x, res->acta[i].y);
+            if (c->genus == genus) {
+                res->acta[dest++] = res->acta[i];
+            }
+        }
+        res->num = dest;
+    }
+
     /* si acta nondum consumpta, expecta */
     if (res->num > 0) return;
 
