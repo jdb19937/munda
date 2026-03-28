@@ -7,7 +7,7 @@ Ludus simulationis tabularis in terminali, lingua C scriptus. Entia viva (feles,
 ## Aedificatio
 
 ```
-make
+face
 ```
 
 Sine dependentiis externis (HTTPS per crispus). Binaria creantur:
@@ -126,8 +126,8 @@ schemae/           — schemata ISON pro validatione
 oracula/           — provisores LLM (openai, anthropic, xai, fictus)
 ```
 
-## Mundatio
+## Purgatio
 
 ```
-make mundus
+face purga
 ```
