@@ -160,7 +160,4 @@ purga:
 	rm -f curre lude fare proba valida
 	rm -f daemonium coniunge specta fac_certificatum
 
-purga_omnia: purga
-	@if [ "$(APOTHECA)" = "." ]; then $(FACE) -C ison purga; $(FACE) -C crispus purga; fi
-
-.PHONY: omnia para expara purga purga_omnia
+.PHONY: omnia para expara purga
