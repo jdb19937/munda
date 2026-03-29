@@ -2,8 +2,9 @@
 
 APOTHECA ?= .
 
-CC = cc
-CFLAGS = -Wall -Wextra -O2 -I. -I$(APOTHECA)/ison -I$(APOTHECA)/crispus
+CC      ?= cc
+CFLAGS  ?= -Wall -Wextra -pedantic -std=c99 -O2
+CFLAGS  += -I. -I$(APOTHECA)/ison -I$(APOTHECA)/crispus
 
 # bibliothecae externae
 LIBISON    = $(APOTHECA)/ison/libison.a
