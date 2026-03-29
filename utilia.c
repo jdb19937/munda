@@ -318,7 +318,7 @@ int hex_ad_octetos(const char *hex, size_t hex_mag,
     return 0;
 }
 
-noreturn void morire(const char *plica, int linea,
+NORETURN void morire(const char *plica, int linea,
                      const char *fmt, ...)
 {
     fprintf(stderr, "%s:%d: ", plica, linea);

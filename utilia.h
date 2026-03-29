@@ -7,9 +7,13 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <stdnoreturn.h>
-
 struct ison_par;
+
+#ifdef __GNUC__
+#define NORETURN __attribute__((noreturn))
+#else
+#define NORETURN
+#endif
 
 /* --- ANSI colores et stili --- */
 
@@ -33,7 +37,7 @@ int prima_occurrentia(const char *textus,
  * scribe nuntium erroris ad stderr et exi.
  * includit nomen plicae et numerum lineae.
  */
-noreturn void morire(const char *plica, int linea,
+NORETURN void morire(const char *plica, int linea,
                      const char *fmt, ...);
 
 /* macro: morire cum __FILE__ et __LINE__ automatice */

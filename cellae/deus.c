@@ -6,5 +6,5 @@
 
 void deus_praepara(cella_t *c)
 {
-    c->deus.potentia = 0;
+    c->p.deus.potentia = 0;
 }

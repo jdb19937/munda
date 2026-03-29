@@ -323,17 +323,17 @@ void terminalis_pinge(const tabula_t *tab)
             unsigned long mg;
             int ud, up;
             if (ph == DEI) {
-                nom = c->deus.nomen;
-                men = c->deus.mens;
-                mg  = c->deus.mens_gradus;
-                ud  = c->deus.ultima_directio;
-                up  = c->deus.ultima_permissa;
+                nom = c->p.deus.nomen;
+                men = c->p.deus.mens;
+                mg  = c->p.deus.mens_gradus;
+                ud  = c->p.deus.ultima_directio;
+                up  = c->p.deus.ultima_permissa;
             } else {
-                nom = c->animus.nomen;
-                men = c->animus.mens;
-                mg  = c->animus.mens_gradus;
-                ud  = c->animus.ultima_directio;
-                up  = c->animus.ultima_permissa;
+                nom = c->p.animus.nomen;
+                men = c->p.animus.mens;
+                mg  = c->p.animus.mens_gradus;
+                ud  = c->p.animus.ultima_directio;
+                up  = c->p.animus.ultima_permissa;
             }
             if (!nom[0])
                 continue;

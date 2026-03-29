@@ -15,7 +15,7 @@ static void zodus_praepara(cella_t *c)
 {
     c->pondus = 50;
     deus_praepara(c);
-    c->deus.potentia = 10;
+    c->p.deus.potentia = 10;
 }
 
 static actio_t zodus_cogito(const struct tabula *tab, int x, int y)

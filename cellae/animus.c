@@ -6,7 +6,7 @@
 
 void animus_praepara(cella_t *c)
 {
-    c->animus.vires     = 0;
-    c->animus.vitalitas = 0;
-    c->animus.satietas  = 0;
+    c->p.animus.vires     = 0;
+    c->p.animus.vitalitas = 0;
+    c->p.animus.satietas  = 0;
 }

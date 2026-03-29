@@ -275,11 +275,11 @@ static void aedifica_valorem(const tabula_t *tab,
 
     const cella_t *c = tabula_da_const(tab, x, y);
     int est_deus = (genera_ops[c->genus].phylum == DEI);
-    int um = est_deus ? c->deus.ultima_modus    : c->animus.ultima_modus;
-    int ud = est_deus ? c->deus.ultima_directio  : c->animus.ultima_directio;
-    int up = est_deus ? c->deus.ultima_permissa   : c->animus.ultima_permissa;
-    const char *audita = est_deus ? c->deus.audita : c->animus.audita;
-    const char *mens   = est_deus ? c->deus.mens   : c->animus.mens;
+    int um = est_deus ? c->p.deus.ultima_modus    : c->p.animus.ultima_modus;
+    int ud = est_deus ? c->p.deus.ultima_directio  : c->p.animus.ultima_directio;
+    int up = est_deus ? c->p.deus.ultima_permissa   : c->p.animus.ultima_permissa;
+    const char *audita = est_deus ? c->p.deus.audita : c->p.animus.audita;
+    const char *mens   = est_deus ? c->p.deus.mens   : c->p.animus.mens;
 
     char *p = buf;
     size_t r = mag;
@@ -295,8 +295,8 @@ static void aedifica_valorem(const tabula_t *tab,
         p += n; r -= (size_t)n;
     }
 
-    if (!est_deus && c->animus.satietas > 0) {
-        n = snprintf(p, r, ", \"satietas\": %d", c->animus.satietas);
+    if (!est_deus && c->p.animus.satietas > 0) {
+        n = snprintf(p, r, ", \"satietas\": %d", c->p.animus.satietas);
         p += n; r -= (size_t)n;
     }
 
@@ -468,7 +468,7 @@ void cogitatio_praecogita(tabula_t *tab, genus_t genus,
             p->x = x;
             p->y = y;
             const char *nom = (genera_ops[genus].phylum == DEI)
-                              ? c->deus.nomen : c->animus.nomen;
+                              ? c->p.deus.nomen : c->p.animus.nomen;
             memcpy(p->nomen, nom, 8);
             res->pendentes_num++;
         }
@@ -507,9 +507,9 @@ void cogitatio_praecogita(tabula_t *tab, genus_t genus,
                 cogitatio_pendens_t *p = &res->pendentes[i];
                 cella_t *c = tabula_da(tab, p->x, p->y);
                 if (genera_ops[c->genus].phylum == DEI)
-                    c->deus.audita[0] = '\0';
+                    c->p.deus.audita[0] = '\0';
                 else
-                    c->animus.audita[0] = '\0';
+                    c->p.animus.audita[0] = '\0';
             }
 
             int reliqui = res->pendentes_num - missi;
@@ -582,7 +582,7 @@ static void aedifica_tabulam_ison(const tabula_t *tab, genus_t genus,
             if (c->genus == genus) {
                 /* ostende nomen */
                 const char *nom = (genera_ops[genus].phylum == DEI)
-                                  ? c->deus.nomen : c->animus.nomen;
+                                  ? c->p.deus.nomen : c->p.animus.nomen;
                 for (const char *n = nom; *n && p + 2 < finis; n++)
                     *p++ = *n;
             } else {
@@ -615,7 +615,7 @@ static void aedifica_nomina_ison(const tabula_t *tab, genus_t genus,
             if (n >= PLICA_MAX) break;
 
             const char *nom = (genera_ops[genus].phylum == DEI)
-                              ? c->deus.nomen : c->animus.nomen;
+                              ? c->p.deus.nomen : c->p.animus.nomen;
             xx[n] = x;
             yy[n] = y;
             memcpy(nomina[n], nom, 8);
@@ -647,11 +647,11 @@ static void aedifica_statum(const tabula_t *tab, int x, int y,
 
     const cella_t *c = tabula_da_const(tab, x, y);
     int est_deus = (genera_ops[c->genus].phylum == DEI);
-    int um = est_deus ? c->deus.ultima_modus    : c->animus.ultima_modus;
-    int ud = est_deus ? c->deus.ultima_directio  : c->animus.ultima_directio;
-    int up = est_deus ? c->deus.ultima_permissa   : c->animus.ultima_permissa;
-    const char *audita = est_deus ? c->deus.audita : c->animus.audita;
-    const char *mens   = est_deus ? c->deus.mens   : c->animus.mens;
+    int um = est_deus ? c->p.deus.ultima_modus    : c->p.animus.ultima_modus;
+    int ud = est_deus ? c->p.deus.ultima_directio  : c->p.animus.ultima_directio;
+    int up = est_deus ? c->p.deus.ultima_permissa   : c->p.animus.ultima_permissa;
+    const char *audita = est_deus ? c->p.deus.audita : c->p.animus.audita;
+    const char *mens   = est_deus ? c->p.deus.mens   : c->p.animus.mens;
 
     char *p = buf;
     size_t r = mag;
@@ -670,9 +670,9 @@ static void aedifica_statum(const tabula_t *tab, int x, int y,
         primo = 0;
     }
 
-    if (!est_deus && c->animus.satietas > 0) {
+    if (!est_deus && c->p.animus.satietas > 0) {
         n = snprintf(p, r, "%s\"satietas\": %d",
-                     primo ? "" : ", ", c->animus.satietas);
+                     primo ? "" : ", ", c->p.animus.satietas);
         p += n; r -= (size_t)n;
         primo = 0;
     }
@@ -819,9 +819,9 @@ void cogitatio_praecogita_tabulam(tabula_t *tab, genus_t genus,
     for (int i = 0; i < vl->num; i++) {
         cella_t *c = tabula_da(tab, vl->xx[i], vl->yy[i]);
         if (genera_ops[c->genus].phylum == DEI)
-            c->deus.audita[0] = '\0';
+            c->p.deus.audita[0] = '\0';
         else
-            c->animus.audita[0] = '\0';
+            c->p.animus.audita[0] = '\0';
     }
 }
 

@@ -8,5 +8,5 @@
 
 void cibus_praepara(cella_t *c, const ison_par_t *pp, int n)
 {
-    c->cibus.nutritio = par_da_int(pp, n, "nutritio", 1);
+    c->p.cibus.nutritio = par_da_int(pp, n, "nutritio", 1);
 }

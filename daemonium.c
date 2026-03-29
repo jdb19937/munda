@@ -128,7 +128,7 @@ static actio_t retis_cogito(const struct tabula *tab, int x, int y)
     const cella_t *c = tabula_da_const(tab, x, y);
     phylum_t ph = genera_ops[c->genus].phylum;
     if (ph == DEI)
-        return imperata_da(c->deus.nomen);
+        return imperata_da(c->p.deus.nomen);
     return ACTIO_NIHIL;
 }
 
@@ -231,7 +231,7 @@ static int tracta_salve(cliens_t *cl, const char *ison, size_t mag,
     genera_nomen(cl->genus, cl->nomen, sizeof(cl->nomen));
     tabula_pone(tab, dx, dy, cl->genus);
     cella_t *c = tabula_da(tab, dx, dy);
-    snprintf(c->deus.nomen, sizeof(c->deus.nomen), "%s", cl->nomen);
+    snprintf(c->p.deus.nomen, sizeof(c->p.deus.nomen), "%s", cl->nomen);
     cl->deus_x = dx;
     cl->deus_y = dy;
 
@@ -299,7 +299,7 @@ static void remove_clientem(cliens_t *cl, tabula_t *tab)
             for (int x = 0; x < latus; x++) {
                 cella_t *c = tabula_da(tab, x, y);
                 if (genera_ops[c->genus].phylum == DEI &&
-                    strcmp(c->deus.nomen, cl->nomen) == 0) {
+                    strcmp(c->p.deus.nomen, cl->nomen) == 0) {
                     memset(c, 0, sizeof(*c));
                     c->genus = VACUUM;
                 }
@@ -331,7 +331,7 @@ static void renova_positiones(tabula_t *tab)
             for (int x = 0; x < latus && !inventum; x++) {
                 const cella_t *c = tabula_da_const(tab, x, y);
                 if (genera_ops[c->genus].phylum == DEI &&
-                    strcmp(c->deus.nomen, cl->nomen) == 0) {
+                    strcmp(c->p.deus.nomen, cl->nomen) == 0) {
                     cl->deus_x = x;
                     cl->deus_y = y;
                     inventum = 1;

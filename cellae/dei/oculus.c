@@ -18,7 +18,7 @@ static void oculus_praepara_fn(cella_t *c)
 {
     c->pondus = 40;
     deus_praepara(c);
-    c->oculus.visus_radius = 5;
+    c->g.oculus.visus_radius = 5;
 }
 
 void oculus_praecogita(tabula_t *tab)

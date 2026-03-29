@@ -97,32 +97,32 @@ char *tabula_ad_ison(const tabula_t *tab, unsigned long gradus)
             if (ph == ANIMA) {
                 char audita_eff[AUDITA_MAX * 2 + 3];
                 char mens_eff[MENS_MAX * 2 + 3];
-                effuge_in_alveum(audita_eff, sizeof(audita_eff), c->animus.audita);
-                effuge_in_alveum(mens_eff, sizeof(mens_eff), c->animus.mens);
+                effuge_in_alveum(audita_eff, sizeof(audita_eff), c->p.animus.audita);
+                effuge_in_alveum(mens_eff, sizeof(mens_eff), c->p.animus.mens);
 
                 pos += (size_t)snprintf(buf + pos, mag_max - pos,
                     ",\"n\":\"%.7s\",\"sa\":%d,\"vi\":%d,\"vt\":%d"
                     ",\"um\":%d,\"ud\":%d,\"up\":%d"
                     ",\"au\":%s,\"me\":%s}",
-                    c->animus.nomen,
-                    c->animus.satietas, c->animus.vires, c->animus.vitalitas,
-                    c->animus.ultima_modus, c->animus.ultima_directio,
-                    c->animus.ultima_permissa,
+                    c->p.animus.nomen,
+                    c->p.animus.satietas, c->p.animus.vires, c->p.animus.vitalitas,
+                    c->p.animus.ultima_modus, c->p.animus.ultima_directio,
+                    c->p.animus.ultima_permissa,
                     audita_eff, mens_eff);
             } else { /* DEI */
                 char audita_eff[AUDITA_MAX * 2 + 3];
                 char mens_eff[MENS_MAX * 2 + 3];
-                effuge_in_alveum(audita_eff, sizeof(audita_eff), c->deus.audita);
-                effuge_in_alveum(mens_eff, sizeof(mens_eff), c->deus.mens);
+                effuge_in_alveum(audita_eff, sizeof(audita_eff), c->p.deus.audita);
+                effuge_in_alveum(mens_eff, sizeof(mens_eff), c->p.deus.mens);
 
                 pos += (size_t)snprintf(buf + pos, mag_max - pos,
                     ",\"n\":\"%.7s\",\"po\":%d"
                     ",\"um\":%d,\"ud\":%d,\"up\":%d"
                     ",\"au\":%s,\"me\":%s}",
-                    c->deus.nomen,
-                    c->deus.potentia,
-                    c->deus.ultima_modus, c->deus.ultima_directio,
-                    c->deus.ultima_permissa,
+                    c->p.deus.nomen,
+                    c->p.deus.potentia,
+                    c->p.deus.ultima_modus, c->p.deus.ultima_directio,
+                    c->p.deus.ultima_permissa,
                     audita_eff, mens_eff);
             }
 

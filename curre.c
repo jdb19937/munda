@@ -99,8 +99,8 @@ int main(int argc, char **argv)
                         int y = (zy + dy + tab->latus) % tab->latus;
                         if (tabula_da_const(tab, x, y)->genus == VACUUM) {
                             tabula_pone(tab, x, y, ZODUS);
-                            snprintf(tabula_da(tab, x, y)->deus.nomen,
-                                     sizeof(tabula_da(tab, x, y)->deus.nomen),
+                            snprintf(tabula_da(tab, x, y)->p.deus.nomen,
+                                     sizeof(tabula_da(tab, x, y)->p.deus.nomen),
                                      "Zodus");
                             habet_zodum = 1;
                         }

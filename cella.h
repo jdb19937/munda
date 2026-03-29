@@ -44,51 +44,32 @@
 #include "cellae/dei/zodus.h"
 #include "cellae/dei/oculus.h"
 
-/* cella plena in tabula — cellula basis + unio duplex phylorum */
+/* cella plena in tabula — cellula basis + uniones phylorum et generum */
 typedef struct cella {
-    /* basis — accessibilis et ut c->genus et ut c->cellula */
+    genus_t genus;
+    int motum;
+    int pondus;
+    /* unio phylorum — basis phyli */
     union {
-        cellula_t cellula;
-        struct {
-            genus_t genus;
-            int motum;
-            int pondus;
-        };
-    };
-    /* unio phylorum — quisque ramus: basis phyli + unio generum */
+        fixum_t fixum;
+        cibus_t cibus;
+        animus_t animus;
+        deus_t deus;
+    } p;
+    /* unio generum — data propria unius generis */
     union {
-        struct {
-            fixum_t fixum;
-            union {
-                vacuum_t vacuum;
-                saxum_t saxum;
-                murus_t murus;
-            };
-        };
-        struct {
-            cibus_t cibus;
-            union {
-                rapum_t rapum;
-                fungus_t fungus;
-            };
-        };
-        struct {
-            animus_t animus;
-            union {
-                feles_t feles;
-                dalekus_t dalekus;
-                ursus_t ursus;
-                corvus_t corvus;
-            };
-        };
-        struct {
-            deus_t deus;
-            union {
-                zodus_t zodus;
-                oculus_t oculus;
-            };
-        };
-    };
+        vacuum_t vacuum;
+        saxum_t saxum;
+        murus_t murus;
+        rapum_t rapum;
+        fungus_t fungus;
+        feles_t feles;
+        dalekus_t dalekus;
+        ursus_t ursus;
+        corvus_t corvus;
+        zodus_t zodus;
+        oculus_t oculus;
+    } g;
 } cella_t;
 
 /* declarationes anticipatae */
