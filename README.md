@@ -37,3 +37,7 @@ Batching parameters control the tradeoff between prompt size and decision qualit
 ## Build
 
 Produces four binaries. Runs on macOS and Linux. Only needs a C compiler and POSIX headers.
+
+## License
+
+Free. Use however you like.
