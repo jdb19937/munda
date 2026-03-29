@@ -49,15 +49,15 @@ Claves in ludo:
 
 Forma: `-m [provisor/]sapientum[+effort]` ubi effort = `low`, `medium`, `high`.
 
-## Mundae (Configurationes Mundorum)
+## Mundae (Configurationes Mundoram)
 
-Quisque mundus est directorium cum:
+Quisque munda est directorium cum:
 - `tabula.ison` — geometria, positiones, sapientum per genus
 - `{phylum}/{genus}.isonl` — attributa individualia per cellam
 
 ```
 mundae/
-  imperium/         — mundus plenus cum Zodo
+  imperium/         — munda plena cum Zodo
   obsidium/         — ursus ab X dalekis circumdatus
 ```
 
