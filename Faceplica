@@ -1,10 +1,9 @@
 # Faceplica — TABULA MUNDA
 
-CC      = cc
-
 APOTHECA ?= .
 
-CFLAGS  = -Wall -Wextra -O2 -I. -I$(APOTHECA)/ison -I$(APOTHECA)/crispus
+CC = cc
+CFLAGS = -Wall -Wextra -O2 -I. -I$(APOTHECA)/ison -I$(APOTHECA)/crispus
 
 # bibliothecae externae
 LIBISON    = $(APOTHECA)/ison/libison.a
@@ -36,17 +35,17 @@ omnia: curre lude fare proba valida daemonium coniunge specta fac_certificatum
 
 para:
 	git submodule update --init ison crispus
-	make -C ison
-	make -C crispus
+	$(FACE) -C ison
+	$(FACE) -C crispus
 
 expara:
 	git submodule deinit -f ison crispus
 
 $(LIBISON):
-	make -C $(APOTHECA)/ison
+	$(FACE) -C $(APOTHECA)/ison
 
 $(LIBCRISPUS):
-	make -C $(APOTHECA)/crispus
+	$(FACE) -C $(APOTHECA)/crispus
 
 # --- retis (protocollum TCP) ---
 
@@ -162,6 +161,6 @@ purga:
 	rm -f daemonium coniunge specta fac_certificatum
 
 purga_omnia: purga
-	@if [ "$(APOTHECA)" = "." ]; then make -C ison purga; make -C crispus purga; fi
+	@if [ "$(APOTHECA)" = "." ]; then $(FACE) -C ison purga; $(FACE) -C crispus purga; fi
 
 .PHONY: omnia para expara purga purga_omnia
