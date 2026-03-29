@@ -1,43 +1,98 @@
-# Tabula Munda
+# munda
 
-Zero-dependency C project implementing four standalone subsystems from scratch: a TLS 1.2 HTTPS client, a lightweight JSON parser with schema validation, a multi-provider LLM abstraction layer, and an agentic communication framework for coordinating autonomous agents on a shared grid.
+**A terminal-based simulation where autonomous agents — cats, bears, daleks, crows — inhabit a toroidal grid, make decisions through LLM inference, engage in emergent multi-turn dialogue, and wage war under the gaze of player-controlled deities. Multiplayer over encrypted TCP. Zero external dependencies.**
 
-Everything compiles with just make. No external libraries. POSIX only.
+## What This Is
 
-## crispus — From-Scratch HTTPS Replacing curl
+munda is an agentic grid simulation. Entities live on a wrapping toroidal board, perceive their surroundings, and decide what to do by calling large language models. They move, push rocks, eat food, hunt each other, talk, shout, and fight — all driven by natural language reasoning that produces genuinely emergent behavior. Cats wander curiously. Bears hunt deliberately. Daleks exterminate methodically. Crows steal and scheme.
 
-A complete TLS 1.2 client library with all cryptography implemented internally, replacing libcurl with roughly three thousand lines of C. The crypto stack includes AES-128-GCM for authenticated encryption, elliptic curve Diffie-Hellman key exchange over P-256 with custom bignum arithmetic, RSA signature verification supporting up to RSA-4096, SHA-256 with HMAC for key derivation, and DER-format X.509 certificate parsing to extract RSA public keys.
+A player-controlled deity walks among them, issuing divine commands through the arrow keys. An omniscient observer deity watches everything unfold. Connect over the network and multiple deities can inhabit the same world simultaneously, each seeing the simulation through their own terminal.
 
-It negotiates a single cipher suite, supports SNI, and handles chunked transfer-encoding. The API follows a synchronous easy-handle pattern alongside an async mode that forks per request with pipe-based IPC, supporting up to sixty-four concurrent requests without threading or shared state.
+The entire thing — HTTPS calls to LLM providers, JSON parsing, TLS encryption, the TCP multiplayer protocol — is built from scratch. No libcurl. No OpenSSL. No JSON library. The cryptographic handshake that secures your multiplayer session uses the same ECDHE P-256 and AES-128-GCM implementation that powers the HTTPS calls to the inference APIs.
 
-## json.c — Lightweight JSON Parser + Schema Validation
+## Providers
 
-A single-file JSON library that performs no allocations for reading. It supports path-based queries with dotted notation and array indexing, incremental JSON construction, and JSONL iteration.
+Multi-provider LLM support with batched async inference:
 
-A standalone CLI validator checks JSONL data files against schemas following JSON Schema draft 2020-12 structure, validating required fields and type correctness and reporting per-line errors.
+- **OpenAI** — GPT models
+- **Anthropic** — Claude models
+- **xAI** — Grok models
 
-## Multi-Provider LLM Stack
+Each entity type can use a different model. Configurable per-world via JSON.
 
-A plugin architecture supporting multiple LLM providers behind a unified async interface. The provider is selected at runtime by model string prefix. Each provider implements three operations: formatting the provider-specific request body and headers, extracting text from the response, and parsing token usage metrics including input, output, cached, and reasoning tokens.
+## Entity Types
 
-Supported providers include OpenAI via the Responses API, Anthropic via the Messages API with cache-aware token counting, xAI via Chat Completions, and a mock provider that delegates to per-type simulation functions for testing.
+| Entity | Behavior |
+|---|---|
+| **Feles** | Curious wanderer |
+| **Ursus** | Deliberate hunter |
+| **Dalekus** | Methodical exterminator |
+| **Corvus** | Cunning scavenger and thief |
+| **Zodus** | Player-controlled deity |
+| **Oculus** | Omniscient observer deity |
 
-Requests flow through thirty-two async slots with non-blocking polling. Each slot tracks state transitions from free to in-flight to complete and accumulates per-model token statistics. Effort levels are forwarded to providers that support them.
+The grid also contains walls, pushable rocks, and two kinds of food (turnips and mushrooms) that restore satiety.
 
-## Agentic Grid Communication
+## Building
 
-Autonomous agents occupy cells on a toroidal grid. Each agent has local perception within a configurable radius of visibility, internal state including memory, satiety, and what it has heard, and communicates with neighbors through directed speech or broadcast to surrounding cells.
+```bash
+face
+```
 
-Agents accumulate what they hear and maintain a persistent thought state across turns. This creates emergent multi-turn dialogue where agents can coordinate, warn, argue, or deceive based on what they have heard and what they are thinking.
+Produces eight binaries: `curre`, `lude`, `fare`, `valida`, `daemonium`, `coniunge`, `specta`, and `fac_certificatum`.
 
-Multiple agent decisions can be collapsed into a single LLM call by sending one batchnar prompt containing each agent's local neighborhood and receiving all decisions in one response. Alternatively, the entire board state can be sent as an omninar query so the LLM can reason about team-wide strategy, deciding which agents should pursue food, which should attack, and which should call out enemy positions.
+## Playing
 
-Batching parameters control the tradeoff between prompt size and decision quality, including maximum agents per batch, how many cycles to wait before sending a partial batch, and per-agent visibility radius. Actions are parsed back into typed structs and executed by the grid simulation engine with full physics including push chains, weight limits, attack thresholds, and toroidal wrapping.
+```bash
+./lude [world [interval_ms]]
+```
 
-## Build
+Arrow keys move your deity. Agents think and act each turn. `q` to quit.
 
-Produces four binaries. Runs on macOS and Linux. Only needs a C compiler and POSIX headers.
+For headless simulation:
+
+```bash
+./curre [world [steps]]
+```
+
+## fare — LLM Command Line
+
+A standalone CLI for querying any supported LLM provider:
+
+```bash
+./fare -m openai/gpt-4o tell me a story
+./fare -m anthropic/claude-sonnet-4-6 -s "respond briefly" what is life
+./fare -m xai/grok-3 explain quantum entanglement
+```
+
+## Networked Multiplayer
+
+Generate a certificate, start the daemon, and connect:
+
+```bash
+./fac_certificatum
+./daemonium [world [port [interval_ms]]]
+./coniunge [-h host] [-p port] [-c cert] [-g ZODUS|OCULUS]
+```
+
+Each connected client spawns a deity on the board. Disconnect and the deity vanishes. The daemon runs the simulation; clients render their view of it. The TCP protocol uses a custom framing layer with ECDHE P-256 session keys and AES-128-GCM authenticated encryption.
+
+For headless networked observation:
+
+```bash
+./specta [-h host] [-p port] [-c cert] [-g ZODUS|OCULUS] [-n steps]
+```
+
+## World Configuration
+
+Each world is a directory containing a `tabula.json` (geometry, positions, model assignments) and per-entity JSONL attribute files:
+
+```text
+mundae/
+  imperium/         — full world with Zodus
+  obsidium/         — a bear surrounded by daleks
+```
 
 ## License
 
-Free. Use however you like.
+Free. Public domain. Use however you like.

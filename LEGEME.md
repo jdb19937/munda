@@ -108,12 +108,11 @@ tabula.c/h        — tabula toroidalis, gradus simulationis, onerator mundi
 cella.h           — definitiones generum, phylorum, actionum
 terminalis.c/h    — redditio terminalis (ANSI)
 oraculum.c/h      — interfacies ad LLM (sync et async per crispus)
-arcana/            — primitiva cryptographica (SHA-256, AES-GCM, EC P-256, bignum)
-crispus/           — bibliotheca HTTPS (TLS 1.2, pendet ab arcana/)
+ison/              — submodulum: bibliotheca ISON (JSON)
+crispus/           — submodulum: bibliotheca HTTPS (TLS 1.2, cryptographia interna)
 retis/             — protocollum TCP bespoke (framing, ECDHE sessio, serialisatio)
 cogitatio.c/h     — praecogitatio generica per oraculum
 fare.c            — CLI imperativum oraculi
-ison.c/h          — parser ISON, validator schematum
 utilia.c/h        — utilia communia
 valida.c          — instrumentum validationis schematum
 cellae/            — implementationes singulorum generum
