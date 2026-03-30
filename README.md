@@ -85,7 +85,7 @@ For headless networked observation:
 
 ## World Configuration
 
-Each world is a directory containing a `tabula.json` (geometry, positions, model assignments) and per-entity JSONL attribute files:
+Each world is a directory containing a `tabula.ison` (geometry, positions, model assignments) and per-entity JSONL attribute files:
 
 ```text
 mundae/
