@@ -133,4 +133,20 @@ void octeti_ad_hex(const uint8_t *src, size_t mag, char *dest);
 int  hex_ad_octetos(const char *hex, size_t hex_mag,
                     uint8_t *dest, size_t dest_mag);
 
+/* --- UTF-8 utilia --- */
+
+/*
+ * utf8_longitudo — numerat bytes in uno charactere UTF-8 valido apud *p.
+ * reddit 1..4 si validus, 0 si invalidus (truncatus vel male formatus).
+ */
+int utf8_longitudo(const unsigned char *p, size_t relicti);
+
+/*
+ * utf8_mundus — scribit src in dest (mag bytes max incl. '\0'),
+ * omittens bytes qui UTF-8 invalidum formant et characteres non-impressibiles
+ * (exceptis '\n', '\t', et spatiis).
+ * reddit numerum bytorum scriptorum (sine '\0').
+ */
+size_t utf8_mundus(char *dest, size_t mag, const char *src);
+
 #endif /* UTILIA_H */

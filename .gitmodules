@@ -4,3 +4,6 @@
 [submodule "crispus"]
 	path = crispus
 	url = git@github.com:jdb19937/crispus.git
+[submodule "phantasma"]
+	path = phantasma
+	url = git@github.com:jdb19937/phantasma.git

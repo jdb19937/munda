@@ -42,5 +42,6 @@ extern const provisor_t provisor_openai;
 extern const provisor_t provisor_xai;
 extern const provisor_t provisor_anthropic;
 extern const provisor_t provisor_fictus;
+extern const provisor_t provisor_nativus;
 
 #endif /* PROVISOR_H */

@@ -329,3 +329,70 @@ NORETURN void morire(const char *plica, int linea,
     fputc('\n', stderr);
     exit(1);
 }
+
+/* ================================================================
+ * UTF-8 utilia
+ * ================================================================ */
+
+int utf8_longitudo(const unsigned char *p, size_t relicti)
+{
+    if (relicti == 0) return 0;
+    unsigned char c = p[0];
+
+    if (c < 0x80) {                       /* 1 byte: 0xxxxxxx */
+        return 1;
+    } else if (c < 0xC2) {               /* 0x80..0xC1: invalidus */
+        return 0;
+    } else if (c < 0xE0) {               /* 2 bytes: 110xxxxx 10xxxxxx */
+        if (relicti < 2) return 0;
+        if ((p[1] & 0xC0) != 0x80) return 0;
+        return 2;
+    } else if (c < 0xF0) {               /* 3 bytes: 1110xxxx ... */
+        if (relicti < 3) return 0;
+        if ((p[1] & 0xC0) != 0x80) return 0;
+        if ((p[2] & 0xC0) != 0x80) return 0;
+        /* surrogates (U+D800..U+DFFF) exclusi */
+        if (c == 0xED && p[1] >= 0xA0) return 0;
+        return 3;
+    } else if (c < 0xF5) {               /* 4 bytes: 11110xxx ... */
+        if (relicti < 4) return 0;
+        if ((p[1] & 0xC0) != 0x80) return 0;
+        if ((p[2] & 0xC0) != 0x80) return 0;
+        if ((p[3] & 0xC0) != 0x80) return 0;
+        return 4;
+    }
+    return 0;
+}
+
+size_t utf8_mundus(char *dest, size_t mag, const char *src)
+{
+    if (!dest || mag == 0) return 0;
+    const unsigned char *s   = (const unsigned char *)src;
+    const unsigned char *fin = s + strlen(src);
+    size_t cursor = 0;
+
+    while (s < fin && cursor + 1 < mag) {
+        size_t relicti = (size_t)(fin - s);
+        int lon = utf8_longitudo(s, relicti);
+        if (lon == 0) {
+            s++;   /* salta byte invalidum */
+            continue;
+        }
+
+        /* byte ASCII: filtra characteres non-impressibiles */
+        if (lon == 1) {
+            unsigned char c = s[0];
+            if (c == '\n' || c == '\t' || (c >= 0x20 && c < 0x7F))
+                dest[cursor++] = (char)c;
+        } else {
+            /* character multi-byte UTF-8 validus */
+            if (cursor + (size_t)lon < mag) {
+                for (int i = 0; i < lon; i++)
+                    dest[cursor++] = (char)s[i];
+            }
+        }
+        s += lon;
+    }
+    dest[cursor] = '\0';
+    return cursor;
+}

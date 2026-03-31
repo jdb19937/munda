@@ -1,46 +1,61 @@
 # Faceplica — TABULA MUNDA
 
 APOTHECA ?= .
+FACE     ?= make
 
-CC      ?= cc
-CFLAGS  ?= -Wall -Wextra -pedantic -std=c99 -O2
-CFLAGS  += -I. -I$(APOTHECA)/ison -I$(APOTHECA)/crispus
+CC     ?= cc
+CFLAGS ?= -Wall -Wextra -pedantic -std=c99 -O2
+CFLAGS += -I. -I$(APOTHECA)/ison -I$(APOTHECA)/crispus
 
-# bibliothecae externae
-LIBISON    = $(APOTHECA)/ison/libison.a
-LIBCRISPUS = $(APOTHECA)/crispus/libcrispus.a
+LIBISON      = $(APOTHECA)/ison/libison.a
+LIBCRISPUS   = $(APOTHECA)/crispus/libcrispus.a
+LIBPHANTASMA = $(APOTHECA)/phantasma/libphantasma.a
+NEXUS_PFR    = `cat $(APOTHECA)/phantasma/nexus_phantasma 2>/dev/null`
 
-# fontes communes
-COMMUNES = tabula.c \
-          cellae/fixa/vacuum.c cellae/fixa/saxum.c cellae/fixa/murus.c \
-          cellae/cibi/rapum.c cellae/cibi/fungus.c \
-          cellae/animae/feles.c cellae/animae/dalekus.c cellae/animae/ursus.c cellae/animae/corvus.c \
-          cellae/dei/zodus.c cellae/dei/oculus.c cellae/deus.c \
-          cella_ops.c cellae/fixum.c cellae/cibus.c cellae/animus.c \
-          cogitatio.c utilia.c fictio.c
-COMMUNES_OBJ = $(COMMUNES:.c=.o)
+# capita omnia — non opus exactis dependentiis per obiectum
+CAPITA = cellula.h cella.h tabula.h terminalis.h oraculum.h cogitatio.h \
+         utilia.h fictio.h genera.h \
+         cellae/animae/feles.h cellae/animae/dalekus.h \
+         cellae/animae/ursus.h cellae/animae/corvus.h \
+         cellae/fixum.h cellae/cibus.h cellae/animus.h cellae/deus.h \
+         cellae/dei/zodus.h cellae/dei/oculus.h \
+         oracula/nativus.h oracula/nativus_lexator.h oracula/provisor.h \
+         retis/retis.h
 
-CAPITA  = cellula.h cella.h tabula.h terminalis.h oraculum.h cogitatio.h utilia.h fictio.h \
-          cellae/animae/feles.h cellae/animae/dalekus.h cellae/animae/ursus.h cellae/animae/corvus.h \
-          cellae/fixum.h cellae/cibus.h cellae/animus.h cellae/deus.h \
-          cellae/dei/zodus.h cellae/dei/oculus.h
+# omnes obiecti communes → libmunda.a
+LIB_OBJ = \
+    tabula.o \
+    cellae/fixa/vacuum.o cellae/fixa/saxum.o cellae/fixa/murus.o \
+    cellae/cibi/rapum.o cellae/cibi/fungus.o \
+    cellae/animae/feles.o cellae/animae/dalekus.o \
+    cellae/animae/ursus.o cellae/animae/corvus.o \
+    cellae/dei/zodus.o cellae/dei/oculus.o cellae/deus.o \
+    cella_ops.o cellae/fixum.o cellae/cibus.o cellae/animus.o \
+    cogitatio.o utilia.o fictio.o \
+    oraculum.o \
+    oracula/openai.o oracula/xai.o oracula/anthropic.o oracula/fictus.o \
+    oracula/nativus_cursus.o oracula/nativus_lexator.o \
+    oracula/nativus_exercitatio.o oracula/nativus_provisor.o \
+    retis/retis.o retis/serializa.o retis/visus.o retis/cliens.o retis/crudus.o
 
-ORACULA_OBJ = oracula/openai.o oracula/xai.o oracula/anthropic.o oracula/fictus.o
-ORACULA_DEP = oracula/provisor.h
+# nexus communis (omnes binarii principale utuntur)
+NEXUS = libmunda.a $(LIBPHANTASMA) $(LIBCRISPUS) $(LIBISON)
 
-# --- omnia (default target) ---
+# --- omnia ---
 
-omnia: curre lude fare proba valida daemonium coniunge specta fac_certificatum
+omnia: curre lude fare proba valida daemonium coniunge specta \
+       fac_certificatum nativus_exercita proba_nativus
 
-# --- para (submoduli) ---
+# --- submoduli ---
 
 para:
-	git submodule update --init ison crispus
-	$(FACE) -C ison
-	$(FACE) -C crispus
+	git submodule update --init ison crispus phantasma
+	$(FACE) -C $(APOTHECA)/ison
+	$(FACE) -C $(APOTHECA)/crispus
+	$(FACE) -C $(APOTHECA)/phantasma
 
 expara:
-	git submodule deinit -f ison crispus
+	git submodule deinit -f ison crispus phantasma
 
 $(LIBISON):
 	$(FACE) -C $(APOTHECA)/ison
@@ -48,117 +63,75 @@ $(LIBISON):
 $(LIBCRISPUS):
 	$(FACE) -C $(APOTHECA)/crispus
 
-# --- retis (protocollum TCP) ---
+$(LIBPHANTASMA):
+	$(FACE) -C $(APOTHECA)/phantasma
 
-RETIS_OBJ = retis/retis.o retis/serializa.o retis/visus.o
-RETIS_DEP = retis/retis.h
-
-retis/retis.o: retis/retis.c $(RETIS_DEP)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-retis/serializa.o: retis/serializa.c retis/serializa.h $(RETIS_DEP) $(CAPITA) genera.h
-	$(CC) $(CFLAGS) -c $< -o $@
-
-retis/visus.o: retis/visus.c retis/visus.h genera.h cellula.h
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# --- curre (sine terminali) ---
-
-curre: curre.o $(COMMUNES_OBJ) oraculum.o $(ORACULA_OBJ) $(LIBCRISPUS) $(LIBISON)
-	$(CC) $(CFLAGS) -o $@ $^
-
-# --- lude (cum terminali) ---
-
-lude: lude.o terminalis.o $(COMMUNES_OBJ) oraculum.o $(ORACULA_OBJ) $(LIBCRISPUS) $(LIBISON)
-	$(CC) $(CFLAGS) -o $@ $^
+# --- compilatio ---
 
 %.o: %.c $(CAPITA)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# --- oraculum ---
-
-oraculum.o: oraculum.c oraculum.h $(ORACULA_DEP) utilia.h
+oracula/%.o: oracula/%.c $(CAPITA)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-oracula/%.o: oracula/%.c $(ORACULA_DEP)
+retis/%.o: retis/%.c $(CAPITA)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# --- fare (imperativum oraculi) ---
+# --- libmunda.a ---
 
-fare.o: fare.c oraculum.h
-	$(CC) $(CFLAGS) -c $< -o $@
+libmunda.a: $(LIB_OBJ) $(LIBPHANTASMA) $(LIBCRISPUS) $(LIBISON)
+	ar rcs $@ $(LIB_OBJ)
 
-fare: fare.o oraculum.o $(ORACULA_OBJ) utilia.o fictio.o $(LIBCRISPUS) $(LIBISON)
-	$(CC) $(CFLAGS) -o $@ $^
+# --- binarii principales ---
 
-# --- valida (validator schematum) ---
+curre: curre.o libmunda.a
+	$(CC) $(CFLAGS) -o $@ curre.o $(NEXUS) $(NEXUS_PFR) -lm
 
-valida.o: valida.c
-	$(CC) $(CFLAGS) -c $< -o $@
+lude: lude.o terminalis.o libmunda.a
+	$(CC) $(CFLAGS) -o $@ lude.o terminalis.o $(NEXUS) $(NEXUS_PFR) -lm
 
-valida: valida.o $(LIBISON)
-	$(CC) $(CFLAGS) -o $@ $^
+fare: fare.o libmunda.a
+	$(CC) $(CFLAGS) -o $@ fare.o $(NEXUS) $(NEXUS_PFR) -lm
 
-# --- probatio crispus ---
+daemonium: daemonium.o libmunda.a
+	$(CC) $(CFLAGS) -o $@ daemonium.o $(NEXUS) $(NEXUS_PFR) -lm
 
-proba: proba.o $(CRISPUS_PROBA_OBJ) $(LIBCRISPUS) utilia.o $(LIBISON)
-	$(CC) $(CFLAGS) -o $@ $^
+coniunge: coniunge.o libmunda.a
+	$(CC) $(CFLAGS) -o $@ coniunge.o $(NEXUS) $(NEXUS_PFR) -lm
+
+specta: specta.o libmunda.a
+	$(CC) $(CFLAGS) -o $@ specta.o $(NEXUS) $(NEXUS_PFR) -lm
+
+fac_certificatum: fac_certificatum.o libmunda.a
+	$(CC) $(CFLAGS) -o $@ fac_certificatum.o $(NEXUS) $(NEXUS_PFR) -lm
+
+nativus_exercita: oracula/nativus_exercita.o libmunda.a
+	$(CC) $(CFLAGS) -o $@ oracula/nativus_exercita.o $(NEXUS) $(NEXUS_PFR) -lm
+
+proba_nativus: oracula/proba_nativus.o libmunda.a
+	$(CC) $(CFLAGS) -o $@ oracula/proba_nativus.o $(NEXUS) $(NEXUS_PFR) -lm
 
 CRISPUS_PROBA_OBJ = $(APOTHECA)/crispus/proba.o
 
-proba.o: proba.c $(APOTHECA)/crispus/proba.h
+$(CRISPUS_PROBA_OBJ): $(APOTHECA)/crispus/proba.c $(APOTHECA)/crispus/proba.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(CRISPUS_PROBA_OBJ): $(APOTHECA)/crispus/proba.c $(APOTHECA)/crispus/proba.h $(APOTHECA)/crispus/crispus.h $(APOTHECA)/crispus/internum.h $(APOTHECA)/crispus/arcana.h
-	$(CC) $(CFLAGS) -c $< -o $@
+proba: proba.o $(CRISPUS_PROBA_OBJ) libmunda.a
+	$(CC) $(CFLAGS) -o $@ proba.o $(CRISPUS_PROBA_OBJ) $(NEXUS) -lm
 
-# --- daemonium (servitor TCP) ---
-
-daemonium: daemonium.o retis/retis.o retis/serializa.o $(COMMUNES_OBJ) oraculum.o $(ORACULA_OBJ) $(LIBCRISPUS) $(LIBISON)
-	$(CC) $(CFLAGS) -o $@ $^
-
-# --- coniunge (cliens interactivus — sine cella.h/tabula.h) ---
-
-CLIENS_OBJ = retis/retis.o retis/cliens.o retis/visus.o retis/crudus.o utilia.o
-
-retis/cliens.o: retis/cliens.c retis/cliens.h $(RETIS_DEP)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-retis/crudus.o: retis/crudus.c retis/crudus.h
-	$(CC) $(CFLAGS) -c $< -o $@
-
-coniunge: coniunge.o $(CLIENS_OBJ) $(LIBCRISPUS) $(LIBISON)
-	$(CC) $(CFLAGS) -o $@ $^
-
-coniunge.o: coniunge.c retis/retis.h retis/cliens.h retis/visus.h retis/crudus.h genera.h cellula.h
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# --- specta (cliens sine capite — sine cella.h/tabula.h) ---
-
-specta: specta.o $(CLIENS_OBJ) $(LIBCRISPUS) $(LIBISON)
-	$(CC) $(CFLAGS) -o $@ $^
-
-specta.o: specta.c retis/retis.h retis/cliens.h retis/visus.h genera.h cellula.h
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# --- fac_certificatum ---
-
-fac_certificatum: fac_certificatum.o retis/retis.o utilia.o $(LIBCRISPUS) $(LIBISON)
-	$(CC) $(CFLAGS) -o $@ $^
-
-fac_certificatum.o: fac_certificatum.c retis/retis.h
-	$(CC) $(CFLAGS) -c $< -o $@
+valida: valida.o $(LIBISON)
+	$(CC) $(CFLAGS) -o $@ valida.o $(LIBISON)
 
 # --- mundatio ---
 
 purga:
-	rm -f curre.o lude.o terminalis.o $(COMMUNES_OBJ)
-	rm -f oraculum.o fare.o daemonium.o coniunge.o specta.o fac_certificatum.o
-	rm -f $(ORACULA_OBJ)
-	rm -f retis/retis.o retis/serializa.o retis/visus.o retis/crudus.o retis/cliens.o
-	rm -f proba.o valida.o
+	rm -f $(LIB_OBJ) libmunda.a
+	rm -f curre.o lude.o terminalis.o fare.o daemonium.o
+	rm -f coniunge.o specta.o fac_certificatum.o proba.o valida.o
+	rm -f oracula/nativus_exercita.o oracula/proba_nativus.o
 	@if [ "$(APOTHECA)" = "." ]; then rm -f crispus/proba.o; fi
-	rm -f curre lude fare proba valida
+	rm -f curre lude fare proba valida proba_nativus nativus_exercita
 	rm -f daemonium coniunge specta fac_certificatum
+	rm -f nativus_dieta_1526.bin nativus_dieta_1526.lex
 
 .PHONY: omnia para expara purga

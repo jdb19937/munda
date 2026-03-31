@@ -27,8 +27,12 @@ static const provisor_t *provisores[8] = {
     &provisor_xai,
     &provisor_anthropic,
     &provisor_fictus,
+    &provisor_nativus,
     NULL
 };
+
+/* nativus_pone_nomen — communicat nomen exemplaris ante extrahe() */
+extern void nativus_pone_nomen(const char *nomen);
 
 void oraculum_adde_provisorem(const provisor_t *prov)
 {
@@ -277,6 +281,11 @@ int oraculum_roga(const char *sapientum, const char *instructiones,
         *responsum = prov->extrahe(rogatum);
         return *responsum ? 0 : -1;
     }
+    if (strcmp(prov->nomen, "nativus") == 0) {
+        nativus_pone_nomen(nomen);
+        *responsum = prov->extrahe(rogatum);
+        return *responsum ? 0 : -1;
+    }
 
     CRISPUS *crispus = crispus_facilis_initia();
     if (!crispus) {
@@ -347,7 +356,9 @@ int oraculum_mitte(const char *sapientum, const char *instructiones,
 
     /* provisores locales: genera responsum statim, sine rete */
     if (strcmp(prov->nomen, "munda") == 0 ||
-        strcmp(prov->nomen, "fictus") == 0) {
+        strcmp(prov->nomen, "fictus") == 0 ||
+        strcmp(prov->nomen, "nativus") == 0) {
+        if (strcmp(prov->nomen, "nativus") == 0) nativus_pone_nomen(nomen);
         f->responsum = prov->extrahe(rogatum);
         f->exitus = 0;
         f->actum = FOSSA_PERFECTA;
