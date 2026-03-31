@@ -2,7 +2,7 @@
  * nativus_cursus.c — passus ante transformatoris nativus
  *
  * Inferentiae et auxiliaria: alloc, I/O, status, forward pass.
- * Operationes matriciae per pfr_matvec_f (phantasma/computo.h).
+ * Operationes per phantasma/computo.h (matvec, rmsnorm, attentio, etc.).
  */
 
 #include "nativus.h"
@@ -15,52 +15,156 @@
 #include <string.h>
 
 /* ================================================================
- * auxiliaria interna: BLAS wrappers (gpu=NULL -> CPU)
+ * GPU buffer management
+ *
+ * Pondera registrantur per-stratum ut buffers separati (sic Metal
+ * et CUDA operari possunt sine offsetting). Activationes registrantur
+ * ut buffers integri. gpu_de() invenit GPU mirror pro CPU pointer.
+ *
+ * Wrappers: upload activationes intratas, computa (GPU si adest, CPU
+ * si non), download activationes exitas. Pondera numquam re-uploadantur.
  * ================================================================ */
 
-/*
- * matvec — y = W * x, W est (out, in), x est (in,), y est (out,).
- * Utitur pfr_matvec_f (phantasma API generalis).
- */
-static void matvec(float *y, const float *W, const float *x, int out, int in)
+#define NGPU_MAX 512
+
+static struct {
+    int activa;
+    struct { void *cpu; void *gpu; size_t bytes; } bufs[NGPU_MAX];
+    int n;
+} ngpu;
+
+static int gpu_registra_v(float *cpu, int n_floats)
 {
-    pfr_matrix_f_t A = { out, in, (float *)W, NULL };
-    pfr_vector_f_t xv = { in,  (float *)x,  NULL };
-    pfr_vector_f_t yv = { out, y,            NULL };
-    pfr_matvec_f(&yv, &A, &xv);
+    if (ngpu.n >= NGPU_MAX) return -1;
+    pfr_vector_f_t tmp = { n_floats, cpu, NULL };
+    if (pfr_in_gpu_mitte_vf(&tmp) != 0 || !tmp.gpu) return -1;
+    ngpu.bufs[ngpu.n].cpu   = cpu;
+    ngpu.bufs[ngpu.n].gpu   = tmp.gpu;
+    ngpu.bufs[ngpu.n].bytes = (size_t)n_floats * sizeof(float);
+    ngpu.n++;
+    return 0;
+}
+
+static int gpu_registra_m(float *cpu, int m, int n)
+{
+    if (ngpu.n >= NGPU_MAX) return -1;
+    pfr_matrix_f_t tmp = { m, n, cpu, NULL };
+    if (pfr_in_gpu_mitte_f(&tmp) != 0 || !tmp.gpu) return -1;
+    ngpu.bufs[ngpu.n].cpu   = cpu;
+    ngpu.bufs[ngpu.n].gpu   = tmp.gpu;
+    ngpu.bufs[ngpu.n].bytes = (size_t)m * n * sizeof(float);
+    ngpu.n++;
+    return 0;
+}
+
+/*
+ * gpu_de — reddit GPU pointer pro CPU pointer, vel NULL.
+ * Solum exactum initium buffer acceptat (sine offset) —
+ * sic et Metal (MTLBuffer) et CUDA functionant.
+ */
+static void *gpu_de(const void *cpu)
+{
+    if (!ngpu.activa || !cpu) return NULL;
+    for (int i = 0; i < ngpu.n; i++)
+        if (ngpu.bufs[i].cpu == cpu) return ngpu.bufs[i].gpu;
+    return NULL;
+}
+
+int nm_gpu_initia(nm_t *nm)
+{
+    memset(&ngpu, 0, sizeof(ngpu));
+    nm_config_t *c = &nm->config;
+    nm_pondera_t *p = &nm->pondera;
+    nm_status_t *s = &nm->status;
+    int d = c->dimensio, df = c->dimensio_occ, L = c->strata;
+    int V = c->vocab_magnitudo, H = c->capita, Hkv = c->capita_kv;
+    int kv_dim = (d / H) * Hkv;
+
+    /* pondera: per-stratum, separati GPU buffers */
+    for (int l = 0; l < L; l++) {
+        if (gpu_registra_v(p->rms_att  + (size_t)l * d, d) < 0) return -1;
+        if (gpu_registra_v(p->rms_ffn  + (size_t)l * d, d) < 0) return -1;
+        if (gpu_registra_m(p->wq + (size_t)l*d*d, d, d) < 0) return -1;
+        if (gpu_registra_m(p->wk + (size_t)l*kv_dim*d, kv_dim, d) < 0) return -1;
+        if (gpu_registra_m(p->wv + (size_t)l*kv_dim*d, kv_dim, d) < 0) return -1;
+        if (gpu_registra_m(p->wo + (size_t)l*d*d, d, d) < 0) return -1;
+        if (gpu_registra_m(p->w1 + (size_t)l*df*d, df, d) < 0) return -1;
+        if (gpu_registra_m(p->w2 + (size_t)l*d*df, d, df) < 0) return -1;
+        if (gpu_registra_m(p->w3 + (size_t)l*df*d, df, d) < 0) return -1;
+    }
+    if (gpu_registra_v(p->rms_finis, d) < 0) return -1;
+    if (gpu_registra_m(p->wvoc, V, d) < 0) return -1;
+    /* activationes */
+    if (gpu_registra_v(s->x, d) < 0 ||
+        gpu_registra_v(s->xb, d) < 0 ||
+        gpu_registra_v(s->xb2, d) < 0 ||
+        gpu_registra_v(s->hb, df) < 0 ||
+        gpu_registra_v(s->hb2, df) < 0 ||
+        gpu_registra_v(s->q, d) < 0 ||
+        gpu_registra_v(s->k, kv_dim) < 0 ||
+        gpu_registra_v(s->v, kv_dim) < 0 ||
+        gpu_registra_v(s->att, (size_t)H * c->longitudo_max) < 0 ||
+        gpu_registra_v(s->logitae, V) < 0)
+        return -1;
+    /* cache non registratur — pfr_attentio_f adhibet raw pointers */
+
+    ngpu.activa = 1;
+    return 0;
+}
+
+void nm_gpu_fini(void)
+{
+    /* GPU buffers liberantur per pfr_computo_fini() */
+    memset(&ngpu, 0, sizeof(ngpu));
 }
 
 /* ================================================================
- * primitiva activationum
+ * wrappers: GPU-transparentes
+ *
+ * Pattern: upload activationes intratas → computa → download exitum.
+ * Pondera iam in GPU persistunt. Si GPU non adest (gpu_de reddit NULL),
+ * pfr_* functiones automatice ad CPU cadunt.
  * ================================================================ */
+
+static void matvec(float *y, const float *W, const float *x, int out, int in)
+{
+    pfr_matrix_f_t A  = { out, in, (float *)W, gpu_de(W) };
+    pfr_vector_f_t xv = { in,  (float *)x,    gpu_de(x) };
+    pfr_vector_f_t yv = { out, y,              gpu_de(y) };
+    if (xv.gpu) pfr_in_gpu_mitte_vf(&xv);
+    pfr_matvec_f(&yv, &A, &xv);
+    if (yv.gpu) pfr_ex_gpu_cape_vf(&yv);
+}
 
 static void rmsnorma(float *o, const float *x, const float *w, int n)
 {
-    float ss = 0.0f;
-    for (int j = 0; j < n; j++) ss += x[j] * x[j];
-    ss = 1.0f / sqrtf(ss / n + 1e-5f);
-    for (int j = 0; j < n; j++) o[j] = w[j] * ss * x[j];
+    pfr_vector_f_t ov = { n, o,          gpu_de(o) };
+    pfr_vector_f_t xv = { n, (float *)x, gpu_de(x) };
+    pfr_vector_f_t wv = { n, (float *)w, gpu_de(w) };
+    if (xv.gpu) pfr_in_gpu_mitte_vf(&xv);
+    pfr_rmsnorm_f(&ov, &xv, &wv, 1e-5f);
+    if (ov.gpu) pfr_ex_gpu_cape_vf(&ov);
 }
 
-static void mollifica(float *x, int n) /* softmax in situ */
+static void swiglu(float *o, const float *a, const float *b, int n)
 {
-    float mx = x[0];
-    for (int i = 1; i < n; i++) if (x[i] > mx) mx = x[i];
-    float s = 0.0f;
-    for (int i = 0; i < n; i++) { x[i] = expf(x[i] - mx); s += x[i]; }
-    for (int i = 0; i < n; i++) x[i] /= s;
+    pfr_vector_f_t ov = { n, o,          gpu_de(o) };
+    pfr_vector_f_t av = { n, (float *)a, gpu_de(a) };
+    pfr_vector_f_t bv = { n, (float *)b, gpu_de(b) };
+    if (av.gpu) pfr_in_gpu_mitte_vf(&av);
+    if (bv.gpu) pfr_in_gpu_mitte_vf(&bv);
+    pfr_swiglu_f(&ov, &av, &bv);
+    if (ov.gpu) pfr_ex_gpu_cape_vf(&ov);
 }
 
+/*
+ * rope_rotatio — sub-vectores (per caput): GPU non adhibetur
+ * quia Metal non sustinet buffer offsets. CPU semper — operatio parva.
+ */
 static void rope_rotatio(float *v, int pos, int caput_dim)
 {
-    for (int i = 0; i < caput_dim; i += 2) {
-        float freq = 1.0f / powf(10000.0f, (float)i / caput_dim);
-        float val  = pos * freq;
-        float fcr  = cosf(val), fci = sinf(val);
-        float v0 = v[i], v1 = v[i + 1];
-        v[i]     = v0 * fcr - v1 * fci;
-        v[i + 1] = v0 * fci + v1 * fcr;
-    }
+    pfr_vector_f_t vv = { caput_dim, v, NULL };
+    pfr_rope_f(&vv, pos);
 }
 
 /* ================================================================
@@ -324,7 +428,6 @@ static float *cursus_interna(nm_t *nm, nm_exercitatio_t *ex,
     int kv_dim = hd * Hkv;
     int lm    = c->longitudo_max;
     int V     = c->vocab_magnitudo;
-    int kv_mul = H / Hkv;       /* capita Q per caput KV */
 
     /* 1. vestigia */
     memcpy(s->x, p->vestigia + (size_t)signum * d, (size_t)d * sizeof(float));
@@ -373,30 +476,11 @@ static float *cursus_interna(nm_t *nm, nm_exercitatio_t *ex,
         memcpy(s->cache_valor  + cache_off, s->v,
                (size_t)kv_dim * sizeof(float));
 
-        /* e. multi-head attention */
-        memset(s->xb, 0, (size_t)d * sizeof(float));
-        for (int h = 0; h < H; h++) {
-            float *q_h  = s->q  + h * hd;
-            float *att  = s->att + h * lm;
-            float *xb_h = s->xb + h * hd;
-            int    hkv  = h / kv_mul;
-
-            for (int t = 0; t <= positio; t++) {
-                float *k_t = s->cache_clavis +
-                             ((size_t)l * lm + t) * kv_dim + hkv * hd;
-                float sc = 0.0f;
-                for (int i = 0; i < hd; i++) sc += q_h[i] * k_t[i];
-                att[t] = sc / sqrtf((float)hd);
-            }
-            mollifica(att, positio + 1);
-
-            for (int t = 0; t <= positio; t++) {
-                float *v_t = s->cache_valor +
-                             ((size_t)l * lm + t) * kv_dim + hkv * hd;
-                float a = att[t];
-                for (int i = 0; i < hd; i++) xb_h[i] += a * v_t[i];
-            }
-        }
+        /* e. attentio multi-capitis */
+        pfr_attentio_f(s->xb, s->q,
+                       s->cache_clavis + (size_t)l * lm * kv_dim,
+                       s->cache_valor  + (size_t)l * lm * kv_dim,
+                       s->att, d, H, Hkv, positio, lm);
 
         if (ex) memcpy(ex->memo_att + (size_t)l * H * lm, s->att,
                        (size_t)H * lm * sizeof(float));
@@ -424,12 +508,8 @@ static float *cursus_interna(nm_t *nm, nm_exercitatio_t *ex,
                    (size_t)df * sizeof(float));
         }
 
-        /* i. SwiGLU: hb = silu(hb) * hb2 */
-        for (int i = 0; i < df; i++) {
-            float v0 = s->hb[i];
-            float sig = 1.0f / (1.0f + expf(-v0));
-            s->hb[i] = v0 * sig * s->hb2[i];
-        }
+        /* i. SwiGLU */
+        swiglu(s->hb, s->hb, s->hb2, df);
 
         /* j. FFN w2 + residuum */
         matvec(s->xb, W_w2, s->hb, d, df);

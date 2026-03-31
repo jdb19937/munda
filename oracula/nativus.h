@@ -163,6 +163,19 @@ void nm_fini(nm_t *nm);
 void nm_status_restitue(nm_t *nm);
 
 /*
+ * nm_gpu_initia — allocat GPU buffers pro ponderibus et activationibus.
+ * Pondera semel mittuntur; activationes syncuntur per-operationem.
+ * Si GPU non adest, reddit -1 et omnes operationes in CPU manent.
+ * Applicatio non debet curare — eadem API cum vel sine GPU.
+ */
+int nm_gpu_initia(nm_t *nm);
+
+/*
+ * nm_gpu_fini — liberat GPU buffers.
+ */
+void nm_gpu_fini(void);
+
+/*
  * nm_cursus — passus ante pro inferentiis (updateat nm->status.logitae).
  * reddit nm->status.logitae (non allocatum separatim).
  */

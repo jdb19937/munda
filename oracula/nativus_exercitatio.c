@@ -120,7 +120,7 @@ int nm_exercitatio_initia(nm_exercitatio_t *ex, const nm_config_t *c)
 {
     memset(ex, 0, sizeof(*ex));
 
-    /* gradientes (communes = 1 come il modello) */
+    /* gradientes (communes = 1 ut in exemplari) */
     ex->grad_data = alloca_pondera_plana(c, 1, &ex->grad);
     if (!ex->grad_data) return -1;
 
@@ -220,15 +220,8 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
     /* Computemus softmax pro loss e logitae (servata in nm->status.logitae). */
     float *logitae = nm->status.logitae;
 
-    /* softmax in situ in d_log */
     memcpy(d_log, logitae, (size_t)V * sizeof(float));
-    {
-        float mx = d_log[0];
-        for (int i = 1; i < V; i++) if (d_log[i] > mx) mx = d_log[i];
-        float s = 0.0f;
-        for (int i = 0; i < V; i++) { d_log[i] = expf(d_log[i] - mx); s += d_log[i]; }
-        for (int i = 0; i < V; i++) d_log[i] /= s;
-    }
+    { pfr_vector_f_t dv = { V, d_log, NULL }; pfr_softmax_f(&dv); }
     float damnum = -logf(d_log[signum_target] + 1e-10f);
     d_log[signum_target] -= 1.0f;  /* gradiens: softmax - one_hot */
 
@@ -288,15 +281,14 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
         /* retro per w2: d_hb = w2^T * d_ffn (gradiens ad hb_post = SwiGLU output) */
         memset(d_hb, 0, (size_t)df * sizeof(float));
         matvec_trans_accum(d_hb, W_w2, d_ffn, d, df);
-        /* G_w2 += d_ffn * hb_post^T  ubi hb_post = silu(hb_m) * hb2_m.
-           memo_hb = hb_m = W1 @ xb (PRE-SwiGLU); hb2_m = W3 @ xb. */
+        /* G_w2 += d_ffn * hb_post^T  ubi hb_post = silu(hb_m) * hb2_m */
         {
             float *hb_post = calloc((size_t)df, sizeof(float));
             if (hb_post) {
-                for (int i = 0; i < df; i++) {
-                    float sig = 1.0f / (1.0f + expf(-hb_m[i]));
-                    hb_post[i] = hb_m[i] * sig * hb2_m[i];
-                }
+                pfr_vector_f_t ov = { df, hb_post,       NULL };
+                pfr_vector_f_t av = { df, (float *)hb_m,  NULL };
+                pfr_vector_f_t bv = { df, (float *)hb2_m, NULL };
+                pfr_swiglu_f(&ov, &av, &bv);
                 ger_accum(G_w2, 1.0f, d_ffn, hb_post, d, df);
                 free(hb_post);
             }
@@ -326,8 +318,8 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
         /* retro per rmsnorm FFN */
         memset(d_x_retro, 0, (size_t)d * sizeof(float));
         rmsnorma_retro(d_x_retro, G_rms_ffn, d_xb, x_mid, W_rms_ffn, d);
-        /* d_x_mid += d_x_retro (residuum: x_mid entra in rmsnorm FFN e anche
-           come residuo: x[l+1] = x_mid + ffn_out) */
+        /* d_x_mid += d_x_retro (residuum: x_mid intrat in rmsnorm FFN et
+           etiam ut residuum: x[l+1] = x_mid + ffn_out) */
         for (int i = 0; i < d; i++) d_x[i] = d_x[i] + d_x_retro[i];
 
         /* --- retropulsio attention --- */
@@ -346,12 +338,9 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
         float *d_xb_concat = calloc((size_t)d, sizeof(float));
         if (!d_xb_concat) { free(d_att_out); break; }
         matvec_trans_accum(d_xb_concat, W_wo, d_att_out, d, d);
-        /* Per calcolare il gradiente di wo, ci serve xb PRIMA di wo.
-           Nel forward: xb = somma pesata dei valori.
-           Non lo abbiamo memo'izzato direttamente come tale.
-           Usiamo nm->status.xb che e' sovrascritto; invece ricomponiamo
-           da att_m e cache_valor. */
-        /* Ricomponi xb_pre_wo per ger su G_wo */
+        /* ad computandum gradientem wo, opus est xb ANTE wo.
+           in passu ante: xb = summa ponderata valorum.
+           non memoizavimus directe; recomponimus ex att_m et cache_valor. */
         {
             float *xb_pre_wo = calloc((size_t)d, sizeof(float));
             if (xb_pre_wo) {
@@ -371,7 +360,7 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
             }
         }
 
-        /* Retro per attenzione testa per testa */
+        /* retropulsio per attentionem caput per caput */
         memset(d_q, 0, (size_t)d * sizeof(float));
         memset(d_k, 0, (size_t)kv_d * sizeof(float));
         memset(d_v, 0, (size_t)kv_d * sizeof(float));
@@ -419,7 +408,7 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
                         for (int i = 0; i < hd; i++) d_q_h[i] += dsp * k_t[i];
                     }
 
-                    /* d_k[pos, hkv] += d_score_pre[pos] * q_h (solo pos corrente) */
+                    /* d_k[pos, hkv] += d_score_pre[pos] * q_h (positio currens solum) */
                     {
                         float *d_k_hkv = d_k + hkv * hd;
                         float dsp = d_score_pre[positio];
@@ -436,13 +425,13 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
         free(d_att_out);
         free(d_xb_concat);
 
-        /* RoPE retro su d_q e d_k */
+        /* RoPE retro in d_q et d_k */
         for (int h = 0; h < H; h++)
             rope_retro(d_q + h * hd, positio, hd);
         for (int h = 0; h < Hkv; h++)
             rope_retro(d_k + h * hd, positio, hd);
 
-        /* retro per wq, wk, wv: d_xb_att e' gradient cumulato */
+        /* retro per wq, wk, wv: d_xb_att est gradiens cumulatus */
         float *d_xb_att = calloc((size_t)d, sizeof(float));
         if (d_xb_att) {
             matvec_trans_accum(d_xb_att, W_wq, d_q, d, d);

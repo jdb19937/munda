@@ -75,6 +75,7 @@ static int nativus_lege_exemplar(const char *nomen)
     snprintf(nativus_nomen_exemplaris, sizeof(nativus_nomen_exemplaris),
              "%s", nomen);
     nativus_initiatus = 1;
+    nm_gpu_initia(&nativus_exemplar);
     return 0;
 }
 

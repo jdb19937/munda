@@ -83,7 +83,7 @@ static char *lege_corpus(void)
  * exercitatio
  * ================================================================ */
 
-#define N_PASSUS      800
+#define N_PASSUS      20
 #define LONGITUDO_SEQ  48
 #define N_MINI          4       /* fenestrae per passum (mini-manipulus) */
 #define GRADUS_DISC   3e-3f
@@ -91,7 +91,7 @@ static char *lege_corpus(void)
 #define BETA2         0.999f
 #define EPSILON       1e-8f
 #define DESICATIO     1e-2f
-#define NUNTIA_PASSUS  50
+#define NUNTIA_PASSUS  10
 
 static void exercita(nm_t *nm, nm_exercitatio_t *ex,
                      const int *signa_corp, int n_corp,
@@ -257,6 +257,20 @@ int main(void)
     printf("   parametri: %zu floats = %.1f KB\n\n",
            n_param, n_param * sizeof(float) / 1024.0);
 
+    /* GPU: mitte pondera et activationes in GPU (si adest et prodest) */
+    int usar_gpu_nm = 0;
+    if (gpu == 0 && config.dimensio >= 256) {
+        if (nm_gpu_initia(&nm) == 0) {
+            usar_gpu_nm = 1;
+            printf("   GPU buffers allocati\n\n");
+        } else {
+            printf("   GPU buffers defecerunt — CPU adhibetur\n\n");
+        }
+    } else if (gpu == 0) {
+        printf("   dim=%d < 256: GPU non prodest, CPU adhibetur\n\n",
+               config.dimensio);
+    }
+
     /* --- 4. exercita --- */
     printf("4. exercito (%d passus)...\n", N_PASSUS);
     nm_exercitatio_t ex;
@@ -278,6 +292,7 @@ int main(void)
         fprintf(stderr, "admonitio: nm_serva defecit\n");
     else
         printf("   exemplar servatum: nativus_dieta_1526.bin\n\n");
+    nm_gpu_fini();
     nm_fini(&nm);
 
     /* --- 6. lege exemplar novum --- */
@@ -289,9 +304,11 @@ int main(void)
         pfr_computo_fini();
         return 1;
     }
-    printf("   exemplar lectum: dim=%d strata=%d vocab=%d\n\n",
+    printf("   exemplar lectum: dim=%d strata=%d vocab=%d\n",
            nm2.config.dimensio, nm2.config.strata,
            nm2.config.vocab_magnitudo);
+    if (gpu == 0 && nm2.config.dimensio >= 256) nm_gpu_initia(&nm2);
+    printf("\n");
 
     /* --- 7. inferentiae --- */
     printf("7. genero textum...\n");
@@ -320,6 +337,7 @@ int main(void)
     }
     printf("\n");
 
+    nm_gpu_fini();
     nm_fini(&nm2);
     nm_lexator_destrue(lex);
     pfr_computo_fini();
