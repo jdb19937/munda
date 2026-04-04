@@ -26,7 +26,7 @@ void oculus_praecogita(tabula_t *tab)
     if (!instructiones)
         instructiones = lege_instructiones(tab->munda, "dei", "oculus");
     const char *sap = tab->sapientum[OCULUS][0] ?
-                      tab->sapientum[OCULUS] : NULL;
+        tab->sapientum[OCULUS] : NULL;
     cogitatio_praecogita(
         tab, OCULUS, 1, 1,
         PRAECOGITATA_MAX, 1, 5,

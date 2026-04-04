@@ -76,9 +76,9 @@ int retis_lege_frame(alveus_retis_t *alv, uint8_t **payload, size_t *mag)
         return 0;
 
     uint32_t longitudo = ((uint32_t)alv->data[0] << 24) |
-    ((uint32_t)alv->data[1] << 16) |
-    ((uint32_t)alv->data[2] << 8)  |
-    (uint32_t)alv->data[3];
+        ((uint32_t)alv->data[1] << 16) |
+        ((uint32_t)alv->data[2] << 8)  |
+        (uint32_t)alv->data[3];
 
     if (longitudo > RETIS_NUNTIUS_MAX)
         return -1;

@@ -29,7 +29,7 @@ void corvus_praecogita(tabula_t *tab)
     if (!instructiones)
         instructiones = lege_instructiones(tab->munda, "animae", "corvus");
     const char *sap = tab->sapientum[CORVUS][0] ?
-                      tab->sapientum[CORVUS] : NULL;
+        tab->sapientum[CORVUS] : NULL;
     cogitatio_praecogita(
         tab, CORVUS, 1, 1,
         1, 1, 5,

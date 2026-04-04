@@ -25,7 +25,7 @@ void dalekus_praecogita(tabula_t *tab)
     if (!instructiones)
         instructiones = lege_instructiones(tab->munda, "animae", "dalekus");
     const char *sap = tab->sapientum[DALEKUS][0] ?
-                      tab->sapientum[DALEKUS] : NULL;
+        tab->sapientum[DALEKUS] : NULL;
     cogitatio_praecogita_tabulam(
         tab, DALEKUS,
         sap, instructiones, &praecogitata

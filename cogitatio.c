@@ -246,7 +246,7 @@ static char *aedifica_instructiones(
     unsigned int capacitates
 ) {
     size_t mag = strlen(INSTRUCTIONES_CAPUT) + 2048 +
-    strlen(INSTRUCTIONES_CAUDA) + strlen(specifica) + 1;
+        strlen(INSTRUCTIONES_CAUDA) + strlen(specifica) + 1;
     char *res = malloc(mag);
     if (!res)
         return NULL;
@@ -522,7 +522,7 @@ void cogitatio_praecogita(
             p->x = x;
             p->y = y;
             const char *nom = (genera_ops[genus].phylum == DEI)
-            ? c->p.deus.nomen : c->p.animus.nomen;
+                ? c->p.deus.nomen : c->p.animus.nomen;
             memcpy(p->nomen, nom, 8);
             res->pendentes_num++;
         }
@@ -533,10 +533,10 @@ void cogitatio_praecogita(
 
     /* --- 3. mitte plicas quando parati --- */
     int paratus = (res->pendentes_num >= plica_mag) ||
-                  (
-                      res->pendentes_num > 0 &&
-                      res->pendentes_gradus >= patientia
-                  );
+        (
+            res->pendentes_num > 0 &&
+            res->pendentes_gradus >= patientia
+        );
 
     if (paratus) {
         char *inst = aedifica_instructiones(
@@ -647,7 +647,7 @@ static void aedifica_tabulam_ison(
             if (c->genus == genus) {
                 /* ostende nomen */
                 const char *nom = (genera_ops[genus].phylum == DEI)
-                ? c->p.deus.nomen : c->p.animus.nomen;
+                    ? c->p.deus.nomen : c->p.animus.nomen;
                 for (const char *n = nom; *n && p + 2 < finis; n++)
                     *p++ = *n;
             } else {
@@ -683,7 +683,7 @@ static void aedifica_nomina_ison(
                 break;
 
             const char *nom = (genera_ops[genus].phylum == DEI)
-            ? c->p.deus.nomen : c->p.animus.nomen;
+                ? c->p.deus.nomen : c->p.animus.nomen;
             xx[n] = x;
             yy[n] = y;
             memcpy(nomina[n], nom, 8);
@@ -860,7 +860,7 @@ void cogitatio_praecogita_tabulam(
 
     /* praepone instructiones tabulae cum modis selectis */
     size_t imag = strlen(INSTRUCTIONES_TABULAE_CAPUT) + 2048 +
-    strlen(INSTRUCTIONES_TABULAE_CAUDA) + strlen(inst) + 1;
+        strlen(INSTRUCTIONES_TABULAE_CAUDA) + strlen(inst) + 1;
     char *inst_totae = malloc(imag);
     if (!inst_totae) {
         free(inst);

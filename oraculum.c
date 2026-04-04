@@ -213,8 +213,7 @@ static void fossa_fini_transferum(struct fossa *f, CRISPUScode rc)
             f->exitus    = -1;
         } else {
             f->responsum = prov->extrahe(f->mem.data);
-            f->exitus = (codex >= 200 && codex < 300 && f->responsum)
-            ? 0 : -1;
+            f->exitus    = (codex >= 200 && codex < 300 && f->responsum) ? 0 : -1;
         }
     }
 

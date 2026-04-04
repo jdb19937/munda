@@ -434,8 +434,8 @@ int nm_lege(nm_t *nm, const char *via)
 
     nm_pondera_init_ptr(&nm->pondera, &nm->config, nm->data);
     nm->pondera.wvoc = nm->pondera_communes
-    ? nm->pondera.vestigia
-                     : (nm->pondera.rms_finis + nm->config.dimensio);
+        ? nm->pondera.vestigia
+        : (nm->pondera.rms_finis + nm->config.dimensio);
 
     return status_alloca(&nm->status, &nm->config);
 }

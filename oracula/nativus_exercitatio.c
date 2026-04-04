@@ -391,7 +391,7 @@ float nm_retropulsio(
                     float *att_h = att_m + h * lm;
                     for (int t = 0; t <= positio; t++) {
                         float *v_t = nm->status.cache_valor +
-                        ((size_t)l * lm + t) * kv_d + hkv * hd;
+                            ((size_t)l * lm + t) * kv_d + hkv * hd;
                         float a = att_h[t];
                         for (int i = 0; i < hd; i++)
                             xh[i] += a * v_t[i];
@@ -429,7 +429,7 @@ float nm_retropulsio(
             if (d_att_score) {
                 for (int t = 0; t <= positio; t++) {
                     float *v_t = nm->status.cache_valor +
-                    ((size_t)l * lm + t) * kv_d + hkv * hd;
+                        ((size_t)l * lm + t) * kv_d + hkv * hd;
                     float sc = 0.0f;
                     for (int i = 0; i < hd; i++)
                         sc += d_c_h[i] * v_t[i];
@@ -447,7 +447,7 @@ float nm_retropulsio(
                     /* d_q_h += sum_t d_score_pre[t] * k_t */
                     for (int t = 0; t <= positio; t++) {
                         float *k_t = nm->status.cache_clavis +
-                        ((size_t)l * lm + t) * kv_d + hkv * hd;
+                            ((size_t)l * lm + t) * kv_d + hkv * hd;
                         float dsp = d_score_pre[t];
                         for (int i = 0; i < hd; i++)
                             d_q_h[i] += dsp * k_t[i];

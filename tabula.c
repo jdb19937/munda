@@ -574,8 +574,8 @@ static void ursi_praegradum(tabula_t *tab)
                 move_animum(tab, x, y, vx, vy);
             } else if (m == TRAHE && vic->genus == VACUUM) {
                 directio_t retro = (dir == SEPTENTRIO) ? MERIDIES :
-                (dir == MERIDIES) ? SEPTENTRIO :
-                (dir == OCCIDENS) ? ORIENS : OCCIDENS;
+                    (dir == MERIDIES) ? SEPTENTRIO :
+                    (dir == OCCIDENS) ? ORIENS : OCCIDENS;
                 int rx, ry;
                 tabula_vicinum(tab, x, y, retro, &rx, &ry);
                 cella_t *post = tabula_da(tab, rx, ry);

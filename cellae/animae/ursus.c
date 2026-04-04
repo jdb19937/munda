@@ -24,7 +24,7 @@ void ursus_praecogita(tabula_t *tab)
     if (!instructiones)
         instructiones = lege_instructiones(tab->munda, "animae", "ursus");
     const char *sap = tab->sapientum[URSUS][0] ?
-                      tab->sapientum[URSUS] : NULL;
+        tab->sapientum[URSUS] : NULL;
     cogitatio_praecogita(
         tab, URSUS, 1, 1,
         1, 1, 4,

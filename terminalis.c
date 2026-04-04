@@ -145,9 +145,8 @@ void terminalis_pinge(const tabula_t *tab)
      * Aedifica totam imaginem in memoria, deinde scribe semel
      * ut vacillatio minuatur.
      */
-    size_t mag = 8192 + (size_t)(latus + 4) * ((size_t)latus * 12 + 32)
-    + (size_t)(latus * latus) * 128;
-    char *buf = malloc(mag);
+    size_t mag = 8192 + (size_t)(latus + 4) * ((size_t)latus * 12 + 32) + (size_t)(latus * latus) * 128;
+    char *buf  = malloc(mag);
     if (!buf)
         return;
 
