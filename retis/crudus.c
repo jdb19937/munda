@@ -13,8 +13,8 @@
 static struct termios prisca;
 static int initiatum = 0;
 
-volatile sig_atomic_t crudus_repinge    = 0;
-volatile sig_atomic_t crudus_finis      = 0;
+volatile sig_atomic_t crudus_repinge     = 0;
+volatile sig_atomic_t crudus_finis       = 0;
 volatile sig_atomic_t crudus_continuatio = 0;
 
 /* --- tractores signorum --- */
@@ -57,19 +57,19 @@ void crudus_signa_installa(void)
     sigemptyset(&sa.sa_mask);
 
     sa.sa_handler = sigint_tracta;
-    sa.sa_flags = 0;
+    sa.sa_flags   = 0;
     sigaction(SIGINT, &sa, NULL);
 
     sa.sa_handler = sigtstp_tracta;
-    sa.sa_flags = 0;
+    sa.sa_flags   = 0;
     sigaction(SIGTSTP, &sa, NULL);
 
     sa.sa_handler = sigcont_tracta;
-    sa.sa_flags = SA_RESTART;
+    sa.sa_flags   = SA_RESTART;
     sigaction(SIGCONT, &sa, NULL);
 
     sa.sa_handler = sigwinch_tracta;
-    sa.sa_flags = 0;
+    sa.sa_flags   = 0;
     sigaction(SIGWINCH, &sa, NULL);
 }
 
@@ -111,6 +111,7 @@ int crudus_lege(void)
 {
     unsigned char c;
     ssize_t n = read(STDIN_FILENO, &c, 1);
-    if (n == 1) return (int)c;
+    if (n == 1)
+        return (int)c;
     return -1;
 }

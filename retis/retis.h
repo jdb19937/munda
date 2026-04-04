@@ -47,8 +47,10 @@ int retis_lege_frame(alveus_retis_t *alv, uint8_t **payload, size_t *mag);
 void retis_alveus_consume(alveus_retis_t *alv, size_t consumpta);
 
 /* decrypta frame in loco; reddit 0 = success, -1 = auth erratum */
-int retis_revela(sessio_t *ses, uint8_t *frame, size_t frame_mag,
-                 uint8_t **clarus, size_t *clar_mag);
+int retis_revela(
+    sessio_t *ses, uint8_t *frame, size_t frame_mag,
+    uint8_t **clarus, size_t *clar_mag
+);
 
 /* --- handshake --- */
 
@@ -57,19 +59,25 @@ void retis_genera_clavem(nm_t *privata, ec_punctum_t *publica);
 void retis_punctum_ad_hex(const ec_punctum_t *p, char *hex);
 int  retis_hex_ad_punctum(const char *hex, ec_punctum_t *p);
 
-void retis_deriva_claves(const ec_punctum_t *eph_communis,
-                         const ec_punctum_t *stat_communis,
-                         const ec_punctum_t *E_c,
-                         const ec_punctum_t *E_s,
-                         sessio_t *ses_c, sessio_t *ses_s);
+void retis_deriva_claves(
+    const ec_punctum_t *eph_communis,
+    const ec_punctum_t *stat_communis,
+    const ec_punctum_t *E_c,
+    const ec_punctum_t *E_s,
+    sessio_t *ses_c, sessio_t *ses_s
+);
 
 /* --- certificatum (ISON) --- */
 
 int retis_lege_certificatum(const char *via, ec_punctum_t *publica);
 int retis_scribe_certificatum(const char *via, const ec_punctum_t *publica);
-int retis_lege_clavem_secretam(const char *via, nm_t *privata,
-                               ec_punctum_t *publica);
-int retis_scribe_clavem_secretam(const char *via, const nm_t *privata,
-                                 const ec_punctum_t *publica);
+int retis_lege_clavem_secretam(
+    const char *via, nm_t *privata,
+    ec_punctum_t *publica
+);
+int retis_scribe_clavem_secretam(
+    const char *via, const nm_t *privata,
+    const ec_punctum_t *publica
+);
 
 #endif /* RETIS_H */

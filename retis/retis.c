@@ -18,14 +18,17 @@
 
 int retis_mitte_nudum(int fd, const void *data, size_t mag)
 {
-    if (mag > RETIS_NUNTIUS_MAX) return -1;
+    if (mag > RETIS_NUNTIUS_MAX)
+        return -1;
     uint8_t caput[4];
     caput[0] = (uint8_t)(mag >> 24);
     caput[1] = (uint8_t)(mag >> 16);
     caput[2] = (uint8_t)(mag >> 8);
     caput[3] = (uint8_t)mag;
-    if (mitte_plene(fd, caput, 4) < 0) return -1;
-    if (mitte_plene(fd, data, mag) < 0) return -1;
+    if (mitte_plene(fd, caput, 4) < 0)
+        return -1;
+    if (mitte_plene(fd, data, mag) < 0)
+        return -1;
     return 0;
 }
 
@@ -43,17 +46,20 @@ int retis_mitte(int fd, sessio_t *ses, const void *clarus, size_t mag)
 
     /* frame occultus: seq_explicitus(8) + textus_occultus(mag) + sigillum(16) */
     size_t frame_mag = 8 + mag + 16;
-    uint8_t *frame = malloc(frame_mag);
-    if (!frame) return -1;
+    uint8_t *frame   = malloc(frame_mag);
+    if (!frame)
+        return -1;
 
     /* seq explicitus */
     for (int i = 7; i >= 0; i--)
         frame[i] = (uint8_t)(seq >> ((7 - i) * 8));
 
     /* occulta */
-    arca128_gcm_occulta(ses->clavis_scr, nonce,
-                        clarus, mag, NULL, 0,
-                        frame + 8, frame + 8 + mag);
+    arca128_gcm_occulta(
+        ses->clavis_scr, nonce,
+        clarus, mag, NULL, 0,
+        frame + 8, frame + 8 + mag
+    );
 
     ses->seq_scr++;
 
@@ -66,18 +72,21 @@ int retis_mitte(int fd, sessio_t *ses, const void *clarus, size_t mag)
 
 int retis_lege_frame(alveus_retis_t *alv, uint8_t **payload, size_t *mag)
 {
-    if (alv->pos < 4) return 0;
+    if (alv->pos < 4)
+        return 0;
 
     uint32_t longitudo = ((uint32_t)alv->data[0] << 24) |
-                          ((uint32_t)alv->data[1] << 16) |
-                          ((uint32_t)alv->data[2] << 8)  |
-                           (uint32_t)alv->data[3];
+    ((uint32_t)alv->data[1] << 16) |
+    ((uint32_t)alv->data[2] << 8)  |
+    (uint32_t)alv->data[3];
 
-    if (longitudo > RETIS_NUNTIUS_MAX) return -1;
-    if (alv->pos < 4 + longitudo) return 0;
+    if (longitudo > RETIS_NUNTIUS_MAX)
+        return -1;
+    if (alv->pos < 4 + longitudo)
+        return 0;
 
     *payload = alv->data + 4;
-    *mag = longitudo;
+    *mag     = longitudo;
     return 1;
 }
 
@@ -92,29 +101,35 @@ void retis_alveus_consume(alveus_retis_t *alv, size_t consumpta)
     }
 }
 
-int retis_revela(sessio_t *ses, uint8_t *frame, size_t frame_mag,
-                 uint8_t **clarus, size_t *clar_mag)
-{
-    if (frame_mag < 8 + 16) return -1;
+int retis_revela(
+    sessio_t *ses, uint8_t *frame, size_t frame_mag,
+    uint8_t **clarus, size_t *clar_mag
+) {
+    if (frame_mag < 8 + 16)
+        return -1;
 
     /* reconstruere nonce ex seq explicito */
     uint8_t nonce[12];
     memcpy(nonce, ses->iv_leg, 4);
     memcpy(nonce + 4, frame, 8);
 
-    size_t textus_mag = frame_mag - 8 - 16;
+    size_t textus_mag        = frame_mag - 8 - 16;
     uint8_t *textus_occultus = frame + 8;
-    uint8_t *sigillum = frame + 8 + textus_mag;
+    uint8_t *sigillum        = frame + 8 + textus_mag;
 
     /* revela in loco (super textum occultum) */
-    if (arca128_gcm_revela(ses->clavis_leg, nonce,
-                           textus_occultus, textus_mag,
-                           NULL, 0,
-                           textus_occultus, sigillum) < 0)
+    if (
+        arca128_gcm_revela(
+            ses->clavis_leg, nonce,
+            textus_occultus, textus_mag,
+            NULL, 0,
+            textus_occultus, sigillum
+        ) < 0
+    )
         return -1;
 
     ses->seq_leg++;
-    *clarus = textus_occultus;
+    *clarus   = textus_occultus;
     *clar_mag = textus_mag;
     return 0;
 }
@@ -132,10 +147,13 @@ void retis_punctum_ad_hex(const ec_punctum_t *p, char *hex)
 
 int retis_hex_ad_punctum(const char *hex, ec_punctum_t *p)
 {
-    if (strlen(hex) != 130) return -1;
+    if (strlen(hex) != 130)
+        return -1;
     uint8_t raw[65];
-    if (hex_ad_octetos(hex, 130, raw, 65) < 0) return -1;
-    if (raw[0] != 0x04) return -1;
+    if (hex_ad_octetos(hex, 130, raw, 65) < 0)
+        return -1;
+    if (raw[0] != 0x04)
+        return -1;
     nm_ex_octis(&p->x, raw + 1, 32);
     nm_ex_octis(&p->y, raw + 33, 32);
     p->infinitum = 0;
@@ -159,12 +177,13 @@ void retis_genera_clavem(nm_t *privata, ec_punctum_t *publica)
 
 /* --- derivatio clavium sessionis --- */
 
-void retis_deriva_claves(const ec_punctum_t *eph_communis,
-                         const ec_punctum_t *stat_communis,
-                         const ec_punctum_t *E_c,
-                         const ec_punctum_t *E_s,
-                         sessio_t *ses_c, sessio_t *ses_s)
-{
+void retis_deriva_claves(
+    const ec_punctum_t *eph_communis,
+    const ec_punctum_t *stat_communis,
+    const ec_punctum_t *E_c,
+    const ec_punctum_t *E_s,
+    sessio_t *ses_c, sessio_t *ses_s
+) {
     /* praedominus = SHA-256(eph.x || stat.x) */
     uint8_t combinatio[64];
     nm_ad_octos(&eph_communis->x, combinatio, 32);
@@ -206,8 +225,8 @@ void retis_deriva_claves(const ec_punctum_t *eph_communis,
     ses_c->seq_leg = 0;
     ses_s->seq_scr = 0;
     ses_s->seq_leg = 0;
-    ses_c->activa = 1;
-    ses_s->activa = 1;
+    ses_c->activa  = 1;
+    ses_s->activa  = 1;
 }
 
 /* --- certificatum I/O --- */
@@ -215,11 +234,13 @@ void retis_deriva_claves(const ec_punctum_t *eph_communis,
 int retis_lege_certificatum(const char *via, ec_punctum_t *publica)
 {
     char *ison = ison_lege_plicam(via);
-    if (!ison) return -1;
+    if (!ison)
+        return -1;
 
     char *hex = ison_da_chordam(ison, "clavis");
     free(ison);
-    if (!hex) return -1;
+    if (!hex)
+        return -1;
 
     int res = retis_hex_ad_punctum(hex, publica);
     free(hex);
@@ -232,22 +253,27 @@ int retis_scribe_certificatum(const char *via, const ec_punctum_t *publica)
     retis_punctum_ad_hex(publica, hex);
 
     char ison[256];
-    snprintf(ison, sizeof(ison),
-             "{\"clavis\":\"%s\",\"algorithmus\":\"EC-P256\"}", hex);
+    snprintf(
+        ison, sizeof(ison),
+        "{\"clavis\":\"%s\",\"algorithmus\":\"EC-P256\"}", hex
+    );
 
     FILE *f = fopen(via, "w");
-    if (!f) return -1;
+    if (!f)
+        return -1;
     fputs(ison, f);
     fputc('\n', f);
     fclose(f);
     return 0;
 }
 
-int retis_lege_clavem_secretam(const char *via, nm_t *privata,
-                               ec_punctum_t *publica)
-{
+int retis_lege_clavem_secretam(
+    const char *via, nm_t *privata,
+    ec_punctum_t *publica
+) {
     char *ison = ison_lege_plicam(via);
-    if (!ison) return -1;
+    if (!ison)
+        return -1;
 
     char *sec_hex = ison_da_chordam(ison, "secreta");
     char *pub_hex = ison_da_chordam(ison, "clavis");
@@ -261,8 +287,10 @@ int retis_lege_clavem_secretam(const char *via, nm_t *privata,
     /* decodifica clavem secretam (64 hex = 32 octeti) */
     uint8_t octeti[32];
     int res = -1;
-    if (strlen(sec_hex) == 64 &&
-        hex_ad_octetos(sec_hex, 64, octeti, 32) == 0) {
+    if (
+        strlen(sec_hex) == 64 &&
+        hex_ad_octetos(sec_hex, 64, octeti, 32) == 0
+    ) {
         nm_ex_octis(privata, octeti, 32);
         res = retis_hex_ad_punctum(pub_hex, publica);
     }
@@ -271,9 +299,10 @@ int retis_lege_clavem_secretam(const char *via, nm_t *privata,
     return res;
 }
 
-int retis_scribe_clavem_secretam(const char *via, const nm_t *privata,
-                                 const ec_punctum_t *publica)
-{
+int retis_scribe_clavem_secretam(
+    const char *via, const nm_t *privata,
+    const ec_punctum_t *publica
+) {
     char pub_hex[131];
     retis_punctum_ad_hex(publica, pub_hex);
 
@@ -284,11 +313,14 @@ int retis_scribe_clavem_secretam(const char *via, const nm_t *privata,
     sec_hex[64] = '\0';
 
     char ison[512];
-    snprintf(ison, sizeof(ison),
-             "{\"secreta\":\"%s\",\"clavis\":\"%s\"}", sec_hex, pub_hex);
+    snprintf(
+        ison, sizeof(ison),
+        "{\"secreta\":\"%s\",\"clavis\":\"%s\"}", sec_hex, pub_hex
+    );
 
     FILE *f = fopen(via, "w");
-    if (!f) return -1;
+    if (!f)
+        return -1;
     fputs(ison, f);
     fputc('\n', f);
     fclose(f);

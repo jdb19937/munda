@@ -9,27 +9,37 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int para(const char *nomen, const char *conatus,
-                const char *clavis_api,
-                const char *instructiones, const char *rogatum,
-                char **corpus, struct crispus_slist **capita)
-{
+static int para(
+    const char *nomen, const char *conatus,
+    const char *clavis_api,
+    const char *instructiones, const char *rogatum,
+    char **corpus, struct crispus_slist **capita
+) {
     (void)conatus;
 
     char *eff_user = ison_effuge(rogatum);
-    if (!eff_user) return -1;
+    if (!eff_user)
+        return -1;
 
     char *eff_sys = NULL;
     if (instructiones) {
         eff_sys = ison_effuge(instructiones);
-        if (!eff_sys) { free(eff_user); return -1; }
+        if (!eff_sys) {
+            free(eff_user);
+            return -1;
+        }
     }
 
     size_t mag = strlen(eff_user) + strlen(nomen) + 256;
-    if (eff_sys) mag += strlen(eff_sys);
+    if (eff_sys)
+        mag += strlen(eff_sys);
 
     char *buf = malloc(mag);
-    if (!buf) { free(eff_user); free(eff_sys); return -1; }
+    if (!buf) {
+        free(eff_user);
+        free(eff_sys);
+        return -1;
+    }
 
     char *p = buf;
     p += sprintf(p, "{\"model\":\"%s\",\"messages\":[", nomen);
@@ -41,8 +51,10 @@ static int para(const char *nomen, const char *conatus,
     free(eff_sys);
 
     char caput_auth[512];
-    snprintf(caput_auth, sizeof(caput_auth),
-             "Authorization: Bearer %s", clavis_api);
+    snprintf(
+        caput_auth, sizeof(caput_auth),
+        "Authorization: Bearer %s", clavis_api
+    );
 
     struct crispus_slist *c = NULL;
     c = crispus_slist_adde(c, "Content-Type: application/json");
@@ -56,17 +68,20 @@ static int para(const char *nomen, const char *conatus,
 static char *extrahe(const char *ison)
 {
     char *textus = ison_da_chordam(ison, "choices[0].message.content");
-    if (textus) return textus;
+    if (textus)
+        return textus;
 
     char *error = ison_da_chordam(ison, "error.message");
-    if (error) return error;
+    if (error)
+        return error;
 
     return strdup(ison);
 }
 
-static void signa(const char *ison, long *accepta, long *recondita,
-                   long *emissa, long *cogitata)
-{
+static void signa(
+    const char *ison, long *accepta, long *recondita,
+    long *emissa, long *cogitata
+) {
     *accepta   = ison_da_numerum(ison, "usage.prompt_tokens");
     *emissa    = ison_da_numerum(ison, "usage.completion_tokens");
     *recondita = 0;

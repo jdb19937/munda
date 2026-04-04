@@ -29,8 +29,10 @@ void oraculum_fini(void);
 /* --- interfacies synchrona --- */
 
 /* instructiones potest esse NULL */
-int oraculum_roga(const char *sapientum, const char *instructiones,
-                  const char *rogatum, char **responsum);
+int oraculum_roga(
+    const char *sapientum, const char *instructiones,
+    const char *rogatum, char **responsum
+);
 
 /* --- interfacies asynchrona --- */
 
@@ -39,8 +41,10 @@ int oraculum_roga(const char *sapientum, const char *instructiones,
 #define ORACULUM_ERRATUM -1
 
 /* sapientum potest esse NULL (utetur praefinitum) */
-int oraculum_mitte(const char *sapientum, const char *instructiones,
-                   const char *rogatum);
+int oraculum_mitte(
+    const char *sapientum, const char *instructiones,
+    const char *rogatum
+);
 
 void oraculum_processus(void);
 

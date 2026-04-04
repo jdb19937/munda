@@ -38,7 +38,7 @@ void oraculum_adde_provisorem(const provisor_t *prov)
 {
     for (int i = 0; i < 7; i++) {
         if (!provisores[i]) {
-            provisores[i] = prov;
+            provisores[i]     = prov;
             provisores[i + 1] = NULL;
             return;
         }
@@ -67,7 +67,8 @@ static size_t scribe_fn(void *contenta, size_t mag, size_t nmemb, void *usor)
     size_t realis = mag * nmemb;
     struct memoria *mem = usor;
     char *novum = realloc(mem->data, mem->magnitudo + realis + 1);
-    if (!novum) return 0;
+    if (!novum)
+        return 0;
     mem->data = novum;
     memcpy(mem->data + mem->magnitudo, contenta, realis);
     mem->magnitudo += realis;
@@ -94,16 +95,20 @@ static const char *resolve_default(const char *provisor, const char *nomen)
     return nomen;
 }
 
-static const provisor_t *resolve(const char *sapientum,
-                                 char *nomen, size_t nmag,
-                                 char *conatus, size_t cmag)
-{
+static const provisor_t *resolve(
+    const char *sapientum,
+    char *nomen, size_t nmag,
+    char *conatus, size_t cmag
+) {
     const char *spec = sapientum;
-    if (!spec || !*spec) spec = SAPIENTUM_PRAEFINITUM;
+    if (!spec || !*spec)
+        spec = SAPIENTUM_PRAEFINITUM;
 
     char provisor[64];
-    lege_sapientum(spec, provisor, sizeof(provisor),
-                   nomen, nmag, conatus, cmag);
+    lege_sapientum(
+        spec, provisor, sizeof(provisor),
+        nomen, nmag, conatus, cmag
+    );
 
     const provisor_t *prov = quaere_provisorem(provisor);
 
@@ -113,8 +118,10 @@ static const provisor_t *resolve(const char *sapientum,
         snprintf(nomen, nmag, "%s", resolutum);
 
     /* serva sapientum plenum "provisor/nomen" */
-    snprintf(sapientum_currens, sizeof(sapientum_currens),
-             "%s/%s", prov->nomen, nomen);
+    snprintf(
+        sapientum_currens, sizeof(sapientum_currens),
+        "%s/%s", prov->nomen, nomen
+    );
     provisor_currentis = prov;
 
     return prov;
@@ -122,28 +129,36 @@ static const provisor_t *resolve(const char *sapientum,
 
 /* --- para crispum cum provisore --- */
 
-static int para_crispum(CRISPUS *crispus, const char *sapientum,
-                     const char *instructiones, const char *rogatum,
-                     char **corpus_out, struct crispus_slist **capita_out,
-                     struct memoria *mem)
-{
+static int para_crispum(
+    CRISPUS *crispus, const char *sapientum,
+    const char *instructiones, const char *rogatum,
+    char **corpus_out, struct crispus_slist **capita_out,
+    struct memoria *mem
+) {
     char nomen[128], conatus[32];
-    const provisor_t *prov = resolve(sapientum,
-                                     nomen, sizeof(nomen),
-                                     conatus, sizeof(conatus));
+    const provisor_t *prov = resolve(
+        sapientum,
+        nomen, sizeof(nomen),
+        conatus, sizeof(conatus)
+    );
 
     const char *clavis = getenv(prov->clavis_env);
-    if (!clavis || !*clavis) return -1;
+    if (!clavis || !*clavis)
+        return -1;
 
     char *corpus = NULL;
     struct crispus_slist *capita = NULL;
 
-    if (prov->para(nomen, conatus, clavis,
-                   instructiones, rogatum,
-                   &corpus, &capita) < 0)
+    if (
+        prov->para(
+            nomen, conatus, clavis,
+            instructiones, rogatum,
+            &corpus, &capita
+        ) < 0
+    )
         return -1;
 
-    mem->data = NULL;
+    mem->data      = NULL;
     mem->magnitudo = 0;
 
     crispus_facilis_pone(crispus, CRISPUSOPT_URL, prov->finis_url);
@@ -184,20 +199,22 @@ static void fossa_fini_transferum(struct fossa *f, CRISPUScode rc)
 
     if (rc != CRISPUSE_OK) {
         char err[256];
-        snprintf(err, sizeof(err), "crispus error: %s",
-                 crispus_facilis_error(rc));
+        snprintf(
+            err, sizeof(err), "crispus error: %s",
+            crispus_facilis_error(rc)
+        );
         f->responsum = strdup(err);
-        f->exitus = -1;
+        f->exitus    = -1;
     } else {
         long codex;
         crispus_facilis_info(f->manubrium, CRISPUSINFO_CODEX_RESPONSI, &codex);
         if (!f->mem.data) {
             f->responsum = strdup("responsum vacuum");
-            f->exitus = -1;
+            f->exitus    = -1;
         } else {
             f->responsum = prov->extrahe(f->mem.data);
             f->exitus = (codex >= 200 && codex < 300 && f->responsum)
-                        ? 0 : -1;
+            ? 0 : -1;
         }
     }
 
@@ -222,12 +239,12 @@ static void fossa_fini_transferum(struct fossa *f, CRISPUScode rc)
     crispus_slist_libera(f->capita);
     free(f->corpus);
     free(f->mem.data);
-    f->manubrium = NULL;
-    f->capita = NULL;
-    f->corpus = NULL;
-    f->mem.data = NULL;
+    f->manubrium     = NULL;
+    f->capita        = NULL;
+    f->corpus        = NULL;
+    f->mem.data      = NULL;
     f->mem.magnitudo = 0;
-    f->actum = FOSSA_PERFECTA;
+    f->actum         = FOSSA_PERFECTA;
 }
 
 /* --- interfacies publica --- */
@@ -237,7 +254,8 @@ int oraculum_initia(void)
     if (crispus_orbis_initia(CRISPUS_GLOBAL_DEFAULT) != CRISPUSE_OK)
         return -1;
     multi = crispus_multi_initia();
-    if (!multi) return -1;
+    if (!multi)
+        return -1;
     memset(fossae, 0, sizeof(fossae));
     numeri_lex = lexicon_crea();
     return 0;
@@ -256,7 +274,8 @@ void oraculum_fini(void)
         free(fossae[i].responsum);
         fossae[i].actum = FOSSA_LIBERA;
     }
-    if (multi) crispus_multi_fini(multi);
+    if (multi)
+        crispus_multi_fini(multi);
     lexicon_libera(numeri_lex);
     numeri_lex = NULL;
     crispus_orbis_fini();
@@ -264,20 +283,25 @@ void oraculum_fini(void)
 
 /* --- synchrona --- */
 
-int oraculum_roga(const char *sapientum, const char *instructiones,
-                  const char *rogatum, char **responsum)
-{
+int oraculum_roga(
+    const char *sapientum, const char *instructiones,
+    const char *rogatum, char **responsum
+) {
     *responsum = NULL;
 
     /* resolve provisorem */
     char nomen[128], conatus[32];
-    const provisor_t *prov = resolve(sapientum,
-                                     nomen, sizeof(nomen),
-                                     conatus, sizeof(conatus));
+    const provisor_t *prov = resolve(
+        sapientum,
+        nomen, sizeof(nomen),
+        conatus, sizeof(conatus)
+    );
 
     /* provisores locales: genera responsum statim, sine rete */
-    if (strcmp(prov->nomen, "munda") == 0 ||
-        strcmp(prov->nomen, "fictus") == 0) {
+    if (
+        strcmp(prov->nomen, "munda") == 0 ||
+        strcmp(prov->nomen, "fictus") == 0
+    ) {
         *responsum = prov->extrahe(rogatum);
         return *responsum ? 0 : -1;
     }
@@ -297,20 +321,26 @@ int oraculum_roga(const char *sapientum, const char *instructiones,
     struct crispus_slist *capita = NULL;
     struct memoria mem = { NULL, 0 };
 
-    if (para_crispum(crispus, sapientum, instructiones, rogatum,
-                  &corpus, &capita, &mem) < 0) {
+    if (
+        para_crispum(
+            crispus, sapientum, instructiones, rogatum,
+            &corpus, &capita, &mem
+        ) < 0
+    ) {
         crispus_facilis_fini(crispus);
         *responsum = strdup("clavis API deest vel para defecit");
         return -1;
     }
 
     CRISPUScode rc = crispus_facilis_age(crispus);
-    int exitus = -1;
+    int exitus     = -1;
 
     if (rc != CRISPUSE_OK) {
         char err[256];
-        snprintf(err, sizeof(err), "crispus error: %s",
-                 crispus_facilis_error(rc));
+        snprintf(
+            err, sizeof(err), "crispus error: %s",
+            crispus_facilis_error(rc)
+        );
         *responsum = strdup(err);
     } else {
         long codex;
@@ -333,20 +363,27 @@ int oraculum_roga(const char *sapientum, const char *instructiones,
 
 /* --- asynchrona --- */
 
-int oraculum_mitte(const char *sapientum, const char *instructiones,
-                   const char *rogatum)
-{
+int oraculum_mitte(
+    const char *sapientum, const char *instructiones,
+    const char *rogatum
+) {
     int fi = -1;
     for (int i = 0; i < FOSSA_MAX; i++) {
-        if (fossae[i].actum == FOSSA_LIBERA) { fi = i; break; }
+        if (fossae[i].actum == FOSSA_LIBERA) {
+            fi = i;
+            break;
+        }
     }
-    if (fi < 0) return -1;
+    if (fi < 0)
+        return -1;
 
     /* resolve provisorem ut sciamus an munda sit */
     char nomen[128], conatus[32];
-    const provisor_t *prov = resolve(sapientum,
-                                     nomen, sizeof(nomen),
-                                     conatus, sizeof(conatus));
+    const provisor_t *prov = resolve(
+        sapientum,
+        nomen, sizeof(nomen),
+        conatus, sizeof(conatus)
+    );
 
     struct fossa *f = &fossae[fi];
     memset(f, 0, sizeof(*f));
@@ -355,13 +392,16 @@ int oraculum_mitte(const char *sapientum, const char *instructiones,
     lexicon_adde_compositam(numeri_lex, f->sapientum, "missae", 1);
 
     /* provisores locales: genera responsum statim, sine rete */
-    if (strcmp(prov->nomen, "munda") == 0 ||
+    if (
+        strcmp(prov->nomen, "munda") == 0 ||
         strcmp(prov->nomen, "fictus") == 0 ||
-        strcmp(prov->nomen, "nativus") == 0) {
-        if (strcmp(prov->nomen, "nativus") == 0) nativus_pone_nomen(nomen);
+        strcmp(prov->nomen, "nativus") == 0
+    ) {
+        if (strcmp(prov->nomen, "nativus") == 0)
+            nativus_pone_nomen(nomen);
         f->responsum = prov->extrahe(rogatum);
-        f->exitus = 0;
-        f->actum = FOSSA_PERFECTA;
+        f->exitus    = 0;
+        f->actum     = FOSSA_PERFECTA;
         lexicon_adde_compositam(numeri_lex, f->sapientum, "successae", 1);
         return fi;
     }
@@ -370,22 +410,26 @@ int oraculum_mitte(const char *sapientum, const char *instructiones,
     if (!crispus) {
         lexicon_adde_compositam(numeri_lex, f->sapientum, "errores", 1);
         f->responsum = strdup("crispus_facilis_initia defecit");
-        f->exitus = -1;
-        f->actum = FOSSA_PERFECTA;
+        f->exitus    = -1;
+        f->actum     = FOSSA_PERFECTA;
         return fi;
     }
 
-    if (para_crispum(crispus, sapientum, instructiones, rogatum,
-                  &f->corpus, &f->capita, &f->mem) < 0) {
+    if (
+        para_crispum(
+            crispus, sapientum, instructiones, rogatum,
+            &f->corpus, &f->capita, &f->mem
+        ) < 0
+    ) {
         crispus_facilis_fini(crispus);
         lexicon_adde_compositam(numeri_lex, f->sapientum, "errores", 1);
         f->responsum = strdup("para defecit (clavis API deest?)");
-        f->exitus = -1;
-        f->actum = FOSSA_PERFECTA;
+        f->exitus    = -1;
+        f->actum     = FOSSA_PERFECTA;
         return fi;
     }
 
-    f->actum = FOSSA_VOLANS;
+    f->actum     = FOSSA_VOLANS;
     f->manubrium = crispus;
     crispus_multi_adde(multi, crispus);
     return fi;
@@ -393,7 +437,8 @@ int oraculum_mitte(const char *sapientum, const char *instructiones,
 
 void oraculum_processus(void)
 {
-    if (!multi) return;
+    if (!multi)
+        return;
 
     int running;
     crispus_multi_age(multi, &running);
@@ -417,12 +462,14 @@ void oraculum_processus(void)
 int oraculum_status(int fi, char **responsum)
 {
     *responsum = NULL;
-    if (fi < 0 || fi >= FOSSA_MAX) return ORACULUM_ERRATUM;
+    if (fi < 0 || fi >= FOSSA_MAX)
+        return ORACULUM_ERRATUM;
 
     struct fossa *f = &fossae[fi];
-    if (f->actum == FOSSA_VOLANS) return ORACULUM_PENDENS;
+    if (f->actum == FOSSA_VOLANS)
+        return ORACULUM_PENDENS;
     if (f->actum == FOSSA_PERFECTA) {
-        *responsum = f->responsum;
+        *responsum   = f->responsum;
         f->responsum = NULL;
         return (f->exitus == 0) ? ORACULUM_PARATUM : ORACULUM_ERRATUM;
     }
@@ -431,17 +478,18 @@ int oraculum_status(int fi, char **responsum)
 
 void oraculum_dimitte(int fi)
 {
-    if (fi < 0 || fi >= FOSSA_MAX) return;
+    if (fi < 0 || fi >= FOSSA_MAX)
+        return;
     free(fossae[fi].responsum);
     fossae[fi].responsum = NULL;
-    fossae[fi].actum = FOSSA_LIBERA;
+    fossae[fi].actum     = FOSSA_LIBERA;
 }
 
 void oraculum_numeri(oraculum_numeri_t *num)
 {
     num->pendentes = 0;
-    num->paratae = 0;
-    num->liberae = 0;
+    num->paratae   = 0;
+    num->liberae   = 0;
     for (int i = 0; i < FOSSA_MAX; i++) {
         switch (fossae[i].actum) {
         case FOSSA_LIBERA:   num->liberae++;   break;
@@ -478,13 +526,17 @@ const char *oraculum_sapientum(void)
 
 int oraculum_numeri_per_sapientum(oraculum_numeri_modelli_t *tabulatum, int maximus)
 {
-    if (!numeri_lex) return 0;
+    if (!numeri_lex)
+        return 0;
     char genera[16][64];
     int ngen = lexicon_genera(numeri_lex, genera, 16);
-    if (ngen > maximus) ngen = maximus;
+    if (ngen > maximus)
+        ngen = maximus;
     for (int i = 0; i < ngen; i++) {
-        snprintf(tabulatum[i].sapientum, sizeof(tabulatum[i].sapientum),
-                 "%s", genera[i]);
+        snprintf(
+            tabulatum[i].sapientum, sizeof(tabulatum[i].sapientum),
+            "%s", genera[i]
+        );
         tabulatum[i].volantes = 0;
         tabulatum[i].paratae  = 0;
         tabulatum[i].missae      = lexicon_da_compositam(numeri_lex, genera[i], "missae");
@@ -497,13 +549,17 @@ int oraculum_numeri_per_sapientum(oraculum_numeri_modelli_t *tabulatum, int maxi
     }
     /* computa volantes et paratae ex fossis vivis */
     for (int i = 0; i < FOSSA_MAX; i++) {
-        if (fossae[i].actum == FOSSA_LIBERA) continue;
+        if (fossae[i].actum == FOSSA_LIBERA)
+            continue;
         const char *nomen = fossae[i].sapientum;
-        if (!nomen[0]) continue;
+        if (!nomen[0])
+            continue;
         for (int j = 0; j < ngen; j++) {
             if (strcmp(tabulatum[j].sapientum, nomen) == 0) {
-                if (fossae[i].actum == FOSSA_VOLANS)   tabulatum[j].volantes++;
-                if (fossae[i].actum == FOSSA_PERFECTA) tabulatum[j].paratae++;
+                if (fossae[i].actum == FOSSA_VOLANS)
+                    tabulatum[j].volantes++;
+                if (fossae[i].actum == FOSSA_PERFECTA)
+                    tabulatum[j].paratae++;
                 break;
             }
         }

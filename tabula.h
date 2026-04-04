@@ -32,8 +32,10 @@ cella_t *tabula_da(tabula_t *tab, int x, int y);
 const cella_t *tabula_da_const(const tabula_t *tab, int x, int y);
 
 /* computa coordinatas vicini in directione data */
-void tabula_vicinum(const tabula_t *tab, int x, int y, directio_t dir,
-                    int *vx, int *vy);
+void tabula_vicinum(
+    const tabula_t *tab, int x, int y, directio_t dir,
+    int *vx, int *vy
+);
 
 /* pone cellulam generis dati ad (x, y) */
 void tabula_pone(tabula_t *tab, int x, int y, genus_t genus);

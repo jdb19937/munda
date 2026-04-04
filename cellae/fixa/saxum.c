@@ -11,7 +11,9 @@ static void saxum_praepara(cella_t *c)
 
 static actio_t saxum_cogito(const struct tabula *tab, int x, int y)
 {
-    (void)tab; (void)x; (void)y;
+    (void)tab;
+    (void)x;
+    (void)y;
     return ACTIO_NIHIL;
 }
 

@@ -15,8 +15,10 @@ int main(int argc, char **argv)
     const char *via_pub = "certificatum.ison";
     const char *via_sec = "clavis_daemoni.ison";
 
-    if (argc > 1) via_pub = argv[1];
-    if (argc > 2) via_sec = argv[2];
+    if (argc > 1)
+        via_pub = argv[1];
+    if (argc > 2)
+        via_sec = argv[2];
 
     nm_t privata;
     ec_punctum_t publica;

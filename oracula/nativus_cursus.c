@@ -29,15 +29,21 @@
 
 static struct {
     int activa;
-    struct { void *cpu; void *gpu; size_t bytes; } bufs[NGPU_MAX];
+    struct {
+        void *cpu;
+        void *gpu;
+        size_t bytes;
+    }bufs[NGPU_MAX];
     int n;
 } ngpu;
 
 static int gpu_registra_v(float *cpu, int n_floats)
 {
-    if (ngpu.n >= NGPU_MAX) return -1;
+    if (ngpu.n >= NGPU_MAX)
+        return -1;
     pfr_vector_f_t tmp = { n_floats, cpu, NULL };
-    if (pfr_in_gpu_mitte_vf(&tmp) != 0 || !tmp.gpu) return -1;
+    if (pfr_in_gpu_mitte_vf(&tmp) != 0 || !tmp.gpu)
+        return -1;
     ngpu.bufs[ngpu.n].cpu   = cpu;
     ngpu.bufs[ngpu.n].gpu   = tmp.gpu;
     ngpu.bufs[ngpu.n].bytes = (size_t)n_floats * sizeof(float);
@@ -47,9 +53,11 @@ static int gpu_registra_v(float *cpu, int n_floats)
 
 static int gpu_registra_m(float *cpu, int m, int n)
 {
-    if (ngpu.n >= NGPU_MAX) return -1;
+    if (ngpu.n >= NGPU_MAX)
+        return -1;
     pfr_matrix_f_t tmp = { m, n, cpu, NULL };
-    if (pfr_in_gpu_mitte_f(&tmp) != 0 || !tmp.gpu) return -1;
+    if (pfr_in_gpu_mitte_f(&tmp) != 0 || !tmp.gpu)
+        return -1;
     ngpu.bufs[ngpu.n].cpu   = cpu;
     ngpu.bufs[ngpu.n].gpu   = tmp.gpu;
     ngpu.bufs[ngpu.n].bytes = (size_t)m * n * sizeof(float);
@@ -64,9 +72,11 @@ static int gpu_registra_m(float *cpu, int m, int n)
  */
 static void *gpu_de(const void *cpu)
 {
-    if (!ngpu.activa || !cpu) return NULL;
+    if (!ngpu.activa || !cpu)
+        return NULL;
     for (int i = 0; i < ngpu.n; i++)
-        if (ngpu.bufs[i].cpu == cpu) return ngpu.bufs[i].gpu;
+        if (ngpu.bufs[i].cpu == cpu)
+            return ngpu.bufs[i].gpu;
     return NULL;
 }
 
@@ -82,20 +92,32 @@ int nm_gpu_initia(nm_t *nm)
 
     /* pondera: per-stratum, separati GPU buffers */
     for (int l = 0; l < L; l++) {
-        if (gpu_registra_v(p->rms_att  + (size_t)l * d, d) < 0) return -1;
-        if (gpu_registra_v(p->rms_ffn  + (size_t)l * d, d) < 0) return -1;
-        if (gpu_registra_m(p->wq + (size_t)l*d*d, d, d) < 0) return -1;
-        if (gpu_registra_m(p->wk + (size_t)l*kv_dim*d, kv_dim, d) < 0) return -1;
-        if (gpu_registra_m(p->wv + (size_t)l*kv_dim*d, kv_dim, d) < 0) return -1;
-        if (gpu_registra_m(p->wo + (size_t)l*d*d, d, d) < 0) return -1;
-        if (gpu_registra_m(p->w1 + (size_t)l*df*d, df, d) < 0) return -1;
-        if (gpu_registra_m(p->w2 + (size_t)l*d*df, d, df) < 0) return -1;
-        if (gpu_registra_m(p->w3 + (size_t)l*df*d, df, d) < 0) return -1;
+        if (gpu_registra_v(p->rms_att  + (size_t)l * d, d) < 0)
+            return -1;
+        if (gpu_registra_v(p->rms_ffn  + (size_t)l * d, d) < 0)
+            return -1;
+        if (gpu_registra_m(p->wq + (size_t)l*d*d, d, d) < 0)
+            return -1;
+        if (gpu_registra_m(p->wk + (size_t)l*kv_dim*d, kv_dim, d) < 0)
+            return -1;
+        if (gpu_registra_m(p->wv + (size_t)l*kv_dim*d, kv_dim, d) < 0)
+            return -1;
+        if (gpu_registra_m(p->wo + (size_t)l*d*d, d, d) < 0)
+            return -1;
+        if (gpu_registra_m(p->w1 + (size_t)l*df*d, df, d) < 0)
+            return -1;
+        if (gpu_registra_m(p->w2 + (size_t)l*d*df, d, df) < 0)
+            return -1;
+        if (gpu_registra_m(p->w3 + (size_t)l*df*d, df, d) < 0)
+            return -1;
     }
-    if (gpu_registra_v(p->rms_finis, d) < 0) return -1;
-    if (gpu_registra_m(p->wvoc, V, d) < 0) return -1;
+    if (gpu_registra_v(p->rms_finis, d) < 0)
+        return -1;
+    if (gpu_registra_m(p->wvoc, V, d) < 0)
+        return -1;
     /* activationes */
-    if (gpu_registra_v(s->x, d) < 0 ||
+    if (
+        gpu_registra_v(s->x, d) < 0 ||
         gpu_registra_v(s->xb, d) < 0 ||
         gpu_registra_v(s->xb2, d) < 0 ||
         gpu_registra_v(s->hb, df) < 0 ||
@@ -104,7 +126,8 @@ int nm_gpu_initia(nm_t *nm)
         gpu_registra_v(s->k, kv_dim) < 0 ||
         gpu_registra_v(s->v, kv_dim) < 0 ||
         gpu_registra_v(s->att, (size_t)H * c->longitudo_max) < 0 ||
-        gpu_registra_v(s->logitae, V) < 0)
+        gpu_registra_v(s->logitae, V) < 0
+    )
         return -1;
     /* cache non registratur — pfr_attentio_f adhibet raw pointers */
 
@@ -131,9 +154,11 @@ static void matvec(float *y, const float *W, const float *x, int out, int in)
     pfr_matrix_f_t A  = { out, in, (float *)W, gpu_de(W) };
     pfr_vector_f_t xv = { in,  (float *)x,    gpu_de(x) };
     pfr_vector_f_t yv = { out, y,              gpu_de(y) };
-    if (xv.gpu) pfr_in_gpu_mitte_vf(&xv);
+    if (xv.gpu)
+        pfr_in_gpu_mitte_vf(&xv);
     pfr_matvec_f(&yv, &A, &xv);
-    if (yv.gpu) pfr_ex_gpu_cape_vf(&yv);
+    if (yv.gpu)
+        pfr_ex_gpu_cape_vf(&yv);
 }
 
 static void rmsnorma(float *o, const float *x, const float *w, int n)
@@ -141,9 +166,11 @@ static void rmsnorma(float *o, const float *x, const float *w, int n)
     pfr_vector_f_t ov = { n, o,          gpu_de(o) };
     pfr_vector_f_t xv = { n, (float *)x, gpu_de(x) };
     pfr_vector_f_t wv = { n, (float *)w, gpu_de(w) };
-    if (xv.gpu) pfr_in_gpu_mitte_vf(&xv);
+    if (xv.gpu)
+        pfr_in_gpu_mitte_vf(&xv);
     pfr_rmsnorm_f(&ov, &xv, &wv, 1e-5f);
-    if (ov.gpu) pfr_ex_gpu_cape_vf(&ov);
+    if (ov.gpu)
+        pfr_ex_gpu_cape_vf(&ov);
 }
 
 static void swiglu(float *o, const float *a, const float *b, int n)
@@ -151,10 +178,13 @@ static void swiglu(float *o, const float *a, const float *b, int n)
     pfr_vector_f_t ov = { n, o,          gpu_de(o) };
     pfr_vector_f_t av = { n, (float *)a, gpu_de(a) };
     pfr_vector_f_t bv = { n, (float *)b, gpu_de(b) };
-    if (av.gpu) pfr_in_gpu_mitte_vf(&av);
-    if (bv.gpu) pfr_in_gpu_mitte_vf(&bv);
+    if (av.gpu)
+        pfr_in_gpu_mitte_vf(&av);
+    if (bv.gpu)
+        pfr_in_gpu_mitte_vf(&bv);
     pfr_swiglu_f(&ov, &av, &bv);
-    if (ov.gpu) pfr_ex_gpu_cape_vf(&ov);
+    if (ov.gpu)
+        pfr_ex_gpu_cape_vf(&ov);
 }
 
 /*
@@ -173,10 +203,10 @@ static void rope_rotatio(float *v, int pos, int caput_dim)
 
 size_t nm_magnitudo_ponderum(const nm_config_t *c, int communes)
 {
-    int d = c->dimensio, df = c->dimensio_occ, L = c->strata;
-    int V = c->vocab_magnitudo, H = c->capita, Hkv = c->capita_kv;
+    int d      = c->dimensio, df = c->dimensio_occ, L = c->strata;
+    int V      = c->vocab_magnitudo, H = c->capita, Hkv = c->capita_kv;
     int kv_dim = (d / H) * Hkv;
-    size_t n = 0;
+    size_t n   = 0;
     n += (size_t)V * d;          /* vestigia */
     n += (size_t)L * d;          /* rms_att */
     n += (size_t)L * d;          /* rms_ffn */
@@ -188,26 +218,38 @@ size_t nm_magnitudo_ponderum(const nm_config_t *c, int communes)
     n += (size_t)L * d * df;     /* w2 */
     n += (size_t)L * df * d;     /* w3 */
     n += (size_t)d;              /* rms_finis */
-    if (!communes) n += (size_t)V * d; /* wvoc */
+    if (!communes)
+        n += (size_t)V * d; /* wvoc */
     return n;
 }
 
 float *nm_pondera_init_ptr(nm_pondera_t *p, const nm_config_t *c, float *data)
 {
-    int d = c->dimensio, df = c->dimensio_occ, L = c->strata;
-    int V = c->vocab_magnitudo, H = c->capita, Hkv = c->capita_kv;
-    int kv_dim = (d / H) * Hkv;
-    p->vestigia  = data; data += (size_t)V * d;
-    p->rms_att   = data; data += (size_t)L * d;
-    p->rms_ffn   = data; data += (size_t)L * d;
-    p->wq        = data; data += (size_t)L * d * d;
-    p->wk        = data; data += (size_t)L * kv_dim * d;
-    p->wv        = data; data += (size_t)L * kv_dim * d;
-    p->wo        = data; data += (size_t)L * d * d;
-    p->w1        = data; data += (size_t)L * df * d;
-    p->w2        = data; data += (size_t)L * d * df;
-    p->w3        = data; data += (size_t)L * df * d;
-    p->rms_finis = data; data += (size_t)d;
+    int d       = c->dimensio, df = c->dimensio_occ, L = c->strata;
+    int V       = c->vocab_magnitudo, H = c->capita, Hkv = c->capita_kv;
+    int kv_dim  = (d / H) * Hkv;
+    p->vestigia = data;
+    data += (size_t)V * d;
+    p->rms_att   = data;
+    data += (size_t)L * d;
+    p->rms_ffn   = data;
+    data += (size_t)L * d;
+    p->wq        = data;
+    data += (size_t)L * d * d;
+    p->wk        = data;
+    data += (size_t)L * kv_dim * d;
+    p->wv        = data;
+    data += (size_t)L * kv_dim * d;
+    p->wo        = data;
+    data += (size_t)L * d * d;
+    p->w1        = data;
+    data += (size_t)L * df * d;
+    p->w2        = data;
+    data += (size_t)L * d * df;
+    p->w3        = data;
+    data += (size_t)L * df * d;
+    p->rms_finis = data;
+    data += (size_t)d;
     p->wvoc      = NULL;
     return data;
 }
@@ -218,10 +260,10 @@ float *nm_pondera_init_ptr(nm_pondera_t *p, const nm_config_t *c, float *data)
 
 static int status_alloca(nm_status_t *s, const nm_config_t *c)
 {
-    int d = c->dimensio, df = c->dimensio_occ, L = c->strata;
-    int V = c->vocab_magnitudo, H = c->capita, Hkv = c->capita_kv;
+    int d      = c->dimensio, df = c->dimensio_occ, L = c->strata;
+    int V      = c->vocab_magnitudo, H = c->capita, Hkv = c->capita_kv;
     int kv_dim = (d / H) * Hkv;
-    int lm = c->longitudo_max;
+    int lm     = c->longitudo_max;
 #define ALLOCA(campo, n) \
     s->campo = calloc((size_t)(n), sizeof(float)); \
     if (!s->campo) return -1;
@@ -243,11 +285,18 @@ static int status_alloca(nm_status_t *s, const nm_config_t *c)
 
 static void status_libera(nm_status_t *s)
 {
-    free(s->x);       free(s->xb);  free(s->xb2);
-    free(s->hb);      free(s->hb2);
-    free(s->q);       free(s->k);   free(s->v);
-    free(s->att);     free(s->logitae);
-    free(s->cache_clavis); free(s->cache_valor);
+    free(s->x);
+    free(s->xb);
+    free(s->xb2);
+    free(s->hb);
+    free(s->hb2);
+    free(s->q);
+    free(s->k);
+    free(s->v);
+    free(s->att);
+    free(s->logitae);
+    free(s->cache_clavis);
+    free(s->cache_valor);
     memset(s, 0, sizeof(*s));
 }
 
@@ -272,15 +321,16 @@ int nm_initia_temere(nm_t *nm, const nm_config_t *config, unsigned int semen)
     size_t n = nm_magnitudo_ponderum(config, 1);
     nm->magnitudo_data = n;
     nm->data = calloc(n, sizeof(float));
-    if (!nm->data) return -1;
+    if (!nm->data)
+        return -1;
 
     nm_pondera_init_ptr(&nm->pondera, config, nm->data);
     nm->pondera.wvoc = nm->pondera.vestigia; /* communes */
 
     /* He initialization: sigma = sqrt(2/n_in) */
-    int d = config->dimensio, df = config->dimensio_occ;
-    int L = config->strata, V = config->vocab_magnitudo;
-    int H = config->capita, Hkv = config->capita_kv;
+    int d      = config->dimensio, df = config->dimensio_occ;
+    int L      = config->strata, V = config->vocab_magnitudo;
+    int H      = config->capita, Hkv = config->capita_kv;
     int kv_dim = (d / H) * Hkv;
 
     float sc_vestigia = sqrtf(2.0f / d);
@@ -289,10 +339,13 @@ int nm_initia_temere(nm_t *nm, const nm_config_t *config, unsigned int semen)
 
     /* rms weights: initia in 1 */
     for (int l = 0; l < L; l++) {
-        for (int i = 0; i < d; i++) nm->pondera.rms_att[l*d + i] = 1.0f;
-        for (int i = 0; i < d; i++) nm->pondera.rms_ffn[l*d + i] = 1.0f;
+        for (int i = 0; i < d; i++)
+            nm->pondera.rms_att[l*d + i] = 1.0f;
+        for (int i = 0; i < d; i++)
+            nm->pondera.rms_ffn[l*d + i] = 1.0f;
     }
-    for (int i = 0; i < d; i++) nm->pondera.rms_finis[i] = 1.0f;
+    for (int i = 0; i < d; i++)
+        nm->pondera.rms_finis[i] = 1.0f;
 
     /* attention weights: He init */
     float sc_att = sqrtf(2.0f / d);
@@ -328,7 +381,8 @@ int nm_initia_temere(nm_t *nm, const nm_config_t *config, unsigned int semen)
 int nm_serva(const nm_t *nm, const char *via)
 {
     FILE *f = fopen(via, "wb");
-    if (!f) return -1;
+    if (!f)
+        return -1;
     unsigned int mag = NM_SIGNUM_MAGICUM;
     fwrite(&mag, sizeof(unsigned int), 1, f);
     fwrite(&nm->config, sizeof(nm_config_t), 1, f);
@@ -342,32 +396,45 @@ int nm_serva(const nm_t *nm, const char *via)
 int nm_lege(nm_t *nm, const char *via)
 {
     FILE *f = fopen(via, "rb");
-    if (!f) return -1;
+    if (!f)
+        return -1;
 
     unsigned int mag;
-    if (fread(&mag, sizeof(unsigned int), 1, f) != 1 ||
-        mag != NM_SIGNUM_MAGICUM) {
-        fclose(f); return -1;
+    if (
+        fread(&mag, sizeof(unsigned int), 1, f) != 1 ||
+        mag != NM_SIGNUM_MAGICUM
+    ) {
+        fclose(f);
+        return -1;
     }
 
     memset(nm, 0, sizeof(*nm));
-    if (fread(&nm->config, sizeof(nm_config_t), 1, f) != 1 ||
-        fread(&nm->pondera_communes, sizeof(int), 1, f) != 1) {
-        fclose(f); return -1;
+    if (
+        fread(&nm->config, sizeof(nm_config_t), 1, f) != 1 ||
+        fread(&nm->pondera_communes, sizeof(int), 1, f) != 1
+    ) {
+        fclose(f);
+        return -1;
     }
 
     size_t n = nm_magnitudo_ponderum(&nm->config, nm->pondera_communes);
     nm->data = malloc(n * sizeof(float));
     nm->magnitudo_data = n;
-    if (!nm->data) { fclose(f); return -1; }
+    if (!nm->data) {
+        fclose(f);
+        return -1;
+    }
     if (fread(nm->data, sizeof(float), n, f) != n) {
-        free(nm->data); nm->data = NULL; fclose(f); return -1;
+        free(nm->data);
+        nm->data = NULL;
+        fclose(f);
+        return -1;
     }
     fclose(f);
 
     nm_pondera_init_ptr(&nm->pondera, &nm->config, nm->data);
     nm->pondera.wvoc = nm->pondera_communes
-                     ? nm->pondera.vestigia
+    ? nm->pondera.vestigia
                      : (nm->pondera.rms_finis + nm->config.dimensio);
 
     return status_alloca(&nm->status, &nm->config);
@@ -375,7 +442,8 @@ int nm_lege(nm_t *nm, const char *via)
 
 void nm_fini(nm_t *nm)
 {
-    if (!nm) return;
+    if (!nm)
+        return;
     status_libera(&nm->status);
     free(nm->data);
     nm->data = NULL;
@@ -412,27 +480,29 @@ void nm_status_restitue(nm_t *nm)
  * cursus_interna — corpus principale; sic tam nm_cursus quam
  * nm_cursus_memo utuntur eodem codice, solo ex != NULL ad memoizationem.
  */
-static float *cursus_interna(nm_t *nm, nm_exercitatio_t *ex,
-                              int signum, int positio)
-{
+static float *cursus_interna(
+    nm_t *nm, nm_exercitatio_t *ex,
+    int signum, int positio
+) {
     nm_config_t *c  = &nm->config;
     nm_pondera_t *p = &nm->pondera;
     nm_status_t  *s = &nm->status;
 
-    int d     = c->dimensio;
-    int df    = c->dimensio_occ;
-    int L     = c->strata;
-    int H     = c->capita;
-    int Hkv   = c->capita_kv;
-    int hd    = d / H;          /* caput_dim */
+    int d      = c->dimensio;
+    int df     = c->dimensio_occ;
+    int L      = c->strata;
+    int H      = c->capita;
+    int Hkv    = c->capita_kv;
+    int hd     = d / H;          /* caput_dim */
     int kv_dim = hd * Hkv;
-    int lm    = c->longitudo_max;
-    int V     = c->vocab_magnitudo;
+    int lm     = c->longitudo_max;
+    int V      = c->vocab_magnitudo;
 
     /* 1. vestigia */
     memcpy(s->x, p->vestigia + (size_t)signum * d, (size_t)d * sizeof(float));
 
-    if (ex) memcpy(ex->memo_x, s->x, (size_t)d * sizeof(float));
+    if (ex)
+        memcpy(ex->memo_x, s->x, (size_t)d * sizeof(float));
 
     /* 2. strata */
     for (int l = 0; l < L; l++) {
@@ -448,8 +518,11 @@ static float *cursus_interna(nm_t *nm, nm_exercitatio_t *ex,
 
         /* a. rmsnorm attention */
         rmsnorma(s->xb, s->x, W_rms_att, d);
-        if (ex) memcpy(ex->memo_xb_att + (size_t)l * d, s->xb,
-                       (size_t)d * sizeof(float));
+        if (ex)
+            memcpy(
+                ex->memo_xb_att + (size_t)l * d, s->xb,
+                (size_t)d * sizeof(float)
+            );
 
         /* b. Q K V */
         matvec(s->q, W_wq, s->xb, d, d);
@@ -463,49 +536,73 @@ static float *cursus_interna(nm_t *nm, nm_exercitatio_t *ex,
             rope_rotatio(s->k + h * hd, positio, hd);
 
         if (ex) {
-            memcpy(ex->memo_q + (size_t)l * d, s->q,
-                   (size_t)d * sizeof(float));
-            memcpy(ex->memo_k + (size_t)l * kv_dim, s->k,
-                   (size_t)kv_dim * sizeof(float));
+            memcpy(
+                ex->memo_q + (size_t)l * d, s->q,
+                (size_t)d * sizeof(float)
+            );
+            memcpy(
+                ex->memo_k + (size_t)l * kv_dim, s->k,
+                (size_t)kv_dim * sizeof(float)
+            );
         }
 
         /* d. cache KV */
         size_t cache_off = ((size_t)l * lm + positio) * kv_dim;
-        memcpy(s->cache_clavis + cache_off, s->k,
-               (size_t)kv_dim * sizeof(float));
-        memcpy(s->cache_valor  + cache_off, s->v,
-               (size_t)kv_dim * sizeof(float));
+        memcpy(
+            s->cache_clavis + cache_off, s->k,
+            (size_t)kv_dim * sizeof(float)
+        );
+        memcpy(
+            s->cache_valor  + cache_off, s->v,
+            (size_t)kv_dim * sizeof(float)
+        );
 
         /* e. attentio multi-capitis */
-        pfr_attentio_f(s->xb, s->q,
-                       s->cache_clavis + (size_t)l * lm * kv_dim,
-                       s->cache_valor  + (size_t)l * lm * kv_dim,
-                       s->att, d, H, Hkv, positio, lm);
+        pfr_attentio_f(
+            s->xb, s->q,
+            s->cache_clavis + (size_t)l * lm * kv_dim,
+            s->cache_valor  + (size_t)l * lm * kv_dim,
+            s->att, d, H, Hkv, positio, lm
+        );
 
-        if (ex) memcpy(ex->memo_att + (size_t)l * H * lm, s->att,
-                       (size_t)H * lm * sizeof(float));
+        if (ex)
+            memcpy(
+                ex->memo_att + (size_t)l * H * lm, s->att,
+                (size_t)H * lm * sizeof(float)
+            );
 
         /* f. projection output + residuum */
         matvec(s->xb2, W_wo, s->xb, d, d);
-        for (int i = 0; i < d; i++) s->x[i] += s->xb2[i];
+        for (int i = 0; i < d; i++)
+            s->x[i] += s->xb2[i];
 
-        if (ex) memcpy(ex->memo_x + (size_t)(l + 1) * d, s->x,
-                       (size_t)d * sizeof(float));
+        if (ex)
+            memcpy(
+                ex->memo_x + (size_t)(l + 1) * d, s->x,
+                (size_t)d * sizeof(float)
+            );
 
         /* g. rmsnorm FFN */
         rmsnorma(s->xb, s->x, W_rms_ffn, d);
-        if (ex) memcpy(ex->memo_xb_ffn + (size_t)l * d, s->xb,
-                       (size_t)d * sizeof(float));
+        if (ex)
+            memcpy(
+                ex->memo_xb_ffn + (size_t)l * d, s->xb,
+                (size_t)d * sizeof(float)
+            );
 
         /* h. FFN w1, w3 */
         matvec(s->hb,  W_w1, s->xb, df, d);
         matvec(s->hb2, W_w3, s->xb, df, d);
 
         if (ex) {
-            memcpy(ex->memo_hb  + (size_t)l * df, s->hb,
-                   (size_t)df * sizeof(float));
-            memcpy(ex->memo_hb2 + (size_t)l * df, s->hb2,
-                   (size_t)df * sizeof(float));
+            memcpy(
+                ex->memo_hb  + (size_t)l * df, s->hb,
+                (size_t)df * sizeof(float)
+            );
+            memcpy(
+                ex->memo_hb2 + (size_t)l * df, s->hb2,
+                (size_t)df * sizeof(float)
+            );
         }
 
         /* i. SwiGLU */
@@ -513,12 +610,14 @@ static float *cursus_interna(nm_t *nm, nm_exercitatio_t *ex,
 
         /* j. FFN w2 + residuum */
         matvec(s->xb, W_w2, s->hb, d, df);
-        for (int i = 0; i < d; i++) s->x[i] += s->xb[i];
+        for (int i = 0; i < d; i++)
+            s->x[i] += s->xb[i];
     }
 
     /* 3. rmsnorm finis */
     rmsnorma(s->x, s->x, p->rms_finis, d);
-    if (ex) memcpy(ex->memo_xfin, s->x, (size_t)d * sizeof(float));
+    if (ex)
+        memcpy(ex->memo_xfin, s->x, (size_t)d * sizeof(float));
 
     /* 4. logitae */
     matvec(s->logitae, p->wvoc, s->x, V, d);

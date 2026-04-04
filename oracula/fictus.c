@@ -19,31 +19,40 @@
 __attribute__((weak)) genus_ops_t genera_ops[GENERA_NUMERUS];
 
 /* lege vicinitatem ex ISON crudo array in graticulam */
-static void lege_vicinitatem(const char *vic_ison,
-                             fictio_vicinitas_t *vic)
-{
+static void lege_vicinitatem(
+    const char *vic_ison,
+    fictio_vicinitas_t *vic
+) {
     memset(vic, '.', sizeof(vic->graticula));
-    vic->latus = 0;
+    vic->latus  = 0;
     vic->series = 0;
-    vic->cx = 0;
-    vic->cy = 0;
+    vic->cx     = 0;
+    vic->cy     = 0;
 
-    if (!vic_ison) return;
+    if (!vic_ison)
+        return;
 
     const char *p = vic_ison;
-    int r = 0, col = 0;
+    int r         = 0, col = 0;
     while (*p) {
         if (*p == '[') {
-            if (p > vic_ison && *(p - 1) == ',') { r++; col = 0; }
+            if (p > vic_ison && *(p - 1) == ',') {
+                r++;
+                col = 0;
+            }
         } else if (*p == '"') {
             p++;
             if (*p && *p != '"') {
                 if (r < FICTIO_LATUS_MAX && col < FICTIO_LATUS_MAX) {
                     vic->graticula[r][col] = *p;
-                    if (*p == '@') { vic->cx = col; vic->cy = r; }
+                    if (*p == '@') {
+                        vic->cx = col;
+                        vic->cy = r;
+                    }
                 }
                 col++;
-                if (col > vic->latus) vic->latus = col;
+                if (col > vic->latus)
+                    vic->latus = col;
             }
             /* transili ad " clausum */
             while (*p && *p != '"') p++;
@@ -65,13 +74,17 @@ static genus_t quaere_genus_ex_signo(char signum)
 
 /* --- provisor interfacies --- */
 
-static int para(const char *nomen, const char *conatus,
-                const char *clavis_api,
-                const char *instructiones, const char *rogatum,
-                char **corpus, struct crispus_slist **capita)
-{
-    (void)nomen; (void)conatus; (void)clavis_api;
-    (void)instructiones; (void)capita;
+static int para(
+    const char *nomen, const char *conatus,
+    const char *clavis_api,
+    const char *instructiones, const char *rogatum,
+    char **corpus, struct crispus_slist **capita
+) {
+    (void)nomen;
+    (void)conatus;
+    (void)clavis_api;
+    (void)instructiones;
+    (void)capita;
 
     *corpus = strdup(rogatum);
     *capita = NULL;
@@ -102,8 +115,12 @@ static char *extrahe(const char *ison)
     int nc = ison_claves(ison, claves, 256);
 
     /* si non ISON ludi, redde sententiam */
-    if (nc <= 0 || !ison_da_crudum(ison, claves[0][0] ?
-                    (char[]){claves[0][0], '\0'} : ".")) {
+    if (
+        nc <= 0 || !ison_da_crudum(
+            ison, claves[0][0] ?
+            (char[]){claves[0][0], '\0'} : "."
+        )
+    ) {
         /* nc <= 0: non ISON objectum, vel nc > 0 sed sine vicinitate */
         return strdup(sententiae[rand() % SENTENTIAE_NUM]);
     }
@@ -119,10 +136,11 @@ static char *extrahe(const char *ison)
     }
 
     ison_scriptor_t *js = ison_scriptor_crea();
-    if (!js) return strdup("{}");
+    if (!js)
+        return strdup("{}");
 
     for (int i = 0; i < nc; i++) {
-        char signum = claves[i][0];
+        char signum   = claves[i][0];
         genus_t genus = quaere_genus_ex_signo(signum);
 
         char via[128];
@@ -135,8 +153,10 @@ static char *extrahe(const char *ison)
 
             char actio[128];
             actio[0] = '\0';
-            genera_ops[genus].fictio(claves[i], &vic,
-                                     actio, sizeof(actio));
+            genera_ops[genus].fictio(
+                claves[i], &vic,
+                actio, sizeof(actio)
+            );
             ison_scriptor_adde(js, claves[i], actio);
         } else {
             ison_scriptor_adde(js, claves[i], "quiesce");
@@ -148,11 +168,15 @@ static char *extrahe(const char *ison)
     return ison_scriptor_fini(js);
 }
 
-static void signa(const char *ison, long *accepta, long *recondita,
-                   long *emissa, long *cogitata)
-{
+static void signa(
+    const char *ison, long *accepta, long *recondita,
+    long *emissa, long *cogitata
+) {
     (void)ison;
-    *accepta = 0; *recondita = 0; *emissa = 0; *cogitata = 0;
+    *accepta   = 0;
+    *recondita = 0;
+    *emissa    = 0;
+    *cogitata  = 0;
 }
 
 const provisor_t provisor_fictus = {

@@ -8,5 +8,7 @@
 
 void fixum_praepara(cella_t *c, const ison_par_t *pp, int n)
 {
-    (void)c; (void)pp; (void)n;
+    (void)c;
+    (void)pp;
+    (void)n;
 }

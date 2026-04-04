@@ -27,12 +27,16 @@
 static char *lege_plicam(const char *via)
 {
     FILE *f = fopen(via, "rb");
-    if (!f) return NULL;
+    if (!f)
+        return NULL;
     fseek(f, 0, SEEK_END);
     long mag = ftell(f);
     fseek(f, 0, SEEK_SET);
     char *buf = malloc((size_t)mag + 1);
-    if (!buf) { fclose(f); return NULL; }
+    if (!buf) {
+        fclose(f);
+        return NULL;
+    }
     fread(buf, 1, (size_t)mag, f);
     buf[mag] = '\0';
     fclose(f);
@@ -53,17 +57,21 @@ static char *lege_corpus(void)
 
     /* summa magnitudine */
     size_t mag_tot = 0;
-    char **partes = malloc((size_t)n_plicae * sizeof(char *));
-    if (!partes) return NULL;
+    char **partes  = malloc((size_t)n_plicae * sizeof(char *));
+    if (!partes)
+        return NULL;
     for (int i = 0; i < n_plicae; i++) {
         partes[i] = lege_plicam(plicae[i]);
-        if (partes[i]) mag_tot += strlen(partes[i]) + 1;
-        else fprintf(stderr, "admonitio: non potui legere '%s'\n", plicae[i]);
+        if (partes[i])
+            mag_tot += strlen(partes[i]) + 1;
+        else
+            fprintf(stderr, "admonitio: non potui legere '%s'\n", plicae[i]);
     }
 
     char *corpus = malloc(mag_tot + 1);
     if (!corpus) {
-        for (int i = 0; i < n_plicae; i++) free(partes[i]);
+        for (int i = 0; i < n_plicae; i++)
+            free(partes[i]);
         free(partes);
         return NULL;
     }
@@ -93,22 +101,24 @@ static char *lege_corpus(void)
 #define DESICATIO     1e-2f
 #define NUNTIA_PASSUS  10
 
-static void exercita(nm_t *nm, nm_exercitatio_t *ex,
-                     const int *signa_corp, int n_corp,
-                     int n_passus)
-{
+static void exercita(
+    nm_t *nm, nm_exercitatio_t *ex,
+    const int *signa_corp, int n_corp,
+    int n_passus
+) {
     int lm = nm->config.longitudo_max;
     int seq_lon = LONGITUDO_SEQ < lm ? LONGITUDO_SEQ : lm - 1;
     unsigned int semen = 42u;
     int max_inc = n_corp - seq_lon - 2;
-    if (max_inc <= 0) max_inc = 1;
+    if (max_inc <= 0)
+        max_inc = 1;
 
     for (int passus = 0; passus < n_passus; passus++) {
         nm_gradientes_pone_nihil(ex, &nm->config);
         float damnum_tot = 0.0f;
 
         for (int mini = 0; mini < N_MINI; mini++) {
-            semen = semen * 1664525u + 1013904223u;
+            semen   = semen * 1664525u + 1013904223u;
             int inc = (int)(semen % (unsigned int)max_inc);
 
             nm_status_restitue(nm);
@@ -125,9 +135,11 @@ static void exercita(nm_t *nm, nm_exercitatio_t *ex,
 
         if ((passus + 1) % NUNTIA_PASSUS == 0) {
             float damnum_med = damnum_tot / (float)(seq_lon * N_MINI);
-            printf("  passus %4d/%d  damnum=%.4f  perplexitas=%.2f\n",
-                   passus + 1, n_passus,
-                   damnum_med, expf(damnum_med));
+            printf(
+                "  passus %4d/%d  damnum=%.4f  perplexitas=%.2f\n",
+                passus + 1, n_passus,
+                damnum_med, expf(damnum_med)
+            );
             fflush(stdout);
         }
     }
@@ -137,15 +149,17 @@ static void exercita(nm_t *nm, nm_exercitatio_t *ex,
  * generatio textus
  * ================================================================ */
 
-static void genera_et_imprime(nm_t *nm, nm_lexator_t *lex,
-                               const char *promptus, int n_genera)
-{
+static void genera_et_imprime(
+    nm_t *nm, nm_lexator_t *lex,
+    const char *promptus, int n_genera
+) {
     nm_config_t *c = &nm->config;
     int V = c->vocab_magnitudo;
 
-    int n_buf = (int)strlen(promptus) + 4;
+    int n_buf  = (int)strlen(promptus) + 4;
     int *signa = malloc((size_t)n_buf * sizeof(int));
-    if (!signa) return;
+    if (!signa)
+        return;
     int n_sig = 0;
     nm_lexator_disseca(lex, promptus, 1, 0, signa, &n_sig);
 
@@ -163,24 +177,36 @@ static void genera_et_imprime(nm_t *nm, nm_lexator_t *lex,
     for (int i = 0; i < n_genera && pos < c->longitudo_max && logitae; i++) {
         /* sampling cum temperatura 0.9 */
         float *prob = malloc((size_t)V * sizeof(float));
-        if (!prob) break;
+        if (!prob)
+            break;
         memcpy(prob, logitae, (size_t)V * sizeof(float));
-        for (int j = 0; j < V; j++) prob[j] /= 0.9f;
+        for (int j = 0; j < V; j++)
+            prob[j] /= 0.9f;
         float mx = prob[0];
-        for (int j = 1; j < V; j++) if (prob[j] > mx) mx = prob[j];
+        for (int j = 1; j < V; j++)
+            if (prob[j] > mx)
+                mx = prob[j];
         float s = 0.0f;
-        for (int j = 0; j < V; j++) { prob[j] = expf(prob[j] - mx); s += prob[j]; }
-        for (int j = 0; j < V; j++) prob[j] /= s;
-        semen = semen * 1664525u + 1013904223u;
-        float r = ((float)(semen & 0x7fffffff)) / (float)0x7fffffff;
+        for (int j = 0; j < V; j++) {
+            prob[j] = expf(prob[j] - mx);
+            s += prob[j];
+        }
+        for (int j = 0; j < V; j++)
+            prob[j] /= s;
+        semen     = semen * 1664525u + 1013904223u;
+        float r   = ((float)(semen & 0x7fffffff)) / (float)0x7fffffff;
         float cdf = 0.0f;
-        int prox = V - 1;
+        int prox  = V - 1;
         for (int j = 0; j < V; j++) {
             cdf += prob[j];
-            if (r < cdf) { prox = j; break; }
+            if (r < cdf) {
+                prox = j;
+                break;
+            }
         }
         free(prob);
-        if (prox == 2) break;
+        if (prox == 2)
+            break;
         printf("%s", nm_lexator_redde(lex, prox));
         fflush(stdout);
         logitae = nm_cursus(nm, prox, pos++);
@@ -220,9 +246,13 @@ int main(void)
     printf("   vocab_magnitudo: %d\n", lex->vocab_magnitudo);
 
     /* tokeniza corpus */
-    int corp_lon = (int)strlen(corpus);
+    int corp_lon    = (int)strlen(corpus);
     int *signa_corp = malloc((size_t)(corp_lon + 4) * sizeof(int));
-    if (!signa_corp) { free(corpus); nm_lexator_destrue(lex); return 1; }
+    if (!signa_corp) {
+        free(corpus);
+        nm_lexator_destrue(lex);
+        return 1;
+    }
     int n_signa_corp = 0;
     nm_lexator_disseca(lex, corpus, 0, 0, signa_corp, &n_signa_corp);
     printf("   signa in corpore: %d\n\n", n_signa_corp);
@@ -235,8 +265,10 @@ int main(void)
         printf("   lexator servatus: nativus_dieta_1526.lex\n\n");
 
     /* --- 3. initia exemplar --- */
-    printf("3. initio exemplar (dim=64, strata=4, capita=4, vocab=%d)...\n",
-           lex->vocab_magnitudo);
+    printf(
+        "3. initio exemplar (dim=64, strata=4, capita=4, vocab=%d)...\n",
+        lex->vocab_magnitudo
+    );
     nm_config_t config = {
         .dimensio      = 64,
         .dimensio_occ  = 172,
@@ -254,21 +286,23 @@ int main(void)
         return 1;
     }
     size_t n_param = nm_magnitudo_ponderum(&config, 1);
-    printf("   parametri: %zu floats = %.1f KB\n\n",
-           n_param, n_param * sizeof(float) / 1024.0);
+    printf(
+        "   parametri: %zu floats = %.1f KB\n\n",
+        n_param, n_param * sizeof(float) / 1024.0
+    );
 
     /* GPU: mitte pondera et activationes in GPU (si adest et prodest) */
-    int usar_gpu_nm = 0;
     if (gpu == 0 && config.dimensio >= 256) {
         if (nm_gpu_initia(&nm) == 0) {
-            usar_gpu_nm = 1;
             printf("   GPU buffers allocati\n\n");
         } else {
             printf("   GPU buffers defecerunt — CPU adhibetur\n\n");
         }
     } else if (gpu == 0) {
-        printf("   dim=%d < 256: GPU non prodest, CPU adhibetur\n\n",
-               config.dimensio);
+        printf(
+            "   dim=%d < 256: GPU non prodest, CPU adhibetur\n\n",
+            config.dimensio
+        );
     }
 
     /* --- 4. exercita --- */
@@ -304,10 +338,13 @@ int main(void)
         pfr_computo_fini();
         return 1;
     }
-    printf("   exemplar lectum: dim=%d strata=%d vocab=%d\n",
-           nm2.config.dimensio, nm2.config.strata,
-           nm2.config.vocab_magnitudo);
-    if (gpu == 0 && nm2.config.dimensio >= 256) nm_gpu_initia(&nm2);
+    printf(
+        "   exemplar lectum: dim=%d strata=%d vocab=%d\n",
+        nm2.config.dimensio, nm2.config.strata,
+        nm2.config.vocab_magnitudo
+    );
+    if (gpu == 0 && nm2.config.dimensio >= 256)
+        nm_gpu_initia(&nm2);
     printf("\n");
 
     /* --- 7. inferentiae --- */
@@ -332,7 +369,8 @@ int main(void)
             nm_lexator_destrue(lex2);
         } else {
             printf("   lexator novus legi non potuit\n");
-            if (lex2) nm_lexator_destrue(lex2);
+            if (lex2)
+                nm_lexator_destrue(lex2);
         }
     }
     printf("\n");

@@ -91,7 +91,7 @@ static actio_t imperata_da(const char *nomen)
 {
     for (int i = 0; i < imperata_num; i++) {
         if (strcmp(imperata_nomina[i], nomen) == 0) {
-            actio_t a = imperata[i];
+            actio_t a   = imperata[i];
             imperata[i] = ACTIO_NIHIL;
             return a;
         }
@@ -101,7 +101,8 @@ static actio_t imperata_da(const char *nomen)
 
 static void imperata_adde(const char *nomen)
 {
-    if (imperata_num >= RETIS_CLIENTI_MAX) return;
+    if (imperata_num >= RETIS_CLIENTI_MAX)
+        return;
     snprintf(imperata_nomina[imperata_num], 8, "%s", nomen);
     imperata[imperata_num] = ACTIO_NIHIL;
     imperata_num++;
@@ -126,7 +127,7 @@ static void imperata_remove(const char *nomen)
 static actio_t retis_cogito(const struct tabula *tab, int x, int y)
 {
     const cella_t *c = tabula_da_const(tab, x, y);
-    phylum_t ph = genera_ops[c->genus].phylum;
+    phylum_t ph      = genera_ops[c->genus].phylum;
     if (ph == DEI)
         return imperata_da(c->p.deus.nomen);
     return ACTIO_NIHIL;
@@ -137,13 +138,14 @@ static actio_t retis_cogito(const struct tabula *tab, int x, int y)
 static int quaere_vacuum(const tabula_t *tab, int *rx, int *ry)
 {
     int latus = tab->latus;
-    int cx = latus / 2, cy = latus / 2;
+    int cx    = latus / 2, cy = latus / 2;
 
     /* spirale a centro */
     for (int r = 0; r < latus; r++) {
         for (int dy = -r; dy <= r; dy++) {
             for (int dx = -r; dx <= r; dx++) {
-                if (abs(dx) != r && abs(dy) != r) continue;
+                if (abs(dx) != r && abs(dy) != r)
+                    continue;
                 int x = (cx + dx + latus) % latus;
                 int y = (cy + dy + latus) % latus;
                 if (tabula_da_const(tab, x, y)->genus == VACUUM) {
@@ -169,14 +171,16 @@ static void genera_nomen(genus_t genus, char *nomen, size_t mag)
 
 /* --- tracta handshake SALVE clientis --- */
 
-static int tracta_salve(cliens_t *cl, const char *ison, size_t mag,
-                        tabula_t *tab)
-{
+static int tracta_salve(
+    cliens_t *cl, const char *ison, size_t mag,
+    tabula_t *tab
+) {
     (void)mag;
 
     /* extrahe clavis publica clientis */
     char *hex = ison_da_chordam(ison, "clavis");
-    if (!hex) return -1;
+    if (!hex)
+        return -1;
 
     if (retis_hex_ad_punctum(hex, &cl->E_c) < 0) {
         free(hex);
@@ -186,7 +190,8 @@ static int tracta_salve(cliens_t *cl, const char *ison, size_t mag,
 
     /* extrahe genus */
     char *genus_str = ison_da_chordam(ison, "genus");
-    if (!genus_str) return -1;
+    if (!genus_str)
+        return -1;
     if (strcmp(genus_str, "ZODUS") == 0)
         cl->genus = ZODUS;
     else if (strcmp(genus_str, "OCULUS") == 0)
@@ -216,8 +221,10 @@ static int tracta_salve(cliens_t *cl, const char *ison, size_t mag,
     ec_multiplica(&stat_communis, &servitor_privata, &cl->E_c);
 
     sessio_t ses_c;
-    retis_deriva_claves(&eph_communis, &stat_communis,
-                        &cl->E_c, &E_s, &ses_c, &cl->sessio);
+    retis_deriva_claves(
+        &eph_communis, &stat_communis,
+        &cl->E_c, &E_s, &ses_c, &cl->sessio
+    );
 
     /* pone deum in tabula */
     int dx, dy;
@@ -240,15 +247,19 @@ static int tracta_salve(cliens_t *cl, const char *ison, size_t mag,
 
     /* mitte ACCEPTUM (occultum) */
     char acc[256];
-    snprintf(acc, sizeof(acc),
-             "{\"typus\":\"acceptum\",\"nomen\":\"%s\",\"x\":%d,\"y\":%d,\"latus\":%d}",
-             cl->nomen, dx, dy, tab->latus);
+    snprintf(
+        acc, sizeof(acc),
+        "{\"typus\":\"acceptum\",\"nomen\":\"%s\",\"x\":%d,\"y\":%d,\"latus\":%d}",
+        cl->nomen, dx, dy, tab->latus
+    );
     if (retis_mitte(cl->fd, &cl->sessio, acc, strlen(acc)) < 0)
         return -1;
 
     cl->activus = 1;
-    fprintf(stderr, "[daemonium] %s (%s) conectus ad (%d,%d)\n",
-            cl->nomen, cl->genus == ZODUS ? "ZODUS" : "OCULUS", dx, dy);
+    fprintf(
+        stderr, "[daemonium] %s (%s) conectus ad (%d,%d)\n",
+        cl->nomen, cl->genus == ZODUS ? "ZODUS" : "OCULUS", dx, dy
+    );
 
     return 0;
 }
@@ -260,10 +271,11 @@ static void tracta_nuntium(cliens_t *cl, const char *ison, size_t mag)
     (void)mag;
 
     char *typus = ison_da_chordam(ison, "typus");
-    if (!typus) return;
+    if (!typus)
+        return;
 
     if (strcmp(typus, "actio") == 0) {
-        actio_t actio = ACTIO_NIHIL;
+        actio_t actio  = ACTIO_NIHIL;
         actio.modus    = (modus_t)ison_da_numerum(ison, "modus");
         actio.directio = (directio_t)ison_da_numerum(ison, "directio");
 
@@ -298,8 +310,10 @@ static void remove_clientem(cliens_t *cl, tabula_t *tab)
         for (int y = 0; y < latus; y++) {
             for (int x = 0; x < latus; x++) {
                 cella_t *c = tabula_da(tab, x, y);
-                if (genera_ops[c->genus].phylum == DEI &&
-                    strcmp(c->p.deus.nomen, cl->nomen) == 0) {
+                if (
+                    genera_ops[c->genus].phylum == DEI &&
+                    strcmp(c->p.deus.nomen, cl->nomen) == 0
+                ) {
                     memset(c, 0, sizeof(*c));
                     c->genus = VACUUM;
                 }
@@ -324,17 +338,20 @@ static void renova_positiones(tabula_t *tab)
     int latus = tab->latus;
     for (int i = 0; i < clienti_num; i++) {
         cliens_t *cl = &clienti[i];
-        if (cl->activus != 1) continue;
+        if (cl->activus != 1)
+            continue;
 
         int inventum = 0;
         for (int y = 0; y < latus && !inventum; y++) {
             for (int x = 0; x < latus && !inventum; x++) {
                 const cella_t *c = tabula_da_const(tab, x, y);
-                if (genera_ops[c->genus].phylum == DEI &&
-                    strcmp(c->p.deus.nomen, cl->nomen) == 0) {
+                if (
+                    genera_ops[c->genus].phylum == DEI &&
+                    strcmp(c->p.deus.nomen, cl->nomen) == 0
+                ) {
                     cl->deus_x = x;
                     cl->deus_y = y;
-                    inventum = 1;
+                    inventum   = 1;
                 }
             }
         }
@@ -357,10 +374,12 @@ static void pinge_statum(const tabula_t *tab)
         for (int x = 0; x < latus; x++)
             census[tabula_da_const(tab, x, y)->genus]++;
 
-    fprintf(stderr, "\r[%lu] F:%d U:%d B:%d C:%d cli:%d  ",
-            tab->gradus_num,
-            census[FELES], census[URSUS], census[DALEKUS],
-            census[CORVUS], clienti_num);
+    fprintf(
+        stderr, "\r[%lu] F:%d U:%d B:%d C:%d cli:%d  ",
+        tab->gradus_num,
+        census[FELES], census[URSUS], census[DALEKUS],
+        census[CORVUS], clienti_num
+    );
 }
 
 /* --- main --- */
@@ -373,14 +392,22 @@ int main(int argc, char **argv)
     const char *via_clavis = "clavis_daemoni.ison";
     int argi = 1;
 
-    if (argi < argc) munda     = argv[argi++];
-    if (argi < argc) portus    = atoi(argv[argi++]);
-    if (argi < argc) tempus_ms = atoi(argv[argi++]);
-    if (tempus_ms < 10) tempus_ms = 10;
+    if (argi < argc)
+        munda     = argv[argi++];
+    if (argi < argc)
+        portus    = atoi(argv[argi++]);
+    if (argi < argc)
+        tempus_ms = atoi(argv[argi++]);
+    if (tempus_ms < 10)
+        tempus_ms = 10;
 
     /* lege clavem secretam */
-    if (retis_lege_clavem_secretam(via_clavis, &servitor_privata,
-                                   &servitor_publica) < 0) {
+    if (
+        retis_lege_clavem_secretam(
+            via_clavis, &servitor_privata,
+            &servitor_publica
+        ) < 0
+    ) {
         fprintf(stderr, "erratum: non possum legere %s\n", via_clavis);
         fprintf(stderr, "curre ./fac_certificatum primum\n");
         return 1;
@@ -409,7 +436,7 @@ int main(int argc, char **argv)
     corvus_initia();
 
     /* substitue cogito pro deis retialibus */
-    genera_ops[ZODUS].cogito = retis_cogito;
+    genera_ops[ZODUS].cogito  = retis_cogito;
     genera_ops[OCULUS].cogito = retis_cogito;
 
     /* initia oraculum */
@@ -434,9 +461,9 @@ int main(int argc, char **argv)
 
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
+    addr.sin_family      = AF_INET;
     addr.sin_addr.s_addr = INADDR_ANY;
-    addr.sin_port = htons((uint16_t)portus);
+    addr.sin_port        = htons((uint16_t)portus);
 
     if (bind(servitor_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
         MORIRE("bind defecit");
@@ -446,18 +473,20 @@ int main(int argc, char **argv)
     /* non-blocking */
     fcntl(servitor_fd, F_SETFL, O_NONBLOCK);
 
-    fprintf(stderr, "[daemonium] ausculto in portu %d, munda=%s, tempus=%dms\n",
-            portus, munda, tempus_ms);
+    fprintf(
+        stderr, "[daemonium] ausculto in portu %d, munda=%s, tempus=%dms\n",
+        portus, munda, tempus_ms
+    );
 
     /* ansa principalis */
     while (!finis_daemoni) {
 
         /* aedifica pollfd */
         struct pollfd fds[1 + RETIS_CLIENTI_MAX];
-        fds[0].fd = servitor_fd;
+        fds[0].fd     = servitor_fd;
         fds[0].events = POLLIN;
         for (int i = 0; i < clienti_num; i++) {
-            fds[1 + i].fd = clienti[i].fd;
+            fds[1 + i].fd     = clienti[i].fd;
             fds[1 + i].events = POLLIN;
         }
 
@@ -468,7 +497,7 @@ int main(int argc, char **argv)
         if (fds[0].revents & POLLIN) {
             struct sockaddr_in cl_addr;
             socklen_t cl_mag = sizeof(cl_addr);
-            int cl_fd = accept(servitor_fd, (struct sockaddr *)&cl_addr, &cl_mag);
+            int cl_fd        = accept(servitor_fd, (struct sockaddr *)&cl_addr, &cl_mag);
             if (cl_fd >= 0) {
                 if (clienti_num >= RETIS_CLIENTI_MAX) {
                     const char *rej = "{\"typus\":\"reiectum\",\"causa\":\"nimis multi\"}";
@@ -499,10 +528,16 @@ int main(int argc, char **argv)
 
             /* lege in alveum */
             size_t spatium = sizeof(cl->alveus.data) - cl->alveus.pos;
-            if (spatium == 0) { cl->activus = -1; continue; }
+            if (spatium == 0) {
+                cl->activus = -1;
+                continue;
+            }
 
             ssize_t r = read(cl->fd, cl->alveus.data + cl->alveus.pos, spatium);
-            if (r <= 0) { cl->activus = -1; continue; }
+            if (r <= 0) {
+                cl->activus = -1;
+                continue;
+            }
             cl->alveus.pos += (size_t)r;
 
             /* processa frames completos */
@@ -524,8 +559,12 @@ int main(int argc, char **argv)
                     /* decrypta et processa */
                     uint8_t *clarus;
                     size_t clar_mag;
-                    if (retis_revela(&cl->sessio, payload, payload_mag,
-                                     &clarus, &clar_mag) == 0) {
+                    if (
+                        retis_revela(
+                            &cl->sessio, payload, payload_mag,
+                            &clarus, &clar_mag
+                        ) == 0
+                    ) {
                         /* NUL-terminat */
                         char *ison = malloc(clar_mag + 1);
                         if (ison) {
@@ -574,8 +613,12 @@ int main(int argc, char **argv)
             size_t ison_mag = strlen(ison);
             for (int i = 0; i < clienti_num; i++) {
                 if (clienti[i].activus == 1) {
-                    if (retis_mitte(clienti[i].fd, &clienti[i].sessio,
-                                    ison, ison_mag) < 0) {
+                    if (
+                        retis_mitte(
+                            clienti[i].fd, &clienti[i].sessio,
+                            ison, ison_mag
+                        ) < 0
+                    ) {
                         clienti[i].activus = -1;
                     }
                 }

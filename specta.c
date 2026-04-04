@@ -61,12 +61,17 @@ int main(int argc, char **argv)
     while (gradus_max == 0 || gradus_recepti < gradus_max) {
         struct pollfd pfd = { .fd = fd, .events = POLLIN };
         int res = poll(&pfd, 1, 5000);
-        if (res < 0) break;
-        if (res == 0) continue;
+        if (res < 0)
+            break;
+        if (res == 0)
+            continue;
 
-        ssize_t r = read(fd, alv.data + alv.pos,
-                         sizeof(alv.data) - alv.pos);
-        if (r <= 0) break;
+        ssize_t r = read(
+            fd, alv.data + alv.pos,
+            sizeof(alv.data) - alv.pos
+        );
+        if (r <= 0)
+            break;
         alv.pos += (size_t)r;
 
         uint8_t *payload;
@@ -74,14 +79,19 @@ int main(int argc, char **argv)
         while (retis_lege_frame(&alv, &payload, &payload_mag) == 1) {
             uint8_t *clarus;
             size_t clar_mag;
-            if (retis_revela(&sessio, payload, payload_mag,
-                             &clarus, &clar_mag) < 0) {
+            if (
+                retis_revela(
+                    &sessio, payload, payload_mag,
+                    &clarus, &clar_mag
+                ) < 0
+            ) {
                 fprintf(stderr, "erratum decryptione\n");
                 goto finis;
             }
 
             char *ison = malloc(clar_mag + 1);
-            if (!ison) goto finis;
+            if (!ison)
+                goto finis;
             memcpy(ison, clarus, clar_mag);
             ison[clar_mag] = '\0';
 

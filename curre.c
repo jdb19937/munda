@@ -42,9 +42,11 @@ static void pinge(const tabula_t *tab)
         for (int x = 0; x < latus; x++)
             census[tabula_da_const(tab, x, y)->genus]++;
 
-    printf("F:%d U:%d B:%d C:%d r:%d f:%d\n\n",
-           census[FELES], census[URSUS], census[DALEKUS],
-           census[CORVUS], census[RAPUM], census[FUNGUS]);
+    printf(
+        "F:%d U:%d B:%d C:%d r:%d f:%d\n\n",
+        census[FELES], census[URSUS], census[DALEKUS],
+        census[CORVUS], census[RAPUM], census[FUNGUS]
+    );
 }
 
 int main(int argc, char **argv)
@@ -53,9 +55,12 @@ int main(int argc, char **argv)
     int gradus = GRADUS_PRAEFINITUM;
     int argi   = 1;
 
-    if (argi < argc) munda  = argv[argi++];
-    if (argi < argc) gradus = atoi(argv[argi++]);
-    if (gradus < 1)  gradus = 1;
+    if (argi < argc)
+        munda  = argv[argi++];
+    if (argi < argc)
+        gradus = atoi(argv[argi++]);
+    if (gradus < 1)
+        gradus = 1;
 
     /* initia genera */
     memset(genera_ops, 0, sizeof(genera_ops));
@@ -94,17 +99,20 @@ int main(int argc, char **argv)
             for (int r = 0; r < tab->latus && !habet_zodum; r++)
                 for (int dy = -r; dy <= r && !habet_zodum; dy++)
                     for (int dx = -r; dx <= r && !habet_zodum; dx++) {
-                        if (abs(dx) != r && abs(dy) != r) continue;
-                        int x = (zx + dx + tab->latus) % tab->latus;
-                        int y = (zy + dy + tab->latus) % tab->latus;
-                        if (tabula_da_const(tab, x, y)->genus == VACUUM) {
-                            tabula_pone(tab, x, y, ZODUS);
-                            snprintf(tabula_da(tab, x, y)->p.deus.nomen,
-                                     sizeof(tabula_da(tab, x, y)->p.deus.nomen),
-                                     "Zodus");
-                            habet_zodum = 1;
-                        }
-                    }
+                if (abs(dx) != r && abs(dy) != r)
+                    continue;
+                int x = (zx + dx + tab->latus) % tab->latus;
+                int y = (zy + dy + tab->latus) % tab->latus;
+                if (tabula_da_const(tab, x, y)->genus == VACUUM) {
+                    tabula_pone(tab, x, y, ZODUS);
+                    snprintf(
+                        tabula_da(tab, x, y)->p.deus.nomen,
+                        sizeof(tabula_da(tab, x, y)->p.deus.nomen),
+                        "Zodus"
+                    );
+                    habet_zodum = 1;
+                }
+            }
         }
     }
 

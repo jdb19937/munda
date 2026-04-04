@@ -27,8 +27,8 @@ static int initiatum = 0;      /* an modus crudus activus sit */
 
 /* --- vexilla signorum --- */
 
-volatile sig_atomic_t repinge_opus   = 0;
-volatile sig_atomic_t finis_opus     = 0;
+volatile sig_atomic_t repinge_opus     = 0;
+volatile sig_atomic_t finis_opus       = 0;
 volatile sig_atomic_t continuatio_opus = 0;
 
 /* --- tractores signorum --- */
@@ -79,19 +79,19 @@ void signa_installa(void)
     sigemptyset(&sa.sa_mask);
 
     sa.sa_handler = sigint_tracta;
-    sa.sa_flags = 0;
+    sa.sa_flags   = 0;
     sigaction(SIGINT, &sa, NULL);
 
     sa.sa_handler = sigtstp_tracta;
-    sa.sa_flags = 0;
+    sa.sa_flags   = 0;
     sigaction(SIGTSTP, &sa, NULL);
 
     sa.sa_handler = sigcont_tracta;
-    sa.sa_flags = SA_RESTART;
+    sa.sa_flags   = SA_RESTART;
     sigaction(SIGCONT, &sa, NULL);
 
     sa.sa_handler = sigwinch_tracta;
-    sa.sa_flags = 0;
+    sa.sa_flags   = 0;
     sigaction(SIGWINCH, &sa, NULL);
 }
 
@@ -146,7 +146,7 @@ void terminalis_pinge(const tabula_t *tab)
      * ut vacillatio minuatur.
      */
     size_t mag = 8192 + (size_t)(latus + 4) * ((size_t)latus * 12 + 32)
-                 + (size_t)(latus * latus) * 128;
+    + (size_t)(latus * latus) * 128;
     char *buf = malloc(mag);
     if (!buf)
         return;
@@ -167,7 +167,7 @@ void terminalis_pinge(const tabula_t *tab)
         p += sprintf(p, "│");
         for (int x = 0; x < latus; x++) {
             const cella_t *c = tabula_da_const(tab, x, y);
-            const char *pic = genera_ops[c->genus].pictura;
+            const char *pic  = genera_ops[c->genus].pictura;
             if (pic)
                 p += sprintf(p, "%s", pic);
             else
@@ -188,118 +188,178 @@ void terminalis_pinge(const tabula_t *tab)
     oraculum_numeri_modelli_t modelli[8];
     int nmod = oraculum_numeri_per_sapientum(modelli, 8);
 
-    int col = latus * 2 + 4; /* columna post tabulam */
+    int col    = latus * 2 + 4; /* columna post tabulam */
     int versus = 1;
 
     /* computa latitudines maximas pro dextrorsum iustificatione */
     int lat1 = 1, lat2 = 1, lat3 = 1;
     for (int i = 0; i < nmod; i++) {
         int v;
-        v = snprintf(NULL, 0, "%d", modelli[i].volantes);  if (v > lat1) lat1 = v;
-        v = snprintf(NULL, 0, "%d", modelli[i].paratae);   if (v > lat1) lat1 = v;
-        v = snprintf(NULL, 0, "%ld", modelli[i].missae);    if (v > lat2) lat2 = v;
-        v = snprintf(NULL, 0, "%ld", modelli[i].successae); if (v > lat2) lat2 = v;
-        v = snprintf(NULL, 0, "%ld", modelli[i].errores);   if (v > lat2) lat2 = v;
-        v = snprintf(NULL, 0, "%ld", modelli[i].signa_accepta);   if (v > lat3) lat3 = v;
-        v = snprintf(NULL, 0, "%ld", modelli[i].signa_recondita); if (v > lat3) lat3 = v;
-        v = snprintf(NULL, 0, "%ld", modelli[i].signa_emissa);    if (v > lat3) lat3 = v;
-        v = snprintf(NULL, 0, "%ld", modelli[i].signa_cogitata);  if (v > lat3) lat3 = v;
+        v = snprintf(NULL, 0, "%d", modelli[i].volantes);
+        if (v > lat1)
+            lat1 = v;
+        v = snprintf(NULL, 0, "%d", modelli[i].paratae);
+        if (v > lat1)
+            lat1 = v;
+        v = snprintf(NULL, 0, "%ld", modelli[i].missae);
+        if (v > lat2)
+            lat2 = v;
+        v = snprintf(NULL, 0, "%ld", modelli[i].successae);
+        if (v > lat2)
+            lat2 = v;
+        v = snprintf(NULL, 0, "%ld", modelli[i].errores);
+        if (v > lat2)
+            lat2 = v;
+        v = snprintf(NULL, 0, "%ld", modelli[i].signa_accepta);
+        if (v > lat3)
+            lat3 = v;
+        v = snprintf(NULL, 0, "%ld", modelli[i].signa_recondita);
+        if (v > lat3)
+            lat3 = v;
+        v = snprintf(NULL, 0, "%ld", modelli[i].signa_emissa);
+        if (v > lat3)
+            lat3 = v;
+        v = snprintf(NULL, 0, "%ld", modelli[i].signa_cogitata);
+        if (v > lat3)
+            lat3 = v;
     }
     if (nmod > 1) {
         int v;
-        v = snprintf(NULL, 0, "%d", on.pendentes); if (v > lat1) lat1 = v;
-        v = snprintf(NULL, 0, "%d", on.paratae);   if (v > lat1) lat1 = v;
-        v = snprintf(NULL, 0, "%ld", on.summa_missae);    if (v > lat2) lat2 = v;
-        v = snprintf(NULL, 0, "%ld", on.summa_successae); if (v > lat2) lat2 = v;
-        v = snprintf(NULL, 0, "%ld", on.summa_errores);   if (v > lat2) lat2 = v;
-        v = snprintf(NULL, 0, "%ld", on.summa_signa_accepta);   if (v > lat3) lat3 = v;
-        v = snprintf(NULL, 0, "%ld", on.summa_signa_recondita); if (v > lat3) lat3 = v;
-        v = snprintf(NULL, 0, "%ld", on.summa_signa_emissa);    if (v > lat3) lat3 = v;
-        v = snprintf(NULL, 0, "%ld", on.summa_signa_cogitata);  if (v > lat3) lat3 = v;
+        v = snprintf(NULL, 0, "%d", on.pendentes);
+        if (v > lat1)
+            lat1 = v;
+        v = snprintf(NULL, 0, "%d", on.paratae);
+        if (v > lat1)
+            lat1 = v;
+        v = snprintf(NULL, 0, "%ld", on.summa_missae);
+        if (v > lat2)
+            lat2 = v;
+        v = snprintf(NULL, 0, "%ld", on.summa_successae);
+        if (v > lat2)
+            lat2 = v;
+        v = snprintf(NULL, 0, "%ld", on.summa_errores);
+        if (v > lat2)
+            lat2 = v;
+        v = snprintf(NULL, 0, "%ld", on.summa_signa_accepta);
+        if (v > lat3)
+            lat3 = v;
+        v = snprintf(NULL, 0, "%ld", on.summa_signa_recondita);
+        if (v > lat3)
+            lat3 = v;
+        v = snprintf(NULL, 0, "%ld", on.summa_signa_emissa);
+        if (v > lat3)
+            lat3 = v;
+        v = snprintf(NULL, 0, "%ld", on.summa_signa_cogitata);
+        if (v > lat3)
+            lat3 = v;
     }
 
     /* summa solum si plures modelli */
     if (nmod > 1) {
-        p += sprintf(p, "\033[%d;%dH" ANSI_BLD ANSI_DIM "── summa oracula ──"
-                     ANSI_RST "\033[K", versus++, col);
-        p += sprintf(p, "\033[%d;%dH"
-                     " " ANSI_CYN "volantes:" ANSI_RST "  %*d"
-                     "  " ANSI_GRN "missae:" ANSI_RST "    %*ld"
-                     "  " ANSI_MAG "accepta:" ANSI_RST "   %*ldt\033[K",
-                     versus++, col,
-                     lat1, on.pendentes,
-                     lat2, on.summa_missae,
-                     lat3, on.summa_signa_accepta);
-        p += sprintf(p, "\033[%d;%dH"
-                     " " ANSI_CYN "paratae:" ANSI_RST "   %*d"
-                     "  " ANSI_GRN "successae:" ANSI_RST " %*ld"
-                     "  " ANSI_MAG "recondita:" ANSI_RST " %*ldt\033[K",
-                     versus++, col,
-                     lat1, on.paratae,
-                     lat2, on.summa_successae,
-                     lat3, on.summa_signa_recondita);
-        p += sprintf(p, "\033[%d;%dH"
-                     "             "
-                     "  " ANSI_RED "errores:" ANSI_RST "   %*ld"
-                     "  " ANSI_MAG "emissa:" ANSI_RST  "    %*ldt\033[K",
-                     versus++, col,
-                     lat2, on.summa_errores,
-                     lat3, on.summa_signa_emissa);
-        p += sprintf(p, "\033[%d;%dH"
-                     "             "
-                     "             "
-                     "   " ANSI_MAG "cogitata:" ANSI_RST "  %*ldt\033[K",
-                     versus++, col,
-                     lat3, on.summa_signa_cogitata);
+        p += sprintf(
+            p, "\033[%d;%dH" ANSI_BLD ANSI_DIM "── summa oracula ──"
+            ANSI_RST "\033[K", versus++, col
+        );
+        p += sprintf(
+            p, "\033[%d;%dH"
+            " " ANSI_CYN "volantes:" ANSI_RST "  %*d"
+            "  " ANSI_GRN "missae:" ANSI_RST "    %*ld"
+            "  " ANSI_MAG "accepta:" ANSI_RST "   %*ldt\033[K",
+            versus++, col,
+            lat1, on.pendentes,
+            lat2, on.summa_missae,
+            lat3, on.summa_signa_accepta
+        );
+        p += sprintf(
+            p, "\033[%d;%dH"
+            " " ANSI_CYN "paratae:" ANSI_RST "   %*d"
+            "  " ANSI_GRN "successae:" ANSI_RST " %*ld"
+            "  " ANSI_MAG "recondita:" ANSI_RST " %*ldt\033[K",
+            versus++, col,
+            lat1, on.paratae,
+            lat2, on.summa_successae,
+            lat3, on.summa_signa_recondita
+        );
+        p += sprintf(
+            p, "\033[%d;%dH"
+            "             "
+            "  " ANSI_RED "errores:" ANSI_RST "   %*ld"
+            "  " ANSI_MAG "emissa:" ANSI_RST  "    %*ldt\033[K",
+            versus++, col,
+            lat2, on.summa_errores,
+            lat3, on.summa_signa_emissa
+        );
+        p += sprintf(
+            p, "\033[%d;%dH"
+            "             "
+            "             "
+            "   " ANSI_MAG "cogitata:" ANSI_RST "  %*ldt\033[K",
+            versus++, col,
+            lat3, on.summa_signa_cogitata
+        );
     }
 
     /* numeri per sapientum */
     for (int i = 0; i < nmod; i++) {
-        p += sprintf(p, "\033[%d;%dH" ANSI_BLD ANSI_YEL "── %s ──"
-                     ANSI_RST "\033[K", versus++, col, modelli[i].sapientum);
-        p += sprintf(p, "\033[%d;%dH"
-                     " " ANSI_CYN "volantes:" ANSI_RST "  %*d"
-                     "  " ANSI_GRN "missae:" ANSI_RST "    %*ld"
-                     "  " ANSI_MAG "accepta:" ANSI_RST "   %*ldt\033[K",
-                     versus++, col,
-                     lat1, modelli[i].volantes,
-                     lat2, modelli[i].missae,
-                     lat3, modelli[i].signa_accepta);
-        p += sprintf(p, "\033[%d;%dH"
-                     " " ANSI_CYN "paratae:" ANSI_RST "   %*d"
-                     "  " ANSI_GRN "successae:" ANSI_RST " %*ld"
-                     "  " ANSI_MAG "recondita:" ANSI_RST " %*ldt\033[K",
-                     versus++, col,
-                     lat1, modelli[i].paratae,
-                     lat2, modelli[i].successae,
-                     lat3, modelli[i].signa_recondita);
-        p += sprintf(p, "\033[%d;%dH"
-                     "             "
-                     "  " ANSI_RED "errores:" ANSI_RST "   %*ld"
-                     "  " ANSI_MAG "emissa:" ANSI_RST "    %*ldt\033[K",
-                     versus++, col,
-                     lat2, modelli[i].errores,
-                     lat3, modelli[i].signa_emissa);
-        p += sprintf(p, "\033[%d;%dH"
-                     "              "
-                     "              "
-                     " " ANSI_MAG "cogitata:" ANSI_RST "  %*ldt\033[K",
-                     versus++, col,
-                     lat3, modelli[i].signa_cogitata);
+        p += sprintf(
+            p, "\033[%d;%dH" ANSI_BLD ANSI_YEL "── %s ──"
+            ANSI_RST "\033[K", versus++, col, modelli[i].sapientum
+        );
+        p += sprintf(
+            p, "\033[%d;%dH"
+            " " ANSI_CYN "volantes:" ANSI_RST "  %*d"
+            "  " ANSI_GRN "missae:" ANSI_RST "    %*ld"
+            "  " ANSI_MAG "accepta:" ANSI_RST "   %*ldt\033[K",
+            versus++, col,
+            lat1, modelli[i].volantes,
+            lat2, modelli[i].missae,
+            lat3, modelli[i].signa_accepta
+        );
+        p += sprintf(
+            p, "\033[%d;%dH"
+            " " ANSI_CYN "paratae:" ANSI_RST "   %*d"
+            "  " ANSI_GRN "successae:" ANSI_RST " %*ld"
+            "  " ANSI_MAG "recondita:" ANSI_RST " %*ldt\033[K",
+            versus++, col,
+            lat1, modelli[i].paratae,
+            lat2, modelli[i].successae,
+            lat3, modelli[i].signa_recondita
+        );
+        p += sprintf(
+            p, "\033[%d;%dH"
+            "             "
+            "  " ANSI_RED "errores:" ANSI_RST "   %*ld"
+            "  " ANSI_MAG "emissa:" ANSI_RST "    %*ldt\033[K",
+            versus++, col,
+            lat2, modelli[i].errores,
+            lat3, modelli[i].signa_emissa
+        );
+        p += sprintf(
+            p, "\033[%d;%dH"
+            "              "
+            "              "
+            " " ANSI_MAG "cogitata:" ANSI_RST "  %*ldt\033[K",
+            versus++, col,
+            lat3, modelli[i].signa_cogitata
+        );
     }
     /* purga reliquas lineas priorum picturarum */
     for (int r = 0; r < 8; r++)
         p += sprintf(p, "\033[%d;%dH\033[K", versus++, col);
 
     /* linea status infra tabulam */
-    p += sprintf(p, "\033[%d;1H gradus: %lu   latus: %d\033[K\n",
-                 latus + 3, tab->gradus_num, latus);
+    p += sprintf(
+        p, "\033[%d;1H gradus: %lu   latus: %d\033[K\n",
+        latus + 3, tab->gradus_num, latus
+    );
     p += sprintf(p, "\033[K");
 
     /* animi et mentes eorum — collige et ordina per nomen */
     int versus_animi = latus + 5;
-    p += sprintf(p, "\033[%d;1H" ANSI_BLD "── mentes animorum ──" ANSI_RST
-                 "\033[K", versus_animi++);
+    p += sprintf(
+        p, "\033[%d;1H" ANSI_BLD "── mentes animorum ──" ANSI_RST
+        "\033[K", versus_animi++
+    );
 
     /* collige omnes animos in indicem */
     typedef struct {
@@ -316,7 +376,7 @@ void terminalis_pinge(const tabula_t *tab)
     for (int y = 0; y < latus; y++) {
         for (int x = 0; x < latus; x++) {
             const cella_t *c = tabula_da_const(tab, x, y);
-            phylum_t ph = genera_ops[c->genus].phylum;
+            phylum_t ph      = genera_ops[c->genus].phylum;
             if (ph != ANIMA && ph != DEI)
                 continue;
             const char *nom, *men;
@@ -338,7 +398,8 @@ void terminalis_pinge(const tabula_t *tab)
             if (!nom[0])
                 continue;
             const char *pic = genera_ops[c->genus].pictura;
-            if (!pic) pic = "??";
+            if (!pic)
+                pic = "??";
             indices[num_animi++] = (visus_animi_t){
                 .pictura          = pic,
                 .nomen            = nom,
@@ -362,22 +423,26 @@ void terminalis_pinge(const tabula_t *tab)
     }
 
     /* exhibe */
-    static const char *dir_signa[] = {"·","↑","↓","←","→"};
+    static const char *dir_signa[] = {"·", "↑", "↓", "←", "→"};
     for (int i = 0; i < num_animi; i++) {
         int d = indices[i].ultima_directio;
         const char *ds = (d >= 0 && d <= 4) ? dir_signa[d] : "?";
         const char *ps = indices[i].ultima_permissa ? "":"✗";
         if (indices[i].mens[0]) {
-            p += sprintf(p, "\033[%d;1H %s " ANSI_CYN "%-4s" ANSI_RST
-                         " " ANSI_DIM "[%lu] {%s%s} — %s" ANSI_RST "\033[K",
-                         versus_animi++, indices[i].pictura,
-                         indices[i].nomen, indices[i].mens_gradus,
-                         ds, ps, indices[i].mens);
+            p += sprintf(
+                p, "\033[%d;1H %s " ANSI_CYN "%-4s" ANSI_RST
+                " " ANSI_DIM "[%lu] {%s%s} — %s" ANSI_RST "\033[K",
+                versus_animi++, indices[i].pictura,
+                indices[i].nomen, indices[i].mens_gradus,
+                ds, ps, indices[i].mens
+            );
         } else {
-            p += sprintf(p, "\033[%d;1H %s " ANSI_CYN "%-4s" ANSI_RST
-                         " " ANSI_DIM "{%s%s} —" ANSI_RST "\033[K",
-                         versus_animi++, indices[i].pictura,
-                         indices[i].nomen, ds, ps);
+            p += sprintf(
+                p, "\033[%d;1H %s " ANSI_CYN "%-4s" ANSI_RST
+                " " ANSI_DIM "{%s%s} —" ANSI_RST "\033[K",
+                versus_animi++, indices[i].pictura,
+                indices[i].nomen, ds, ps
+            );
         }
     }
     free(indices);

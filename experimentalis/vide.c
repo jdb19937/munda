@@ -35,11 +35,16 @@ int main(int argc, char **argv)
     int mag_cellulae  = MAG_PRAEFINITA;
     int argi          = 1;
 
-    if (argi < argc) munda        = argv[argi++];
-    if (argi < argc) tempus_ms    = atoi(argv[argi++]);
-    if (argi < argc) mag_cellulae = atoi(argv[argi++]);
-    if (tempus_ms < 10) tempus_ms = 10;
-    if (mag_cellulae < 4) mag_cellulae = 4;
+    if (argi < argc)
+        munda        = argv[argi++];
+    if (argi < argc)
+        tempus_ms    = atoi(argv[argi++]);
+    if (argi < argc)
+        mag_cellulae = atoi(argv[argi++]);
+    if (tempus_ms < 10)
+        tempus_ms = 10;
+    if (mag_cellulae < 4)
+        mag_cellulae = 4;
 
     /* initia genera cellularum */
     memset(genera_ops, 0, sizeof(genera_ops));
@@ -81,17 +86,20 @@ int main(int argc, char **argv)
             for (int r = 0; r < tab->latus && !habet_zodum; r++)
                 for (int dy = -r; dy <= r && !habet_zodum; dy++)
                     for (int dx = -r; dx <= r && !habet_zodum; dx++) {
-                        if (abs(dx) != r && abs(dy) != r) continue;
-                        int x = (zx + dx + tab->latus) % tab->latus;
-                        int y = (zy + dy + tab->latus) % tab->latus;
-                        if (tabula_da_const(tab, x, y)->genus == VACUUM) {
-                            tabula_pone(tab, x, y, ZODUS);
-                            snprintf(tabula_da(tab, x, y)->p.deus.nomen,
-                                     sizeof(tabula_da(tab, x, y)->p.deus.nomen),
-                                     "Zodus");
-                            habet_zodum = 1;
-                        }
-                    }
+                if (abs(dx) != r && abs(dy) != r)
+                    continue;
+                int x = (zx + dx + tab->latus) % tab->latus;
+                int y = (zy + dy + tab->latus) % tab->latus;
+                if (tabula_da_const(tab, x, y)->genus == VACUUM) {
+                    tabula_pone(tab, x, y, ZODUS);
+                    snprintf(
+                        tabula_da(tab, x, y)->p.deus.nomen,
+                        sizeof(tabula_da(tab, x, y)->p.deus.nomen),
+                        "Zodus"
+                    );
+                    habet_zodum = 1;
+                }
+            }
         }
     }
 
@@ -113,10 +121,14 @@ int main(int argc, char **argv)
             break;
         if (ch == 't')
             zodus_teleporta = 1;
-        if (ch == 'A') zodus_imperium = SEPTENTRIO;
-        if (ch == 'B') zodus_imperium = MERIDIES;
-        if (ch == 'C') zodus_imperium = ORIENS;
-        if (ch == 'D') zodus_imperium = OCCIDENS;
+        if (ch == 'A')
+            zodus_imperium = SEPTENTRIO;
+        if (ch == 'B')
+            zodus_imperium = MERIDIES;
+        if (ch == 'C')
+            zodus_imperium = ORIENS;
+        if (ch == 'D')
+            zodus_imperium = OCCIDENS;
 
         /* gradus simulationis cum tempore fixo */
         Uint32 nunc = SDL_GetTicks();

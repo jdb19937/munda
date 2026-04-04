@@ -20,13 +20,16 @@ static char *coniunge(int argc, char **argv, int ab)
     size_t lon = 0;
     for (int i = ab; i < argc; i++)
         lon += strlen(argv[i]) + 1;
-    if (lon == 0) return strdup("");
+    if (lon == 0)
+        return strdup("");
 
     char *buf = malloc(lon);
-    if (!buf) return NULL;
+    if (!buf)
+        return NULL;
     char *p = buf;
     for (int i = ab; i < argc; i++) {
-        if (i > ab) *p++ = ' ';
+        if (i > ab)
+            *p++ = ' ';
         size_t n = strlen(argv[i]);
         memcpy(p, argv[i], n);
         p += n;
@@ -54,7 +57,8 @@ int main(int argc, char **argv)
     }
 
     if (argi >= argc) {
-        fprintf(stderr,
+        fprintf(
+            stderr,
             "usus: %s [-m sapientum] [-s instructiones] rogatum ...\n"
             "\n"
             "  -m forma: [provisor/]sapientum[+effort]\n"
@@ -65,7 +69,8 @@ int main(int argc, char **argv)
             "  %s -m gpt-5.4 salve\n"
             "  %s -m openai/gpt-5.4+high -s 'responde Latine' quid est\n"
             "  %s -m anthropic/claude-sonnet-4-6 dic fabulam\n",
-            argv[0], argv[0], argv[0], argv[0]);
+            argv[0], argv[0], argv[0], argv[0]
+        );
         return 1;
     }
 
@@ -79,7 +84,7 @@ int main(int argc, char **argv)
     oraculum_initia();
 
     char *resp = NULL;
-    int rc = oraculum_roga(sapientum, instructiones, rogatum, &resp);
+    int rc     = oraculum_roga(sapientum, instructiones, rogatum, &resp);
 
     if (rc == 0 && resp)
         printf("%s\n", resp);

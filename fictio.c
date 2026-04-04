@@ -24,24 +24,25 @@ directio_t fictio_dir_fortuita(void)
 directio_t fictio_quaere_proximum(const fictio_vicinitas_t *vic, char signum)
 {
     int optima_dist = 9999;
-    int optima_dx = 0, optima_dy = 0;
+    int optima_dx   = 0, optima_dy = 0;
 
     for (int ry = 0; ry < vic->series; ry++) {
         for (int rx = 0; rx < vic->latus; rx++) {
             if (vic->graticula[ry][rx] == signum) {
-                int dx = rx - vic->cx;
-                int dy = ry - vic->cy;
+                int dx   = rx - vic->cx;
+                int dy   = ry - vic->cy;
                 int dist = abs(dx) + abs(dy);
                 if (dist > 0 && dist < optima_dist) {
                     optima_dist = dist;
-                    optima_dx = dx;
-                    optima_dy = dy;
+                    optima_dx   = dx;
+                    optima_dy   = dy;
                 }
             }
         }
     }
 
-    if (optima_dist == 9999) return DIR_NIHIL;
+    if (optima_dist == 9999)
+        return DIR_NIHIL;
 
     if (abs(optima_dy) >= abs(optima_dx))
         return (optima_dy < 0) ? SEPTENTRIO : MERIDIES;
@@ -49,9 +50,10 @@ directio_t fictio_quaere_proximum(const fictio_vicinitas_t *vic, char signum)
         return (optima_dx < 0) ? OCCIDENS : ORIENS;
 }
 
-int fictio_vicinum_est(const fictio_vicinitas_t *vic,
-                       char signum, directio_t dir)
-{
+int fictio_vicinum_est(
+    const fictio_vicinitas_t *vic,
+    char signum, directio_t dir
+) {
     int tx = vic->cx, ty = vic->cy;
 
     switch (dir) {

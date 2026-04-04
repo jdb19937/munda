@@ -213,21 +213,27 @@ void nm_gradientes_pone_nihil(nm_exercitatio_t *ex, const nm_config_t *c);
  * signum_target: signum expectatum (index in vocabulario).
  * Accumulat in ex->grad. Reddit damnum (cross-entropy loss).
  */
-float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
-                     int signum, int signum_target, int positio);
+float nm_retropulsio(
+    nm_t *nm, nm_exercitatio_t *ex,
+    int signum, int signum_target, int positio
+);
 
 /*
  * nm_gradientes_tonde — tondetur norma globaliter ad max_norma (gradient clipping).
  * reddit normam ante tonsionem.
  */
-float nm_gradientes_tonde(nm_exercitatio_t *ex, const nm_config_t *c,
-                          float max_norma);
+float nm_gradientes_tonde(
+    nm_exercitatio_t *ex, const nm_config_t *c,
+    float max_norma
+);
 
 /*
  * nm_passus_adami — passus AdamW: updateat pondera, resetat gradientes.
  */
-void nm_passus_adami(nm_t *nm, nm_exercitatio_t *ex,
-                     float gradus_discendi, float beta1, float beta2,
-                     float epsilon, float desicatio);
+void nm_passus_adami(
+    nm_t *nm, nm_exercitatio_t *ex,
+    float gradus_discendi, float beta1, float beta2,
+    float epsilon, float desicatio
+);
 
 #endif /* NATIVUS_H */

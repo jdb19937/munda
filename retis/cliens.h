@@ -16,7 +16,9 @@ int retis_conecte(const char *hospes, int portus);
  * saluta servitorem: ECDHE handshake cum certificato.
  * populat sessio. reddit 0 = success, -1 = erratum.
  */
-int retis_saluta(int fd, const char *genus_str, const char *via_cert,
-                 sessio_t *sessio);
+int retis_saluta(
+    int fd, const char *genus_str, const char *via_cert,
+    sessio_t *sessio
+);
 
 #endif /* CLIENS_H */

@@ -9,38 +9,52 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int para(const char *nomen, const char *conatus,
-                const char *clavis_api,
-                const char *instructiones, const char *rogatum,
-                char **corpus, struct crispus_slist **capita)
-{
+static int para(
+    const char *nomen, const char *conatus,
+    const char *clavis_api,
+    const char *instructiones, const char *rogatum,
+    char **corpus, struct crispus_slist **capita
+) {
     char *eff_user = ison_effuge(rogatum);
-    if (!eff_user) return -1;
+    if (!eff_user)
+        return -1;
 
     char *eff_sys = NULL;
     if (instructiones) {
         eff_sys = ison_effuge(instructiones);
-        if (!eff_sys) { free(eff_user); return -1; }
+        if (!eff_sys) {
+            free(eff_user);
+            return -1;
+        }
     }
 
     size_t mag = strlen(eff_user) + strlen(nomen) + 512;
-    if (eff_sys) mag += strlen(eff_sys);
+    if (eff_sys)
+        mag += strlen(eff_sys);
 
     char *buf = malloc(mag);
-    if (!buf) { free(eff_user); free(eff_sys); return -1; }
+    if (!buf) {
+        free(eff_user);
+        free(eff_sys);
+        return -1;
+    }
 
     char *p = buf;
     p += sprintf(p, "{\"model\":\"%s\",\"max_tokens\":1024", nomen);
 
     if (conatus[0] && strcmp(conatus, "low") != 0)
-        p += sprintf(p, ",\"thinking\":{\"type\":\"enabled\","
-                        "\"budget_tokens\":4096}");
+        p += sprintf(
+            p, ",\"thinking\":{\"type\":\"enabled\","
+            "\"budget_tokens\":4096}"
+        );
 
     if (eff_sys)
         p += sprintf(p, ",\"system\":\"%s\"", eff_sys);
 
-    p += sprintf(p, ",\"messages\":[{\"role\":\"user\","
-                    "\"content\":\"%s\"}]}", eff_user);
+    p += sprintf(
+        p, ",\"messages\":[{\"role\":\"user\","
+        "\"content\":\"%s\"}]}", eff_user
+    );
 
     free(eff_user);
     free(eff_sys);
@@ -61,17 +75,20 @@ static int para(const char *nomen, const char *conatus,
 static char *extrahe(const char *ison)
 {
     char *textus = ison_da_chordam(ison, "content[0].text");
-    if (textus) return textus;
+    if (textus)
+        return textus;
 
     char *error = ison_da_chordam(ison, "error.message");
-    if (error) return error;
+    if (error)
+        return error;
 
     return strdup(ison);
 }
 
-static void signa(const char *ison, long *accepta, long *recondita,
-                   long *emissa, long *cogitata)
-{
+static void signa(
+    const char *ison, long *accepta, long *recondita,
+    long *emissa, long *cogitata
+) {
     *accepta   = ison_da_numerum(ison, "usage.input_tokens");
     *emissa    = ison_da_numerum(ison, "usage.output_tokens");
     *recondita = ison_da_numerum(ison, "usage.cache_read_input_tokens");

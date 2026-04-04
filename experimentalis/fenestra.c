@@ -20,7 +20,9 @@
 
 /* --- typi --- */
 
-typedef struct { Uint8 r, g, b; } color_t;
+typedef struct {
+    Uint8 r, g, b;
+}color_t;
 
 /* --- status SDL --- */
 
@@ -52,31 +54,34 @@ static inline Uint32 fac_colorem(Uint8 r, Uint8 g, Uint8 b)
 
 static inline void pone_punctulum(int x, int y, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
-    if (x < 0 || y < 0 || x >= lat_img || y >= lat_img) return;
+    if (x < 0 || y < 0 || x >= lat_img || y >= lat_img)
+        return;
     int idx = y * lat_img + x;
     if (a == 255) {
         punctula[idx] = fac_colorem(r, g, b);
         return;
     }
-    if (a == 0) return;
-    Uint32 f = punctula[idx];
-    Uint8 fr = (f >> 16) & 0xFF, fg = (f >> 8) & 0xFF, fb = f & 0xFF;
-    Uint8 nr = (Uint8)((r * a + fr * (255 - a)) / 255);
-    Uint8 ng = (Uint8)((g * a + fg * (255 - a)) / 255);
-    Uint8 nb = (Uint8)((b * a + fb * (255 - a)) / 255);
+    if (a == 0)
+        return;
+    Uint32 f      = punctula[idx];
+    Uint8 fr      = (f >> 16) & 0xFF, fg = (f >> 8) & 0xFF, fb = f & 0xFF;
+    Uint8 nr      = (Uint8)((r * a + fr * (255 - a)) / 255);
+    Uint8 ng      = (Uint8)((g * a + fg * (255 - a)) / 255);
+    Uint8 nb      = (Uint8)((b * a + fb * (255 - a)) / 255);
     punctula[idx] = fac_colorem(nr, ng, nb);
 }
 
 /* pinge ellipsem mollem (antialiased) */
-static void pinge_ellipsem(int cx, int cy, float rx, float ry,
-                           Uint8 r, Uint8 g, Uint8 b, Uint8 alpha_max)
-{
+static void pinge_ellipsem(
+    int cx, int cy, float rx, float ry,
+    Uint8 r, Uint8 g, Uint8 b, Uint8 alpha_max
+) {
     int irx = (int)(rx + 1.5f), iry = (int)(ry + 1.5f);
     for (int dy = -iry; dy <= iry; dy++) {
         for (int dx = -irx; dx <= irx; dx++) {
             float ex = (float)dx / rx;
             float ey = (float)dy / ry;
-            float d = sqrtf(ex * ex + ey * ey);
+            float d  = sqrtf(ex * ex + ey * ey);
             Uint8 a;
             if (d < 0.9f)
                 a = alpha_max;
@@ -91,36 +96,41 @@ static void pinge_ellipsem(int cx, int cy, float rx, float ry,
 }
 
 /* pinge ellipsem cum gradiente (lumen a superiore-sinistro) */
-static void pinge_ellipsem_umbratam(int cx, int cy, float rx, float ry,
-                                    color_t basis, color_t lux, color_t umbra)
-{
+static void pinge_ellipsem_umbratam(
+    int cx, int cy, float rx, float ry,
+    color_t basis, color_t lux, color_t umbra
+) {
     int irx = (int)(rx + 1.5f), iry = (int)(ry + 1.5f);
     for (int dy = -iry; dy <= iry; dy++) {
         for (int dx = -irx; dx <= irx; dx++) {
             float ex = (float)dx / rx;
             float ey = (float)dy / ry;
-            float d = sqrtf(ex * ex + ey * ey);
-            if (d > 1.1f) continue;
+            float d  = sqrtf(ex * ex + ey * ey);
+            if (d > 1.1f)
+                continue;
             Uint8 a = (d < 0.9f) ? 255 :
-                      (Uint8)(255.0f * (1.0f - (d - 0.9f) * 5.0f));
-            if (a == 0) continue;
+            (Uint8)(255.0f * (1.0f - (d - 0.9f) * 5.0f));
+            if (a == 0)
+                continue;
 
             /* gradiens luminosus: (-0.5, -0.7) est directio luminis */
             float lum = 0.5f - 0.35f * ex - 0.45f * ey;
-            if (lum < 0) lum = 0;
-            if (lum > 1) lum = 1;
+            if (lum < 0)
+                lum = 0;
+            if (lum > 1)
+                lum = 1;
 
             Uint8 r, g, b;
             if (lum > 0.5f) {
                 float t = (lum - 0.5f) * 2.0f;
-                r = (Uint8)(basis.r + t * (lux.r - basis.r));
-                g = (Uint8)(basis.g + t * (lux.g - basis.g));
-                b = (Uint8)(basis.b + t * (lux.b - basis.b));
+                r       = (Uint8)(basis.r + t * (lux.r - basis.r));
+                g       = (Uint8)(basis.g + t * (lux.g - basis.g));
+                b       = (Uint8)(basis.b + t * (lux.b - basis.b));
             } else {
                 float t = lum * 2.0f;
-                r = (Uint8)(umbra.r + t * (basis.r - umbra.r));
-                g = (Uint8)(umbra.g + t * (basis.g - umbra.g));
-                b = (Uint8)(umbra.b + t * (basis.b - umbra.b));
+                r       = (Uint8)(umbra.r + t * (basis.r - umbra.r));
+                g       = (Uint8)(umbra.g + t * (basis.g - umbra.g));
+                b       = (Uint8)(umbra.b + t * (basis.b - umbra.b));
             }
             pone_punctulum(cx + dx, cy + dy, r, g, b, a);
         }
@@ -128,20 +138,34 @@ static void pinge_ellipsem_umbratam(int cx, int cy, float rx, float ry,
 }
 
 /* pinge triangulum plenum */
-static void pinge_triangulum(int x0, int y0, int x1, int y1, int x2, int y2,
-                             Uint8 r, Uint8 g, Uint8 b, Uint8 a)
-{
+static void pinge_triangulum(
+    int x0, int y0, int x1, int y1, int x2, int y2,
+    Uint8 r, Uint8 g, Uint8 b, Uint8 a
+) {
     int min_x = x0, max_x = x0, min_y = y0, max_y = y0;
-    if (x1 < min_x) min_x = x1; if (x1 > max_x) max_x = x1;
-    if (x2 < min_x) min_x = x2; if (x2 > max_x) max_x = x2;
-    if (y1 < min_y) min_y = y1; if (y1 > max_y) max_y = y1;
-    if (y2 < min_y) min_y = y2; if (y2 > max_y) max_y = y2;
+    if (x1 < min_x)
+        min_x = x1;
+    if (x1 > max_x)
+        max_x = x1;
+    if (x2 < min_x)
+        min_x = x2;
+    if (x2 > max_x)
+        max_x = x2;
+    if (y1 < min_y)
+        min_y = y1;
+    if (y1 > max_y)
+        max_y = y1;
+    if (y2 < min_y)
+        min_y = y2;
+    if (y2 > max_y)
+        max_y = y2;
 
     for (int py = min_y; py <= max_y; py++) {
         for (int px = min_x; px <= max_x; px++) {
             /* barycentricae coordinatae */
             float d = (float)((y1 - y2) * (x0 - x2) + (x2 - x1) * (y0 - y2));
-            if (fabsf(d) < 0.001f) continue;
+            if (fabsf(d) < 0.001f)
+                continue;
             float la = ((float)((y1 - y2) * (px - x2) + (x2 - x1) * (py - y2))) / d;
             float lb = ((float)((y2 - y0) * (px - x2) + (x0 - x2) * (py - y2))) / d;
             float lc = 1.0f - la - lb;
@@ -152,18 +176,26 @@ static void pinge_triangulum(int x0, int y0, int x1, int y1, int x2, int y2,
 }
 
 /* pinge lineam (Bresenham) */
-static void pinge_lineam(int x0, int y0, int x1, int y1,
-                         Uint8 r, Uint8 g, Uint8 b, Uint8 a)
-{
-    int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
-    int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+static void pinge_lineam(
+    int x0, int y0, int x1, int y1,
+    Uint8 r, Uint8 g, Uint8 b, Uint8 a
+) {
+    int dx  = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+    int dy  = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
     int err = dx + dy;
     for (;;) {
         pone_punctulum(x0, y0, r, g, b, a);
-        if (x0 == x1 && y0 == y1) break;
+        if (x0 == x1 && y0 == y1)
+            break;
         int e2 = 2 * err;
-        if (e2 >= dy) { err += dy; x0 += sx; }
-        if (e2 <= dx) { err += dx; y0 += sy; }
+        if (e2 >= dy) {
+            err += dy;
+            x0 += sx;
+        }
+        if (e2 <= dx) {
+            err += dx;
+            y0 += sy;
+        }
     }
 }
 
@@ -180,27 +212,29 @@ static void pinge_herbam(int px, int py)
     /* basis terrae */
     for (int dy = 0; dy < m; dy++) {
         for (int dx = 0; dx < m; dx++) {
-            float n = strepitus(px + dx, py + dy, 0);
+            float n  = strepitus(px + dx, py + dy, 0);
             float n2 = strepitus(px + dx, py + dy, 42);
-            Uint8 r = (Uint8)(28 + n * 14);
-            Uint8 g = (Uint8)(45 + n * 18 + n2 * 8);
-            Uint8 b = (Uint8)(22 + n * 10);
+            Uint8 r  = (Uint8)(28 + n * 14);
+            Uint8 g  = (Uint8)(45 + n * 18 + n2 * 8);
+            Uint8 b  = (Uint8)(22 + n * 10);
             pone_punctulum(px + dx, py + dy, r, g, b, 255);
         }
     }
     /* herbae culmi — punctula lucidiora */
     for (int i = 0; i < m * m / 12; i++) {
-        int gx = (int)(strepitus(px + i, py, 7) * (float)m);
-        int gy = (int)(strepitus(px, py + i, 11) * (float)m);
+        int gx   = (int)(strepitus(px + i, py, 7) * (float)m);
+        int gy   = (int)(strepitus(px, py + i, 11) * (float)m);
         float br = strepitus(px + gx, py + gy, 19);
-        Uint8 r = (Uint8)(40 + br * 30);
-        Uint8 g = (Uint8)(70 + br * 50);
-        Uint8 b = (Uint8)(25 + br * 15);
+        Uint8 r  = (Uint8)(40 + br * 30);
+        Uint8 g  = (Uint8)(70 + br * 50);
+        Uint8 b  = (Uint8)(25 + br * 15);
         pone_punctulum(px + gx, py + gy, r, g, b, 200);
         /* culmus sursum */
         if (br > 0.5f)
-            pone_punctulum(px + gx, py + gy - 1,
-                           (Uint8)(50 + br * 40), (Uint8)(90 + br * 50), 30, 160);
+            pone_punctulum(
+                px + gx, py + gy - 1,
+                (Uint8)(50 + br * 40), (Uint8)(90 + br * 50), 30, 160
+            );
     }
 }
 
@@ -208,8 +242,8 @@ static void pinge_herbam(int px, int py)
 static void pinge_saxum(int px, int py)
 {
     pinge_herbam(px, py);
-    int cx = px + mag_cellulae / 2;
-    int cy = py + mag_cellulae / 2;
+    int cx   = px + mag_cellulae / 2;
+    int cy   = py + mag_cellulae / 2;
     float rx = SF(11), ry = SF(10);
 
     /* umbra */
@@ -222,15 +256,20 @@ static void pinge_saxum(int px, int py)
             /* forma irregularis: ellipsis perturbata strepitu */
             float ex = (float)dx / rx;
             float ey = (float)dy / ry;
-            float n = strepitus(cx + dx, cy + dy, 3) * 0.25f;
-            float d = sqrtf(ex * ex + ey * ey) + n - 0.12f;
-            if (d > 1.05f) continue;
+            float n  = strepitus(cx + dx, cy + dy, 3) * 0.25f;
+            float d  = sqrtf(ex * ex + ey * ey) + n - 0.12f;
+            if (d > 1.05f)
+                continue;
             Uint8 a = (d < 0.9f) ? 255 : (Uint8)(255.0f * fmaxf(0, 1.0f - (d - 0.9f) * 6.67f));
-            if (a == 0) continue;
+            if (a == 0)
+                continue;
 
             float lum = 0.55f - 0.3f * ex - 0.35f * ey;
             lum += strepitus(cx + dx, cy + dy, 5) * 0.15f;
-            if (lum < 0) lum = 0; if (lum > 1) lum = 1;
+            if (lum < 0)
+                lum = 0;
+            if (lum > 1)
+                lum = 1;
             Uint8 r = (Uint8)(80 + lum * 90);
             Uint8 g = (Uint8)(78 + lum * 82);
             Uint8 b = (Uint8)(70 + lum * 70);
@@ -248,26 +287,28 @@ static void pinge_murum(int px, int py)
 {
     int m = mag_cellulae;
     int alt_lateris = m / 4;
-    if (alt_lateris < 2) alt_lateris = 2;
+    if (alt_lateris < 2)
+        alt_lateris = 2;
     int lat_lateris = m / 2;
-    if (lat_lateris < 4) lat_lateris = 4;
+    if (lat_lateris < 4)
+        lat_lateris = 4;
 
     /* cementum (fundum) */
     for (int dy = 0; dy < m; dy++)
         for (int dx = 0; dx < m; dx++) {
-            float n = strepitus(px + dx, py + dy, 20);
-            Uint8 g = (Uint8)(58 + n * 12);
-            pone_punctulum(px + dx, py + dy, g, (Uint8)(g - 5), (Uint8)(g - 10), 255);
-        }
+        float n = strepitus(px + dx, py + dy, 20);
+        Uint8 g = (Uint8)(58 + n * 12);
+        pone_punctulum(px + dx, py + dy, g, (Uint8)(g - 5), (Uint8)(g - 10), 255);
+    }
 
     /* lateres */
     for (int ry = 0; ry < 4; ry++) {
-        int yy = ry * alt_lateris;
+        int yy       = ry * alt_lateris;
         int x_offset = (ry % 2) ? lat_lateris / 2 : 0;
         for (int rx = -1; rx < 3; rx++) {
             int xx = rx * lat_lateris + x_offset;
             /* color lateris cum variatione */
-            float n = strepitus(px + xx, py + yy, 25);
+            float n  = strepitus(px + xx, py + yy, 25);
             Uint8 br = (Uint8)(140 + n * 40);
             Uint8 bg = (Uint8)(65 + n * 25);
             Uint8 bb = (Uint8)(50 + n * 20);
@@ -275,19 +316,24 @@ static void pinge_murum(int px, int py)
             for (int dy = 1; dy < alt_lateris - 1; dy++) {
                 for (int dx = 1; dx < lat_lateris - 1; dx++) {
                     int fx = xx + dx, fy = yy + dy;
-                    if (fx < 0 || fx >= m || fy < 0 || fy >= m) continue;
+                    if (fx < 0 || fx >= m || fy < 0 || fy >= m)
+                        continue;
                     /* gradiens per laterem */
-                    float t = (float)dy / (float)alt_lateris;
+                    float t   = (float)dy / (float)alt_lateris;
                     float lum = 1.0f - t * 0.3f;
                     /* margo superiore lucidior */
-                    if (dy == 1) lum += 0.15f;
+                    if (dy == 1)
+                        lum += 0.15f;
                     float nn = strepitus(px + fx, py + fy, 27) * 0.08f;
                     lum += nn;
-                    if (lum > 1.15f) lum = 1.15f;
-                    pone_punctulum(px + fx, py + fy,
-                                   (Uint8)(br * lum > 255 ? 255 : br * lum),
-                                   (Uint8)(bg * lum > 255 ? 255 : bg * lum),
-                                   (Uint8)(bb * lum > 255 ? 255 : bb * lum), 255);
+                    if (lum > 1.15f)
+                        lum = 1.15f;
+                    pone_punctulum(
+                        px + fx, py + fy,
+                        (Uint8)(br * lum > 255 ? 255 : br * lum),
+                        (Uint8)(bg * lum > 255 ? 255 : bg * lum),
+                        (Uint8)(bb * lum > 255 ? 255 : bb * lum), 255
+                    );
                 }
             }
         }
@@ -308,33 +354,47 @@ static void pinge_felem(int px, int py)
     for (float t = 0; t < 1.0f; t += 0.02f) {
         float tx = cx + SF(4) + t * SF(8);
         float ty = cy + SF(4) - sinf(t * 3.14159f) * SF(6);
-        pinge_ellipsem((int)tx, (int)ty, SF(1.2f), SF(1.2f),
-                       corpus.r, corpus.g, corpus.b, 220);
+        pinge_ellipsem(
+            (int)tx, (int)ty, SF(1.2f), SF(1.2f),
+            corpus.r, corpus.g, corpus.b, 220
+        );
     }
 
     /* umbra */
     pinge_ellipsem(cx + S(2), cy + S(3), SF(10), SF(8), 10, 15, 8, 80);
 
     /* corpus */
-    pinge_ellipsem_umbratam(cx, cy + S(3), SF(9), SF(7),
-                            corpus, lux, umbra_c);
+    pinge_ellipsem_umbratam(
+        cx, cy + S(3), SF(9), SF(7),
+        corpus, lux, umbra_c
+    );
 
     /* caput */
-    pinge_ellipsem_umbratam(cx, cy - S(4), SF(8), SF(7),
-                            corpus, lux, umbra_c);
+    pinge_ellipsem_umbratam(
+        cx, cy - S(4), SF(8), SF(7),
+        corpus, lux, umbra_c
+    );
 
     /* aures — trianguli */
     /* auris sinistra */
-    pinge_triangulum(cx - S(7), cy - S(5), cx - S(5), cy - S(13), cx - S(2), cy - S(7),
-                     umbra_c.r, umbra_c.g, umbra_c.b, 255);
-    pinge_triangulum(cx - S(6), cy - S(6), cx - S(5), cy - S(11), cx - S(3), cy - S(7),
-                     220, 140, 160, 255);
+    pinge_triangulum(
+        cx - S(7), cy - S(5), cx - S(5), cy - S(13), cx - S(2), cy - S(7),
+        umbra_c.r, umbra_c.g, umbra_c.b, 255
+    );
+    pinge_triangulum(
+        cx - S(6), cy - S(6), cx - S(5), cy - S(11), cx - S(3), cy - S(7),
+        220, 140, 160, 255
+    );
 
     /* auris dextra */
-    pinge_triangulum(cx + S(7), cy - S(5), cx + S(5), cy - S(13), cx + S(2), cy - S(7),
-                     umbra_c.r, umbra_c.g, umbra_c.b, 255);
-    pinge_triangulum(cx + S(6), cy - S(6), cx + S(5), cy - S(11), cx + S(3), cy - S(7),
-                     220, 140, 160, 255);
+    pinge_triangulum(
+        cx + S(7), cy - S(5), cx + S(5), cy - S(13), cx + S(2), cy - S(7),
+        umbra_c.r, umbra_c.g, umbra_c.b, 255
+    );
+    pinge_triangulum(
+        cx + S(6), cy - S(6), cx + S(5), cy - S(11), cx + S(3), cy - S(7),
+        220, 140, 160, 255
+    );
 
     /* oculi */
     /* sclera */
@@ -351,8 +411,10 @@ static void pinge_felem(int px, int py)
     pone_punctulum(cx + S(4), cy - S(6), 255, 255, 255, 240);
 
     /* nasus */
-    pinge_triangulum(cx - S(1), cy - S(2), cx + S(1), cy - S(2), cx, cy - S(1),
-                     255, 140, 160, 255);
+    pinge_triangulum(
+        cx - S(1), cy - S(2), cx + S(1), cy - S(2), cx, cy - S(1),
+        255, 140, 160, 255
+    );
 
     /* os */
     pinge_lineam(cx, cy - S(1), cx - S(1), cy, 120, 70, 50, 160);
@@ -377,22 +439,22 @@ static void pinge_dalekum(int px, int py)
 
     /* corpus inferius (trapezoideum) — amplior infra */
     for (int dy = S(2); dy < S(14); dy++) {
-        float t = (float)dy / SF(14);
+        float t   = (float)dy / SF(14);
         float lat = SF(7) + t * SF(4);
         float lum = 0.7f - t * 0.3f;
         for (int dx = -(int)lat; dx <= (int)lat; dx++) {
             float edge = fabsf((float)dx) / lat;
-            float l = lum + (1.0f - edge) * 0.15f;
-            Uint8 r = (Uint8)(140 * l + 40);
-            Uint8 g = (Uint8)(130 * l + 35);
-            Uint8 b = (Uint8)(145 * l + 50);
+            float l    = lum + (1.0f - edge) * 0.15f;
+            Uint8 r    = (Uint8)(140 * l + 40);
+            Uint8 g    = (Uint8)(130 * l + 35);
+            Uint8 b    = (Uint8)(145 * l + 50);
             pone_punctulum(cx + dx, cy + dy, r, g, b, 255);
         }
     }
 
     /* cingulum sphaerolarum */
     int num_sph = 5;
-    int sph_y = cy + S(6);
+    int sph_y   = cy + S(6);
     for (int i = 0; i < num_sph; i++) {
         int sx = cx - S(7) + (i * S(14)) / (num_sph - 1);
         pinge_ellipsem(sx, sph_y, SF(1.8f), SF(1.8f), 80, 80, 90, 255);
@@ -411,12 +473,14 @@ static void pinge_dalekum(int px, int py)
 
     /* oculus (lucerna rubra) */
     float pulsus = 0.6f + 0.4f * sinf((float)numerus_picturae * 0.15f);
-    Uint8 glow = (Uint8)(180 + 75 * pulsus);
+    Uint8 glow   = (Uint8)(180 + 75 * pulsus);
     pinge_ellipsem(cx + S(9), cy - S(9), SF(2.5f), SF(2.5f), glow, 30, 20, 255);
     pinge_ellipsem(cx + S(9), cy - S(9), SF(1.2f), SF(1.2f), 255, 200, 180, 200);
     /* fulgur circa oculum */
-    pinge_ellipsem(cx + S(9), cy - S(9), SF(4), SF(4),
-                   255, 40, 20, (Uint8)(40 * pulsus));
+    pinge_ellipsem(
+        cx + S(9), cy - S(9), SF(4), SF(4),
+        255, 40, 20, (Uint8)(40 * pulsus)
+    );
 
     /* bracchium armatum (sinistrum) */
     pinge_lineam(cx - S(7), cy + S(1), cx - S(12), cy + S(4), 110, 110, 130, 255);
@@ -439,19 +503,27 @@ static void pinge_ursum(int px, int py)
     pinge_ellipsem(cx + S(2), cy + S(3), SF(11), SF(9), 10, 15, 8, 80);
 
     /* corpus — grandior quam feles */
-    pinge_ellipsem_umbratam(cx, cy + S(2), SF(11), SF(10),
-                            corpus, lux, umbra_c);
+    pinge_ellipsem_umbratam(
+        cx, cy + S(2), SF(11), SF(10),
+        corpus, lux, umbra_c
+    );
 
     /* caput */
-    pinge_ellipsem_umbratam(cx, cy - S(5), SF(9), SF(8),
-                            corpus, lux, umbra_c);
+    pinge_ellipsem_umbratam(
+        cx, cy - S(5), SF(9), SF(8),
+        corpus, lux, umbra_c
+    );
 
     /* aures rotundae */
-    pinge_ellipsem_umbratam(cx - S(7), cy - S(10), SF(3.5f), SF(3.5f),
-                            corpus, lux, umbra_c);
+    pinge_ellipsem_umbratam(
+        cx - S(7), cy - S(10), SF(3.5f), SF(3.5f),
+        corpus, lux, umbra_c
+    );
     pinge_ellipsem(cx - S(7), cy - S(10), SF(2.0f), SF(2.0f), 180, 130, 100, 200);
-    pinge_ellipsem_umbratam(cx + S(7), cy - S(10), SF(3.5f), SF(3.5f),
-                            corpus, lux, umbra_c);
+    pinge_ellipsem_umbratam(
+        cx + S(7), cy - S(10), SF(3.5f), SF(3.5f),
+        corpus, lux, umbra_c
+    );
     pinge_ellipsem(cx + S(7), cy - S(10), SF(2.0f), SF(2.0f), 180, 130, 100, 200);
 
     /* rostrum (muzzle) — ovale lucidius */
@@ -483,29 +555,39 @@ static void pinge_corvum(int px, int py)
     pinge_ellipsem(cx + S(2), cy + S(4), SF(9), SF(5), 10, 15, 8, 70);
 
     /* cauda */
-    pinge_triangulum(cx + S(5), cy + S(2), cx + S(12), cy + S(6), cx + S(5), cy + S(6),
-                     corpus.r, corpus.g, corpus.b, 255);
+    pinge_triangulum(
+        cx + S(5), cy + S(2), cx + S(12), cy + S(6), cx + S(5), cy + S(6),
+        corpus.r, corpus.g, corpus.b, 255
+    );
 
     /* ala (posterior) */
-    pinge_ellipsem_umbratam(cx + S(1), cy + S(1), SF(10), SF(7),
-                            (color_t){30, 32, 42}, (color_t){55, 58, 72}, (color_t){12, 12, 20});
+    pinge_ellipsem_umbratam(
+        cx + S(1), cy + S(1), SF(10), SF(7),
+        (color_t){30, 32, 42}, (color_t){55, 58, 72}, (color_t){12, 12, 20}
+    );
 
     /* corpus */
-    pinge_ellipsem_umbratam(cx - S(1), cy, SF(9), SF(7),
-                            corpus, lux, umbra_c);
+    pinge_ellipsem_umbratam(
+        cx - S(1), cy, SF(9), SF(7),
+        corpus, lux, umbra_c
+    );
 
     /* caput */
-    pinge_ellipsem_umbratam(cx - S(5), cy - S(5), SF(6), SF(5.5f),
-                            corpus, lux, umbra_c);
+    pinge_ellipsem_umbratam(
+        cx - S(5), cy - S(5), SF(6), SF(5.5f),
+        corpus, lux, umbra_c
+    );
 
     /* oculus */
     pinge_ellipsem(cx - S(7), cy - S(6), SF(1.8f), SF(1.8f), 255, 220, 50, 255);
     pinge_ellipsem(cx - S(7), cy - S(6), SF(0.9f), SF(0.9f), 10, 10, 10, 255);
 
     /* rostrum */
-    pinge_triangulum(cx - S(10), cy - S(5), cx - S(14), cy - S(4),
-                     cx - S(10), cy - S(3),
-                     220, 160, 40, 255);
+    pinge_triangulum(
+        cx - S(10), cy - S(5), cx - S(14), cy - S(4),
+        cx - S(10), cy - S(3),
+        220, 160, 40, 255
+    );
     /* rostrum superius lucidior */
     pinge_lineam(cx - S(10), cy - S(5), cx - S(14), cy - S(4), 250, 200, 80, 180);
 
@@ -527,21 +609,28 @@ static void pinge_rapum(int px, int py)
     int cy = py + mag_cellulae / 2;
 
     /* folia (virides trianguli supra) */
-    pinge_triangulum(cx, cy - S(8), cx - S(4), cy - S(14), cx + S(1), cy - S(6),
-                     40, 160, 40, 255);
-    pinge_triangulum(cx, cy - S(8), cx + S(4), cy - S(14), cx - S(1), cy - S(6),
-                     50, 180, 50, 255);
-    pinge_triangulum(cx, cy - S(7), cx, cy - S(13), cx + S(2), cy - S(8),
-                     60, 200, 60, 240);
+    pinge_triangulum(
+        cx, cy - S(8), cx - S(4), cy - S(14), cx + S(1), cy - S(6),
+        40, 160, 40, 255
+    );
+    pinge_triangulum(
+        cx, cy - S(8), cx + S(4), cy - S(14), cx - S(1), cy - S(6),
+        50, 180, 50, 255
+    );
+    pinge_triangulum(
+        cx, cy - S(7), cx, cy - S(13), cx + S(2), cy - S(8),
+        60, 200, 60, 240
+    );
 
     /* corpus rapi — conus inversus cum gradiente */
     for (int dy = -S(7); dy <= S(10); dy++) {
-        float t = (float)(dy + S(7)) / (float)(S(17));
+        float t   = (float)(dy + S(7)) / (float)(S(17));
         float lat = SF(6) * (1.0f - t * 0.85f);
-        if (lat < 0.5f) lat = 0.5f;
+        if (lat < 0.5f)
+            lat = 0.5f;
         for (int dx = -(int)lat; dx <= (int)lat; dx++) {
             float edge = fabsf((float)dx) / fmaxf(lat, 1.0f);
-            float lum = 0.8f - edge * 0.4f + (1.0f - t) * 0.2f;
+            float lum  = 0.8f - edge * 0.4f + (1.0f - t) * 0.2f;
             /* lineis horizontalibus */
             float stria = sinf(t * 25.0f) * 0.05f;
             lum += stria;
@@ -569,10 +658,12 @@ static void pinge_fungum(int px, int py)
         float lat = SF(3) + (float)dy / SF(10) * SF(1.5f);
         for (int dx = -(int)lat; dx <= (int)lat; dx++) {
             float edge = fabsf((float)dx) / fmaxf(lat, 1.0f);
-            float lum = 1.0f - edge * 0.3f;
-            pone_punctulum(cx + dx, cy + dy,
-                           (Uint8)(stip.r * lum), (Uint8)(stip.g * lum),
-                           (Uint8)(stip.b * lum), 255);
+            float lum  = 1.0f - edge * 0.3f;
+            pone_punctulum(
+                cx + dx, cy + dy,
+                (Uint8)(stip.r * lum), (Uint8)(stip.g * lum),
+                (Uint8)(stip.b * lum), 255
+            );
         }
     }
 
@@ -581,7 +672,7 @@ static void pinge_fungum(int px, int py)
     color_t pil_lux  = { 230, 120, 130 };
     color_t pil_umbr = { 100, 20, 30 };
     float prx = SF(11), pry = SF(8);
-    int pcy = cy - S(4);
+    int pcy   = cy - S(4);
 
     /* solum pars superior hemisphaerae */
     int irx = (int)(prx + 2), iry = (int)(pry + 2);
@@ -589,23 +680,28 @@ static void pinge_fungum(int px, int py)
         for (int dx = -irx; dx <= irx; dx++) {
             float ex = (float)dx / prx;
             float ey = (float)dy / pry;
-            float d = sqrtf(ex * ex + ey * ey);
-            if (d > 1.1f) continue;
+            float d  = sqrtf(ex * ex + ey * ey);
+            if (d > 1.1f)
+                continue;
             Uint8 a = (d < 0.9f) ? 255 : (Uint8)(255.0f * fmaxf(0, 1.0f - (d - 0.9f) * 5.0f));
-            if (a == 0) continue;
+            if (a == 0)
+                continue;
             float lum = 0.5f - 0.35f * ex - 0.45f * ey;
-            if (lum < 0) lum = 0; if (lum > 1) lum = 1;
+            if (lum < 0)
+                lum = 0;
+            if (lum > 1)
+                lum = 1;
             Uint8 r, g, b;
             if (lum > 0.5f) {
                 float t = (lum - 0.5f) * 2.0f;
-                r = (Uint8)(pileus.r + t * (pil_lux.r - pileus.r));
-                g = (Uint8)(pileus.g + t * (pil_lux.g - pileus.g));
-                b = (Uint8)(pileus.b + t * (pil_lux.b - pileus.b));
+                r       = (Uint8)(pileus.r + t * (pil_lux.r - pileus.r));
+                g       = (Uint8)(pileus.g + t * (pil_lux.g - pileus.g));
+                b       = (Uint8)(pileus.b + t * (pil_lux.b - pileus.b));
             } else {
                 float t = lum * 2.0f;
-                r = (Uint8)(pil_umbr.r + t * (pileus.r - pil_umbr.r));
-                g = (Uint8)(pil_umbr.g + t * (pileus.g - pil_umbr.g));
-                b = (Uint8)(pil_umbr.b + t * (pileus.b - pil_umbr.b));
+                r       = (Uint8)(pil_umbr.r + t * (pileus.r - pil_umbr.r));
+                g       = (Uint8)(pil_umbr.g + t * (pileus.g - pil_umbr.g));
+                b       = (Uint8)(pil_umbr.b + t * (pileus.b - pil_umbr.b));
             }
             pone_punctulum(cx + dx, pcy + dy, r, g, b, a);
         }
@@ -631,7 +727,8 @@ static void pinge_zodum(int px, int py)
     for (int dy = -S(15); dy <= S(15); dy++) {
         for (int dx = -S(15); dx <= S(15); dx++) {
             float d = sqrtf((float)(dx * dx + dy * dy)) / SF(14);
-            if (d > 1.0f) continue;
+            if (d > 1.0f)
+                continue;
             Uint8 a = (Uint8)((1.0f - d) * (25 + 20 * pulsus));
             pone_punctulum(cx + dx, cy + dy, 255, 240, 80, a);
         }
@@ -646,12 +743,16 @@ static void pinge_zodum(int px, int py)
     pinge_ellipsem(cx + S(1), cy + S(3), SF(8), SF(6), 80, 80, 20, 60);
 
     /* corpus */
-    pinge_ellipsem_umbratam(cx, cy + S(2), SF(8), SF(8),
-                            corpus, lux, umbra_c);
+    pinge_ellipsem_umbratam(
+        cx, cy + S(2), SF(8), SF(8),
+        corpus, lux, umbra_c
+    );
 
     /* caput */
-    pinge_ellipsem_umbratam(cx, cy - S(5), SF(7), SF(6),
-                            corpus, lux, umbra_c);
+    pinge_ellipsem_umbratam(
+        cx, cy - S(5), SF(7), SF(6),
+        corpus, lux, umbra_c
+    );
 
     /* oculi (determinati, heroici) */
     pinge_ellipsem(cx - S(3), cy - S(6), SF(2.2f), SF(1.5f), 255, 255, 255, 255);
@@ -671,7 +772,7 @@ static void pinge_zodum(int px, int py)
 
     /* aureola pulsans */
     float rad_aur = SF(10) + pulsus * SF(2);
-    int ir = (int)(rad_aur + 3);
+    int ir        = (int)(rad_aur + 3);
     for (int dy = -ir; dy <= ir; dy++) {
         for (int dx = -ir; dx <= ir; dx++) {
             float dist = sqrtf((float)(dx * dx + dy * dy));
@@ -696,7 +797,8 @@ static void pinge_oculum(int px, int py)
     for (int dy = -S(14); dy <= S(14); dy++) {
         for (int dx = -S(14); dx <= S(14); dx++) {
             float d = sqrtf((float)(dx * dx + dy * dy)) / SF(13);
-            if (d > 1.0f) continue;
+            if (d > 1.0f)
+                continue;
             Uint8 a = (Uint8)((1.0f - d) * (15 + 15 * pulsus));
             pone_punctulum(cx + dx, cy + dy, 80, 180, 255, a);
         }
@@ -709,14 +811,16 @@ static void pinge_oculum(int px, int py)
             float ey = (float)dy / SF(6);
             /* forma mandorlae */
             float d = sqrtf(ex * ex + ey * ey * (1.0f + fabsf(ex) * 0.5f));
-            if (d > 1.05f) continue;
+            if (d > 1.05f)
+                continue;
             Uint8 a = (d < 0.9f) ? 255 : (Uint8)(255.0f * fmaxf(0, 1.0f - (d - 0.9f) * 6.67f));
-            if (a == 0) continue;
+            if (a == 0)
+                continue;
             /* venae subtiles */
             float vn = strepitus(cx + dx, cy + dy, 33) * 0.15f;
-            Uint8 r = (Uint8)(240 + vn * 15);
-            Uint8 g = (Uint8)(235 - vn * 30);
-            Uint8 b = (Uint8)(230 - vn * 20);
+            Uint8 r  = (Uint8)(240 + vn * 15);
+            Uint8 g  = (Uint8)(235 - vn * 30);
+            Uint8 b  = (Uint8)(230 - vn * 20);
             pone_punctulum(cx + dx, cy + dy, r, g, b, a);
         }
     }
@@ -724,21 +828,23 @@ static void pinge_oculum(int px, int py)
     /* iris */
     color_t iris = { 40, 140, 220 };
     float ir_rad = SF(5);
-    int iir = (int)(ir_rad + 2);
+    int iir      = (int)(ir_rad + 2);
     for (int dy = -iir; dy <= iir; dy++) {
         for (int dx = -iir; dx <= iir; dx++) {
             float d = sqrtf((float)(dx * dx + dy * dy));
-            if (d > ir_rad + 1.0f) continue;
+            if (d > ir_rad + 1.0f)
+                continue;
             Uint8 a = (d < ir_rad - 0.5f) ? 255 :
-                      (Uint8)(255.0f * fmaxf(0, 1.0f - (d - ir_rad + 0.5f)));
-            if (a == 0) continue;
+            (Uint8)(255.0f * fmaxf(0, 1.0f - (d - ir_rad + 0.5f)));
+            if (a == 0)
+                continue;
             /* radiationes in iride */
-            float ang = atan2f((float)dy, (float)dx);
+            float ang     = atan2f((float)dy, (float)dx);
             float rad_var = sinf(ang * 8.0f) * 0.15f + 0.85f;
-            float lum = rad_var * (1.0f - d / ir_rad * 0.3f);
-            Uint8 r = (Uint8)(iris.r * lum);
-            Uint8 g = (Uint8)(iris.g * lum);
-            Uint8 b = (Uint8)(iris.b * lum);
+            float lum     = rad_var * (1.0f - d / ir_rad * 0.3f);
+            Uint8 r       = (Uint8)(iris.r * lum);
+            Uint8 g       = (Uint8)(iris.g * lum);
+            Uint8 b       = (Uint8)(iris.b * lum);
             pone_punctulum(cx + dx, cy + dy, r, g, b, a);
         }
     }
@@ -800,8 +906,10 @@ int fenestra_initia(int latus_cellulae)
         return -1;
     }
 
-    pictor = SDL_CreateRenderer(fenestra, -1,
-        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    pictor = SDL_CreateRenderer(
+        fenestra, -1,
+        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+    );
     if (!pictor) {
         fprintf(stderr, "pictor creari non potuit: %s\n", SDL_GetError());
         SDL_DestroyWindow(fenestra);
@@ -809,7 +917,7 @@ int fenestra_initia(int latus_cellulae)
         return -1;
     }
 
-    clausa_est = 0;
+    clausa_est       = 0;
     numerus_picturae = 0;
     return 0;
 }
@@ -821,22 +929,27 @@ void fenestra_pinge(const tabula_t *tab)
     if (!pictor || clausa_est)
         return;
 
-    int latus = tab->latus;
+    int latus     = tab->latus;
     int lat_novum = latus * mag_cellulae;
 
     if (lat_novum != lat_img) {
-        if (textura) SDL_DestroyTexture(textura);
+        if (textura)
+            SDL_DestroyTexture(textura);
         free(punctula);
 
-        lat_img = lat_novum;
+        lat_img  = lat_novum;
         punctula = malloc((size_t)lat_img * (size_t)lat_img * sizeof(Uint32));
-        if (!punctula) return;
+        if (!punctula)
+            return;
 
-        textura = SDL_CreateTexture(pictor,
+        textura = SDL_CreateTexture(
+            pictor,
             SDL_PIXELFORMAT_ARGB8888,
             SDL_TEXTUREACCESS_STREAMING,
-            lat_img, lat_img);
-        if (!textura) return;
+            lat_img, lat_img
+        );
+        if (!textura)
+            return;
 
         SDL_SetWindowSize(fenestra, lat_img, lat_img);
     }
@@ -885,9 +998,18 @@ void fenestra_fini(void)
 {
     free(punctula);
     punctula = NULL;
-    if (textura)  { SDL_DestroyTexture(textura);   textura  = NULL; }
-    if (pictor)   { SDL_DestroyRenderer(pictor);    pictor   = NULL; }
-    if (fenestra) { SDL_DestroyWindow(fenestra);    fenestra = NULL; }
+    if (textura)  {
+        SDL_DestroyTexture(textura);
+        textura  = NULL;
+    }
+    if (pictor)   {
+        SDL_DestroyRenderer(pictor);
+        pictor   = NULL;
+    }
+    if (fenestra) {
+        SDL_DestroyWindow(fenestra);
+        fenestra = NULL;
+    }
     SDL_Quit();
 }
 

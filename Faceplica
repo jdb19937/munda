@@ -134,4 +134,7 @@ purga:
 	rm -f daemonium coniunge specta fac_certificatum
 	rm -f nativus_dieta_1526.bin nativus_dieta_1526.lex
 
-.PHONY: omnia para expara purga
+linte:
+	insinulint -c *.[ch] retis/*.[ch] oracula/*.[ch] cellae/*.[ch] cellae/*/*.[ch]
+
+.PHONY: omnia para expara purga linte

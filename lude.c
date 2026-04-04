@@ -32,9 +32,12 @@ int main(int argc, char **argv)
     int tempus_ms = TEMPUS_PRAEFINITUM;
     int argi      = 1;
 
-    if (argi < argc) munda     = argv[argi++];
-    if (argi < argc) tempus_ms = atoi(argv[argi++]);
-    if (tempus_ms < 10) tempus_ms = 10;
+    if (argi < argc)
+        munda     = argv[argi++];
+    if (argi < argc)
+        tempus_ms = atoi(argv[argi++]);
+    if (tempus_ms < 10)
+        tempus_ms = 10;
 
     /* initia genera cellularum */
     memset(genera_ops, 0, sizeof(genera_ops));
@@ -77,17 +80,20 @@ int main(int argc, char **argv)
             for (int r = 0; r < tab->latus && !habet_zodum; r++)
                 for (int dy = -r; dy <= r && !habet_zodum; dy++)
                     for (int dx = -r; dx <= r && !habet_zodum; dx++) {
-                        if (abs(dx) != r && abs(dy) != r) continue;
-                        int x = (zx + dx + tab->latus) % tab->latus;
-                        int y = (zy + dy + tab->latus) % tab->latus;
-                        if (tabula_da_const(tab, x, y)->genus == VACUUM) {
-                            tabula_pone(tab, x, y, ZODUS);
-                            snprintf(tabula_da(tab, x, y)->p.deus.nomen,
-                                     sizeof(tabula_da(tab, x, y)->p.deus.nomen),
-                                     "Zodus");
-                            habet_zodum = 1;
-                        }
-                    }
+                if (abs(dx) != r && abs(dy) != r)
+                    continue;
+                int x = (zx + dx + tab->latus) % tab->latus;
+                int y = (zy + dy + tab->latus) % tab->latus;
+                if (tabula_da_const(tab, x, y)->genus == VACUUM) {
+                    tabula_pone(tab, x, y, ZODUS);
+                    snprintf(
+                        tabula_da(tab, x, y)->p.deus.nomen,
+                        sizeof(tabula_da(tab, x, y)->p.deus.nomen),
+                        "Zodus"
+                    );
+                    habet_zodum = 1;
+                }
+            }
         }
     }
 
@@ -154,7 +160,8 @@ int main(int argc, char **argv)
                     }
                 }
             }
-            if (finis) break;
+            if (finis)
+                break;
         } else if (res < 0 && errno != EINTR) {
             break;
         }

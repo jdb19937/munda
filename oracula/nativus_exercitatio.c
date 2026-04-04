@@ -20,16 +20,19 @@
  * matvec_trans_accum — y += W^T * x  via pfr_matvec_trans_f
  * W est (out_dim, in_dim), x est (out_dim,), y est (in_dim,).
  */
-static void matvec_trans_accum(float *y, const float *W,
-                               const float *x, int out_dim, int in_dim)
-{
+static void matvec_trans_accum(
+    float *y, const float *W,
+    const float *x, int out_dim, int in_dim
+) {
     pfr_matrix_f_t A  = { out_dim, in_dim, (float *)W, NULL };
     pfr_vector_f_t xv = { out_dim, (float *)x, NULL };
     float *tmp = calloc((size_t)in_dim, sizeof(float));
-    if (!tmp) return;
+    if (!tmp)
+        return;
     pfr_vector_f_t tv = { in_dim, tmp, NULL };
     pfr_matvec_trans_f(&tv, &A, &xv);
-    for (int i = 0; i < in_dim; i++) y[i] += tmp[i];
+    for (int i = 0; i < in_dim; i++)
+        y[i] += tmp[i];
     free(tmp);
 }
 
@@ -37,9 +40,10 @@ static void matvec_trans_accum(float *y, const float *W,
  * ger_accum — W += alpha * x * y^T  via pfr_ger_f
  * W est (m, n), x est (m,), y est (n,).
  */
-static void ger_accum(float *W, float alpha,
-                      const float *x, const float *y, int m, int n)
-{
+static void ger_accum(
+    float *W, float alpha,
+    const float *x, const float *y, int m, int n
+) {
     pfr_matrix_f_t A  = { m, n, W, NULL };
     pfr_vector_f_t xv = { m, (float *)x, NULL };
     pfr_vector_f_t yv = { n, (float *)y, NULL };
@@ -51,18 +55,22 @@ static void ger_accum(float *W, float alpha,
  * d_x += grad_x, d_w += grad_w  (accumulative).
  * x: intratio normae, w: pondera normae, d_y: gradiens exitus.
  */
-static void rmsnorma_retro(float *d_x, float *d_w,
-                           const float *d_y, const float *x,
-                           const float *w, int n)
-{
+static void rmsnorma_retro(
+    float *d_x, float *d_w,
+    const float *d_y, const float *x,
+    const float *w, int n
+) {
     float ss = 0.0f;
-    for (int i = 0; i < n; i++) ss += x[i] * x[i];
+    for (int i = 0; i < n; i++)
+        ss += x[i] * x[i];
     float s = 1.0f / sqrtf(ss / n + 1e-5f);  /* = 1 / rms */
 
-    for (int i = 0; i < n; i++) d_w[i] += d_y[i] * x[i] * s;
+    for (int i = 0; i < n; i++)
+        d_w[i] += d_y[i] * x[i] * s;
 
     float A = 0.0f;
-    for (int j = 0; j < n; j++) A += d_y[j] * w[j] * x[j];
+    for (int j = 0; j < n; j++)
+        A += d_y[j] * w[j] * x[j];
 
     float c = s * s * s / n;
     for (int j = 0; j < n; j++)
@@ -73,11 +81,13 @@ static void rmsnorma_retro(float *d_x, float *d_w,
  * softmax_retro — gradientes pro softmax.
  * d_in[i] = p[i] * (d_out[i] - dot(d_out, p)).
  */
-static void softmax_retro(float *d_in, const float *d_out,
-                          const float *p, int n)
-{
+static void softmax_retro(
+    float *d_in, const float *d_out,
+    const float *p, int n
+) {
     float dot = 0.0f;
-    for (int i = 0; i < n; i++) dot += d_out[i] * p[i];
+    for (int i = 0; i < n; i++)
+        dot += d_out[i] * p[i];
     for (int i = 0; i < n; i++)
         d_in[i] = p[i] * (d_out[i] - dot);
 }
@@ -91,7 +101,7 @@ static void rope_retro(float *d_v, int pos, int caput_dim)
         float freq = 1.0f / powf(10000.0f, (float)i / caput_dim);
         float val  = pos * freq;
         float fcr  = cosf(val), fci = sinf(val);
-        float v0 = d_v[i], v1 = d_v[i + 1];
+        float v0   = d_v[i], v1 = d_v[i + 1];
         /* rotatio inversa: angulus negativus */
         d_v[i]     = v0 * fcr + v1 * fci;
         d_v[i + 1] = -v0 * fci + v1 * fcr;
@@ -102,12 +112,14 @@ static void rope_retro(float *d_v, int pos, int caput_dim)
  * alloca / libera exercitatio
  * ================================================================ */
 
-static float *alloca_pondera_plana(const nm_config_t *c, int communes,
-                                   nm_pondera_t *p)
-{
-    size_t n = nm_magnitudo_ponderum(c, communes);
+static float *alloca_pondera_plana(
+    const nm_config_t *c, int communes,
+    nm_pondera_t *p
+) {
+    size_t n    = nm_magnitudo_ponderum(c, communes);
     float *data = calloc(n, sizeof(float));
-    if (!data) return NULL;
+    if (!data)
+        return NULL;
     float *dopo = nm_pondera_init_ptr(p, c, data);
     if (communes)
         p->wvoc = p->vestigia;
@@ -122,13 +134,16 @@ int nm_exercitatio_initia(nm_exercitatio_t *ex, const nm_config_t *c)
 
     /* gradientes (communes = 1 ut in exemplari) */
     ex->grad_data = alloca_pondera_plana(c, 1, &ex->grad);
-    if (!ex->grad_data) return -1;
+    if (!ex->grad_data)
+        return -1;
 
     ex->impetus_data = alloca_pondera_plana(c, 1, &ex->impetus);
-    if (!ex->impetus_data) return -1;
+    if (!ex->impetus_data)
+        return -1;
 
     ex->vis_data = alloca_pondera_plana(c, 1, &ex->vis);
-    if (!ex->vis_data) return -1;
+    if (!ex->vis_data)
+        return -1;
 
     int d    = c->dimensio;
     int df   = c->dimensio_occ;
@@ -181,37 +196,46 @@ void nm_gradientes_pone_nihil(nm_exercitatio_t *ex, const nm_config_t *c)
  * retropulsio — backward pass pro una positione
  * ================================================================ */
 
-float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
-                     int signum, int signum_target, int positio)
-{
+float nm_retropulsio(
+    nm_t *nm, nm_exercitatio_t *ex,
+    int signum, int signum_target, int positio
+) {
     nm_config_t  *c = &nm->config;
     nm_pondera_t *p = &nm->pondera;
     nm_pondera_t *g = &ex->grad;
 
-    int d    = c->dimensio;
-    int df   = c->dimensio_occ;
-    int L    = c->strata;
-    int H    = c->capita;
-    int Hkv  = c->capita_kv;
-    int hd   = d / H;
-    int kv_d = hd * Hkv;
-    int lm   = c->longitudo_max;
-    int V    = c->vocab_magnitudo;
+    int d      = c->dimensio;
+    int df     = c->dimensio_occ;
+    int L      = c->strata;
+    int H      = c->capita;
+    int Hkv    = c->capita_kv;
+    int hd     = d / H;
+    int kv_d   = hd * Hkv;
+    int lm     = c->longitudo_max;
+    int V      = c->vocab_magnitudo;
     int kv_mul = H / Hkv;
 
     /* --- buffers temporanei (in pila vel globales per plicam) --- */
-    float *d_x    = calloc((size_t)d, sizeof(float));
-    float *d_xb   = calloc((size_t)d, sizeof(float));
-    float *d_hb   = calloc((size_t)df, sizeof(float));
-    float *d_hb2  = calloc((size_t)df, sizeof(float));
-    float *d_q    = calloc((size_t)d, sizeof(float));
-    float *d_k    = calloc((size_t)kv_d, sizeof(float));
-    float *d_v    = calloc((size_t)kv_d, sizeof(float));
-    float *d_log  = calloc((size_t)V, sizeof(float));
-    if (!d_x || !d_xb || !d_hb || !d_hb2 ||
-        !d_q || !d_k  || !d_v  || !d_log) {
-        free(d_x); free(d_xb); free(d_hb); free(d_hb2);
-        free(d_q); free(d_k);  free(d_v);  free(d_log);
+    float *d_x   = calloc((size_t)d, sizeof(float));
+    float *d_xb  = calloc((size_t)d, sizeof(float));
+    float *d_hb  = calloc((size_t)df, sizeof(float));
+    float *d_hb2 = calloc((size_t)df, sizeof(float));
+    float *d_q   = calloc((size_t)d, sizeof(float));
+    float *d_k   = calloc((size_t)kv_d, sizeof(float));
+    float *d_v   = calloc((size_t)kv_d, sizeof(float));
+    float *d_log = calloc((size_t)V, sizeof(float));
+    if (
+        !d_x || !d_xb || !d_hb || !d_hb2 ||
+        !d_q || !d_k  || !d_v  || !d_log
+    ) {
+        free(d_x);
+        free(d_xb);
+        free(d_hb);
+        free(d_hb2);
+        free(d_q);
+        free(d_k);
+        free(d_v);
+        free(d_log);
         return 0.0f;
     }
 
@@ -221,7 +245,12 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
     float *logitae = nm->status.logitae;
 
     memcpy(d_log, logitae, (size_t)V * sizeof(float));
-    { pfr_vector_f_t dv = { V, d_log, NULL }; pfr_softmax_f(&dv); }
+    {
+        pfr_vector_f_t dv = {
+            V, d_log, NULL
+        };
+        pfr_softmax_f(&dv);
+    }
     float damnum = -logf(d_log[signum_target] + 1e-10f);
     d_log[signum_target] -= 1.0f;  /* gradiens: softmax - one_hot */
 
@@ -234,8 +263,14 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
     /* 3. retro per rmsnorm finis */
     float *d_x_retro = calloc((size_t)d, sizeof(float));
     if (!d_x_retro) {
-        free(d_x); free(d_xb); free(d_hb); free(d_hb2);
-        free(d_q); free(d_k);  free(d_v);  free(d_log);
+        free(d_x);
+        free(d_xb);
+        free(d_hb);
+        free(d_hb2);
+        free(d_q);
+        free(d_k);
+        free(d_v);
+        free(d_log);
         return damnum;
     }
     /* x ante rmsnorm finis = memo_x[(L)] */
@@ -275,7 +310,8 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
         /* d_x e strato l+1 est gradiens post residuum FFN:
            x[l+1] = x_mid + ffn_out => d_x_mid += d_x, d_ffn_out = d_x */
         float *d_ffn = calloc((size_t)d, sizeof(float));
-        if (!d_ffn) break;
+        if (!d_ffn)
+            break;
         memcpy(d_ffn, d_x, (size_t)d * sizeof(float));
 
         /* retro per w2: d_hb = w2^T * d_ffn (gradiens ad hb_post = SwiGLU output) */
@@ -297,11 +333,11 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
         /* retro per SwiGLU: hb_m = memo_hb = W1 @ xb (PRE-SwiGLU, non opus recomputo) */
         memset(d_hb2, 0, (size_t)df * sizeof(float));
         for (int i = 0; i < df; i++) {
-            float sig = 1.0f / (1.0f + expf(-hb_m[i]));
+            float sig       = 1.0f / (1.0f + expf(-hb_m[i]));
             float silu_val  = hb_m[i] * sig;
             float silu_grad = sig * (1.0f + hb_m[i] * (1.0f - sig));
-            d_hb2[i] = d_hb[i] * silu_val;
-            d_hb[i]  = d_hb[i] * hb2_m[i] * silu_grad;
+            d_hb2[i]        = d_hb[i] * silu_val;
+            d_hb[i]         = d_hb[i] * hb2_m[i] * silu_grad;
         }
 
         /* retro per w1: d_xb_ffn += w1^T * d_hb */
@@ -320,7 +356,8 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
         rmsnorma_retro(d_x_retro, G_rms_ffn, d_xb, x_mid, W_rms_ffn, d);
         /* d_x_mid += d_x_retro (residuum: x_mid intrat in rmsnorm FFN et
            etiam ut residuum: x[l+1] = x_mid + ffn_out) */
-        for (int i = 0; i < d; i++) d_x[i] = d_x[i] + d_x_retro[i];
+        for (int i = 0; i < d; i++)
+            d_x[i] = d_x[i] + d_x_retro[i];
 
         /* --- retropulsio attention --- */
         float *xb_att = ex->memo_xb_att + (size_t)l * d;
@@ -331,12 +368,16 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
            x_mid = x_in + att_out => d_x_in = d_x_mid, d_att_out = d_x_mid */
         /* Prima: retro per wo */
         float *d_att_out = calloc((size_t)d, sizeof(float));
-        if (!d_att_out) break;
+        if (!d_att_out)
+            break;
         memcpy(d_att_out, d_x, (size_t)d * sizeof(float));
 
         /* retro per wo: d_xb_concat = wo^T * d_att_out */
         float *d_xb_concat = calloc((size_t)d, sizeof(float));
-        if (!d_xb_concat) { free(d_att_out); break; }
+        if (!d_xb_concat) {
+            free(d_att_out);
+            break;
+        }
         matvec_trans_accum(d_xb_concat, W_wo, d_att_out, d, d);
         /* ad computandum gradientem wo, opus est xb ANTE wo.
            in passu ante: xb = summa ponderata valorum.
@@ -345,14 +386,15 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
             float *xb_pre_wo = calloc((size_t)d, sizeof(float));
             if (xb_pre_wo) {
                 for (int h = 0; h < H; h++) {
-                    float *xh = xb_pre_wo + h * hd;
-                    int hkv = h / kv_mul;
+                    float *xh    = xb_pre_wo + h * hd;
+                    int hkv      = h / kv_mul;
                     float *att_h = att_m + h * lm;
                     for (int t = 0; t <= positio; t++) {
                         float *v_t = nm->status.cache_valor +
-                                     ((size_t)l * lm + t) * kv_d + hkv * hd;
+                        ((size_t)l * lm + t) * kv_d + hkv * hd;
                         float a = att_h[t];
-                        for (int i = 0; i < hd; i++) xh[i] += a * v_t[i];
+                        for (int i = 0; i < hd; i++)
+                            xh[i] += a * v_t[i];
                     }
                 }
                 ger_accum(G_wo, 1.0f, d_att_out, xb_pre_wo, d, d);
@@ -372,13 +414,14 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
             float *d_q_h = d_q    + h * hd;
             float *att_h = att_m  + h * lm;
             float *d_c_h = d_xb_concat + h * hd;
-            int hkv = h / kv_mul;
+            int hkv      = h / kv_mul;
 
             /* d_v[hkv] += sum_t att_h[t] * d_c_h */
             for (int t = 0; t <= positio; t++) {
                 float *d_v_hkv = d_v + hkv * hd;
-                float a = att_h[t];
-                for (int i = 0; i < hd; i++) d_v_hkv[i] += a * d_c_h[i];
+                float a        = att_h[t];
+                for (int i = 0; i < hd; i++)
+                    d_v_hkv[i] += a * d_c_h[i];
             }
 
             /* d_att_h[t] = dot(d_c_h, v_t) */
@@ -386,9 +429,10 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
             if (d_att_score) {
                 for (int t = 0; t <= positio; t++) {
                     float *v_t = nm->status.cache_valor +
-                                 ((size_t)l * lm + t) * kv_d + hkv * hd;
+                    ((size_t)l * lm + t) * kv_d + hkv * hd;
                     float sc = 0.0f;
-                    for (int i = 0; i < hd; i++) sc += d_c_h[i] * v_t[i];
+                    for (int i = 0; i < hd; i++)
+                        sc += d_c_h[i] * v_t[i];
                     d_att_score[t] = sc;
                 }
 
@@ -403,15 +447,16 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
                     /* d_q_h += sum_t d_score_pre[t] * k_t */
                     for (int t = 0; t <= positio; t++) {
                         float *k_t = nm->status.cache_clavis +
-                                     ((size_t)l * lm + t) * kv_d + hkv * hd;
+                        ((size_t)l * lm + t) * kv_d + hkv * hd;
                         float dsp = d_score_pre[t];
-                        for (int i = 0; i < hd; i++) d_q_h[i] += dsp * k_t[i];
+                        for (int i = 0; i < hd; i++)
+                            d_q_h[i] += dsp * k_t[i];
                     }
 
                     /* d_k[pos, hkv] += d_score_pre[pos] * q_h (positio currens solum) */
                     {
                         float *d_k_hkv = d_k + hkv * hd;
-                        float dsp = d_score_pre[positio];
+                        float dsp      = d_score_pre[positio];
                         for (int i = 0; i < hd; i++)
                             d_k_hkv[i] += dsp * q_h[i];
                     }
@@ -445,9 +490,12 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
 
             /* retro per rmsnorm att */
             memset(d_x_retro, 0, (size_t)d * sizeof(float));
-            rmsnorma_retro(d_x_retro, G_rms_att, d_xb_att,
-                           x_in, W_rms_att, d);
-            for (int i = 0; i < d; i++) d_x[i] = d_x[i] + d_x_retro[i];
+            rmsnorma_retro(
+                d_x_retro, G_rms_att, d_xb_att,
+                x_in, W_rms_att, d
+            );
+            for (int i = 0; i < d; i++)
+                d_x[i] = d_x[i] + d_x_retro[i];
 
             free(d_xb_att);
         }
@@ -476,17 +524,20 @@ float nm_retropulsio(nm_t *nm, nm_exercitatio_t *ex,
  * tonsio gradientium (gradient clipping)
  * ================================================================ */
 
-float nm_gradientes_tonde(nm_exercitatio_t *ex, const nm_config_t *c,
-                          float max_norma)
-{
-    size_t n = nm_magnitudo_ponderum(c, 1);
-    float *g = ex->grad_data;
+float nm_gradientes_tonde(
+    nm_exercitatio_t *ex, const nm_config_t *c,
+    float max_norma
+) {
+    size_t n    = nm_magnitudo_ponderum(c, 1);
+    float *g    = ex->grad_data;
     float norma = 0.0f;
-    for (size_t i = 0; i < n; i++) norma += g[i] * g[i];
+    for (size_t i = 0; i < n; i++)
+        norma += g[i] * g[i];
     norma = sqrtf(norma);
     if (norma > max_norma) {
         float scala = max_norma / norma;
-        for (size_t i = 0; i < n; i++) g[i] *= scala;
+        for (size_t i = 0; i < n; i++)
+            g[i] *= scala;
     }
     return norma;
 }
@@ -495,29 +546,32 @@ float nm_gradientes_tonde(nm_exercitatio_t *ex, const nm_config_t *c,
  * passus AdamW
  * ================================================================ */
 
-void nm_passus_adami(nm_t *nm, nm_exercitatio_t *ex,
-                     float gradus_discendi, float beta1, float beta2,
-                     float epsilon, float desicatio)
-{
+void nm_passus_adami(
+    nm_t *nm, nm_exercitatio_t *ex,
+    float gradus_discendi, float beta1, float beta2,
+    float epsilon, float desicatio
+) {
     ex->passus++;
-    float t = (float)ex->passus;
+    float t   = (float)ex->passus;
     float bc1 = 1.0f - powf(beta1, t);
     float bc2 = 1.0f - powf(beta2, t);
 
     size_t n = nm_magnitudo_ponderum(&nm->config, nm->pondera_communes);
-    float *w  = nm->data;
-    float *g  = ex->grad_data;
-    float *m  = ex->impetus_data;
-    float *v  = ex->vis_data;
+    float *w = nm->data;
+    float *g = ex->grad_data;
+    float *m = ex->impetus_data;
+    float *v = ex->vis_data;
 
     for (size_t i = 0; i < n; i++) {
-        float gi = g[i];
-        m[i] = beta1 * m[i] + (1.0f - beta1) * gi;
-        v[i] = beta2 * v[i] + (1.0f - beta2) * gi * gi;
+        float gi     = g[i];
+        m[i]         = beta1 * m[i] + (1.0f - beta1) * gi;
+        v[i]         = beta2 * v[i] + (1.0f - beta2) * gi * gi;
         float m_corr = m[i] / bc1;
         float v_corr = v[i] / bc2;
-        w[i] -= gradus_discendi * (m_corr / (sqrtf(v_corr) + epsilon)
-                                   + desicatio * w[i]);
+        w[i] -= gradus_discendi * (
+            m_corr / (sqrtf(v_corr) + epsilon)
+            + desicatio * w[i]
+        );
     }
 
     nm_gradientes_pone_nihil(ex, &nm->config);

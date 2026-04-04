@@ -16,18 +16,23 @@
 #include <unistd.h>
 #include <poll.h>
 
-static int mitte_actio(int fd, sessio_t *ses,
-                       int modus, int directio, const char *sermo)
-{
+static int mitte_actio(
+    int fd, sessio_t *ses,
+    int modus, int directio, const char *sermo
+) {
     char ison[256];
     if (sermo && sermo[0]) {
-        snprintf(ison, sizeof(ison),
-                 "{\"typus\":\"actio\",\"modus\":%d,\"directio\":%d,\"sermo\":\"%s\"}",
-                 modus, directio, sermo);
+        snprintf(
+            ison, sizeof(ison),
+            "{\"typus\":\"actio\",\"modus\":%d,\"directio\":%d,\"sermo\":\"%s\"}",
+            modus, directio, sermo
+        );
     } else {
-        snprintf(ison, sizeof(ison),
-                 "{\"typus\":\"actio\",\"modus\":%d,\"directio\":%d}",
-                 modus, directio);
+        snprintf(
+            ison, sizeof(ison),
+            "{\"typus\":\"actio\",\"modus\":%d,\"directio\":%d}",
+            modus, directio
+        );
     }
     return retis_mitte(fd, ses, ison, strlen(ison));
 }
@@ -94,14 +99,15 @@ int main(int argc, char **argv)
         }
 
         struct pollfd fds[2];
-        fds[0].fd = fd;
+        fds[0].fd     = fd;
         fds[0].events = POLLIN;
-        fds[1].fd = STDIN_FILENO;
+        fds[1].fd     = STDIN_FILENO;
         fds[1].events = POLLIN;
 
         int res = poll(fds, 2, 100);
         if (res < 0) {
-            if (!crudus_finis) continue;
+            if (!crudus_finis)
+                continue;
             break;
         }
 
@@ -122,8 +128,10 @@ int main(int argc, char **argv)
                 if (ch == 't' || ch == 'T') {
                     int latus = visus.latus > 0 ? visus.latus : 16;
                     char sermo[32];
-                    snprintf(sermo, sizeof(sermo), "%d %d",
-                             rand() % latus, rand() % latus);
+                    snprintf(
+                        sermo, sizeof(sermo), "%d %d",
+                        rand() % latus, rand() % latus
+                    );
                     mitte_actio(fd, &sessio, TELEPORTA, DIR_NIHIL, sermo);
                 }
                 if (ch == '\033') {
@@ -143,8 +151,10 @@ int main(int argc, char **argv)
 
         /* data a servitore */
         if (fds[0].revents & POLLIN) {
-            ssize_t r = read(fd, alv.data + alv.pos,
-                             sizeof(alv.data) - alv.pos);
+            ssize_t r = read(
+                fd, alv.data + alv.pos,
+                sizeof(alv.data) - alv.pos
+            );
             if (r <= 0) {
                 currens = 0;
                 break;
@@ -156,14 +166,21 @@ int main(int argc, char **argv)
             while (retis_lege_frame(&alv, &payload, &payload_mag) == 1) {
                 uint8_t *clarus;
                 size_t clar_mag;
-                if (retis_revela(&sessio, payload, payload_mag,
-                                 &clarus, &clar_mag) < 0) {
+                if (
+                    retis_revela(
+                        &sessio, payload, payload_mag,
+                        &clarus, &clar_mag
+                    ) < 0
+                ) {
                     currens = 0;
                     break;
                 }
 
                 char *ison = malloc(clar_mag + 1);
-                if (!ison) { currens = 0; break; }
+                if (!ison) {
+                    currens = 0;
+                    break;
+                }
                 memcpy(ison, clarus, clar_mag);
                 ison[clar_mag] = '\0';
 

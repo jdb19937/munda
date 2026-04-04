@@ -75,8 +75,10 @@ int nm_lexator_lege(nm_lexator_t *lex, const char *via);
  * n_signa: *n_signa imponitur numero signorum.
  * bos/eos: 1 = adde signum initii/finis.
  */
-void nm_lexator_disseca(const nm_lexator_t *lex, const char *textus,
-                        int bos, int eos, int *signa, int *n_signa);
+void nm_lexator_disseca(
+    const nm_lexator_t *lex, const char *textus,
+    int bos, int eos, int *signa, int *n_signa
+);
 
 /*
  * nm_lexator_redde — decodat signum in chorda.

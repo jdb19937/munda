@@ -29,17 +29,19 @@ tabula_t *tabula_crea(const char *munda)
 
     int latus = (int)ison_da_numerum(ison, "latus");
     free(ison);
-    if (latus < 4) latus = 4;
-    if (latus > 128) latus = 128;
+    if (latus < 4)
+        latus = 4;
+    if (latus > 128)
+        latus = 128;
 
     tabula_t *tab = malloc(sizeof(*tab));
     if (!tab)
         return NULL;
 
-    tab->latus = latus;
+    tab->latus      = latus;
     tab->gradus_num = 0;
-    tab->munda = munda;
-    tab->cellulae = calloc((size_t)latus * latus, sizeof(cella_t));
+    tab->munda      = munda;
+    tab->cellulae   = calloc((size_t)latus * latus, sizeof(cella_t));
     if (!tab->cellulae) {
         free(tab);
         return NULL;
@@ -78,9 +80,10 @@ typedef struct {
 } imple_ctx_t;
 
 /* applica attributa individualia ex paribus ISON */
-static void applica_attributa(cella_t *c, genus_t genus,
-                              const ison_par_t *pp, int n)
-{
+static void applica_attributa(
+    cella_t *c, genus_t genus,
+    const ison_par_t *pp, int n
+) {
     c->pondus = par_da_int(pp, n, "pondus", c->pondus);
 
     phylum_t ph = genera_ops[genus].phylum;
@@ -88,12 +91,12 @@ static void applica_attributa(cella_t *c, genus_t genus,
         c->p.animus.vires     = par_da_int(pp, n, "vires", c->p.animus.vires);
         c->p.animus.vitalitas = par_da_int(pp, n, "vitalitas", c->p.animus.vitalitas);
         c->p.animus.satietas  = par_da_int(pp, n, "satietas", c->p.animus.satietas);
-        const char *m = par_da_chordam(pp, n, "mens", "");
+        const char *m         = par_da_chordam(pp, n, "mens", "");
         if (m[0])
             snprintf(c->p.animus.mens, MENS_MAX, "%s", m);
     } else if (ph == DEI) {
         c->p.deus.potentia = par_da_int(pp, n, "potentia", c->p.deus.potentia);
-        const char *m = par_da_chordam(pp, n, "mens", "");
+        const char *m      = par_da_chordam(pp, n, "mens", "");
         if (m[0])
             snprintf(c->p.deus.mens, MENS_MAX, "%s", m);
     }
@@ -115,9 +118,10 @@ static void applica_attributa(cella_t *c, genus_t genus,
 
 static void imple_lineam(const ison_par_t *pp, int n, void *ctx)
 {
-    imple_ctx_t *ic = ctx;
+    imple_ctx_t *ic   = ctx;
     const char *nomen = par_da_chordam(pp, n, "nomen", "");
-    if (!nomen[0]) return;
+    if (!nomen[0])
+        return;
 
     /* quaere positionem in tabula.ison */
     char via_x[128], via_y[128];
@@ -147,7 +151,8 @@ void tabula_imple(tabula_t *tab)
     char via[256];
     snprintf(via, sizeof(via), "%s/tabula.ison", tab->munda);
     char *tabula_ison = ison_lege_plicam(via);
-    if (!tabula_ison) return;
+    if (!tabula_ison)
+        return;
 
     /* murus perimeter */
     char *murus_val = ison_da_chordam(tabula_ison, "murus");
@@ -170,8 +175,10 @@ void tabula_imple(tabula_t *tab)
         for (int g = 0; g < GENERA_ISONL_NUM; g++) {
             char *val = ison_da_chordam(sap_crudum, genera_isonl[g].nomen);
             if (val) {
-                snprintf(tab->sapientum[genera_isonl[g].genus],
-                         sizeof(tab->sapientum[0]), "%s", val);
+                snprintf(
+                    tab->sapientum[genera_isonl[g].genus],
+                    sizeof(tab->sapientum[0]), "%s", val
+                );
                 free(val);
             }
         }
@@ -181,10 +188,13 @@ void tabula_imple(tabula_t *tab)
     /* onera genera ex ISONL */
     for (int g = 0; g < GENERA_ISONL_NUM; g++) {
         char isonl_via[256];
-        snprintf(isonl_via, sizeof(isonl_via), "%s/%s/%s.isonl",
-                 tab->munda, genera_isonl[g].phylum, genera_isonl[g].nomen);
+        snprintf(
+            isonl_via, sizeof(isonl_via), "%s/%s/%s.isonl",
+            tab->munda, genera_isonl[g].phylum, genera_isonl[g].nomen
+        );
         char *isonl = ison_lege_plicam(isonl_via);
-        if (!isonl) continue;
+        if (!isonl)
+            continue;
 
         imple_ctx_t ctx = {
             .tab = tab,
@@ -220,9 +230,10 @@ const cella_t *tabula_da_const(const tabula_t *tab, int x, int y)
     return &tab->cellulae[y * tab->latus + x];
 }
 
-void tabula_vicinum(const tabula_t *tab, int x, int y, directio_t dir,
-                    int *vx, int *vy)
-{
+void tabula_vicinum(
+    const tabula_t *tab, int x, int y, directio_t dir,
+    int *vx, int *vy
+) {
     /* delta pro quaque directione */
     static const int dx[] = { 0,  0,  0, -1,  1 };
     static const int dy[] = { 0, -1,  1,  0,  0 };
@@ -235,8 +246,8 @@ void tabula_vicinum(const tabula_t *tab, int x, int y, directio_t dir,
 void tabula_pone(tabula_t *tab, int x, int y, genus_t genus)
 {
     cella_t *c = tabula_da(tab, x, y);
-    c->genus = genus;
-    c->motum = 0;
+    c->genus   = genus;
+    c->motum   = 0;
     if (genera_ops[genus].praepara)
         genera_ops[genus].praepara(c);
 }
@@ -245,27 +256,33 @@ void tabula_pone(tabula_t *tab, int x, int y, genus_t genus)
  * sermo — adde verba ad receptaculum auditorum animi
  * ================================================================ */
 
-static void adde_sermonem(cella_t *vic, const char *ab_nomine,
-                          const char *sermo)
-{
-    if (!sermo[0]) return;
+static void adde_sermonem(
+    cella_t *vic, const char *ab_nomine,
+    const char *sermo
+) {
+    if (!sermo[0])
+        return;
     phylum_t ph = genera_ops[vic->genus].phylum;
-    if (ph != ANIMA && ph != DEI) return;
+    if (ph != ANIMA && ph != DEI)
+        return;
 
-    char *audita = (ph == DEI) ? vic->p.deus.audita : vic->p.animus.audita;
-    size_t cur = strlen(audita);
+    char *audita    = (ph == DEI) ? vic->p.deus.audita : vic->p.animus.audita;
+    size_t cur      = strlen(audita);
     size_t reliquum = AUDITA_MAX - cur - 1;
-    if (reliquum < 8) return;  /* receptaculum plenum */
+    if (reliquum < 8)
+        return;  /* receptaculum plenum */
 
     snprintf(audita + cur, reliquum, "[%s]: %s\n", ab_nomine, sermo);
 }
 
-static void clama_ad_vicinos(tabula_t *tab, int cx, int cy,
-                             const char *ab_nomine, const char *sermo)
-{
+static void clama_ad_vicinos(
+    tabula_t *tab, int cx, int cy,
+    const char *ab_nomine, const char *sermo
+) {
     for (int dy = -1; dy <= 1; dy++) {
         for (int dx = -1; dx <= 1; dx++) {
-            if (dx == 0 && dy == 0) continue;
+            if (dx == 0 && dy == 0)
+                continue;
             cella_t *vic = tabula_da(tab, cx + dx, cy + dy);
             adde_sermonem(vic, ab_nomine, sermo);
         }
@@ -282,12 +299,13 @@ static void clama_ad_vicinos(tabula_t *tab, int cx, int cy,
 
 /* mete catenam pellendam: longitudo et summa ponderum.
  * reddit 1 si catena in vacuum terminatur, 0 si non. */
-static int meti_catenam(tabula_t *tab, int sx, int sy, directio_t dir,
-                        int *catena_num, int *summa_pond)
-{
+static int meti_catenam(
+    tabula_t *tab, int sx, int sy, directio_t dir,
+    int *catena_num, int *summa_pond
+) {
     int latus = tab->latus;
-    int n = 0, sp = 0;
-    int cx = sx, cy = sy;
+    int n     = 0, sp = 0;
+    int cx    = sx, cy = sy;
     while (n < latus) {
         cella_t *c = tabula_da(tab, cx, cy);
         if (c->genus == VACUUM)
@@ -296,7 +314,8 @@ static int meti_catenam(tabula_t *tab, int sx, int sy, directio_t dir,
         n++;
         int nx, ny;
         tabula_vicinum(tab, cx, cy, dir, &nx, &ny);
-        cx = nx; cy = ny;
+        cx = nx;
+        cy = ny;
     }
     *catena_num = n;
     *summa_pond = sp;
@@ -313,29 +332,35 @@ struct propositum {
 };
 
 /* an cellula (qx,qy) in via propositi sit */
-static int propositum_continet(const tabula_t *tab,
-                               const struct propositum *p,
-                               int qx, int qy)
-{
+static int propositum_continet(
+    const tabula_t *tab,
+    const struct propositum *p,
+    int qx, int qy
+) {
     int cx = p->pulsor_x, cy = p->pulsor_y;
-    if (cx == qx && cy == qy) return 1;
+    if (cx == qx && cy == qy)
+        return 1;
     for (int i = 0; i < p->catena_num + 1; i++) {
         tabula_vicinum(tab, cx, cy, p->dir, &cx, &cy);
-        if (cx == qx && cy == qy) return 1;
+        if (cx == qx && cy == qy)
+            return 1;
     }
     return 0;
 }
 
 /* an duo proposita vias communes habeant */
-static int conflictum(const tabula_t *tab,
-                      const struct propositum *a,
-                      const struct propositum *b)
-{
+static int conflictum(
+    const tabula_t *tab,
+    const struct propositum *a,
+    const struct propositum *b
+) {
     int cx = b->pulsor_x, cy = b->pulsor_y;
-    if (propositum_continet(tab, a, cx, cy)) return 1;
+    if (propositum_continet(tab, a, cx, cy))
+        return 1;
     for (int i = 0; i < b->catena_num + 1; i++) {
         tabula_vicinum(tab, cx, cy, b->dir, &cx, &cy);
-        if (propositum_continet(tab, a, cx, cy)) return 1;
+        if (propositum_continet(tab, a, cx, cy))
+            return 1;
     }
     return 0;
 }
@@ -354,25 +379,27 @@ static void exsequi_pulsionem(tabula_t *tab, const struct propositum *p)
     for (int k = n - 1; k > 0; k--) {
         cella_t *dst = tabula_da(tab, xs[k], ys[k]);
         cella_t *src = tabula_da(tab, xs[k-1], ys[k-1]);
-        *dst = *src;
-        dst->motum = 1;
+        *dst         = *src;
+        dst->motum   = 1;
     }
 
     /* munda originem */
     cella_t *orig = tabula_da(tab, xs[0], ys[0]);
-    orig->genus = VACUUM;
-    orig->pondus = 0;
-    orig->motum = 1;
+    orig->genus   = VACUUM;
+    orig->pondus  = 0;
+    orig->motum   = 1;
     memset(&orig->p.animus, 0, sizeof(orig->p.animus));
 }
 
 /* parse coordinatas teleportationis ex sermo.
  * "X Y" = absolutae, "+DX +DY" = relativae ('+' detegit modum).
  * reddit 1 si parsum successum, 0 si defectus. */
-static int parse_teleporta(const char *sermo, int cx, int cy, int latus,
-                           int *tx, int *ty)
-{
-    if (!sermo[0]) return 0;
+static int parse_teleporta(
+    const char *sermo, int cx, int cy, int latus,
+    int *tx, int *ty
+) {
+    if (!sermo[0])
+        return 0;
 
     int relativum = (strchr(sermo, '+') != NULL);
 
@@ -412,7 +439,7 @@ static void ursi_praegradum(tabula_t *tab)
 {
     struct propositum proposita[PROPOSITA_MAX];
     int prop_num = 0;
-    int latus = tab->latus;
+    int latus    = tab->latus;
 
     for (int y = 0; y < latus; y++) {
         for (int x = 0; x < latus; x++) {
@@ -421,7 +448,10 @@ static void ursi_praegradum(tabula_t *tab)
                 continue;
 
             genus_ops_t *ops = &genera_ops[URSUS];
-            if (!ops->cogito) { c->motum = 1; continue; }
+            if (!ops->cogito) {
+                c->motum = 1;
+                continue;
+            }
 
             actio_t act = ops->cogito(tab, x, y);
 
@@ -430,15 +460,20 @@ static void ursi_praegradum(tabula_t *tab)
                 c->p.animus.mens_gradus = tab->gradus_num;
             }
 
-            if (act.modus == QUIESCE) { c->motum = 1; continue; }
+            if (act.modus == QUIESCE) {
+                c->motum = 1;
+                continue;
+            }
 
             /* loquere / clama */
             if (act.modus == LOQUERE) {
                 if (act.directio != DIR_NIHIL) {
                     int lx, ly;
                     tabula_vicinum(tab, x, y, act.directio, &lx, &ly);
-                    adde_sermonem(tabula_da(tab, lx, ly),
-                                  c->p.animus.nomen, act.sermo);
+                    adde_sermonem(
+                        tabula_da(tab, lx, ly),
+                        c->p.animus.nomen, act.sermo
+                    );
                 }
                 c->p.animus.ultima_modus = LOQUERE;
                 c->p.animus.ultima_directio = act.directio;
@@ -457,7 +492,7 @@ static void ursi_praegradum(tabula_t *tab)
 
             /* teleporta — coordinatis, non directione */
             if (act.modus == TELEPORTA) {
-                c->p.animus.ultima_modus = TELEPORTA;
+                c->p.animus.ultima_modus    = TELEPORTA;
                 c->p.animus.ultima_directio = DIR_NIHIL;
                 int tx, ty;
                 if (parse_teleporta(act.sermo, x, y, latus, &tx, &ty)) {
@@ -465,8 +500,10 @@ static void ursi_praegradum(tabula_t *tab)
                     if (genera_ops[dest->genus].phylum == DEI) {
                         c->p.animus.ultima_permissa = 0;
                         c->motum = 1;
-                    } else if (genera_ops[dest->genus].phylum == ANIMA &&
-                               c->p.animus.vires > dest->p.animus.vitalitas) {
+                    } else if (
+                        genera_ops[dest->genus].phylum == ANIMA &&
+                        c->p.animus.vires > dest->p.animus.vitalitas
+                    ) {
                         c->p.animus.ultima_permissa = 1;
                         move_animum(tab, x, y, tx, ty);
                     } else if (genera_ops[dest->genus].phylum == CIBUS) {
@@ -493,25 +530,30 @@ static void ursi_praegradum(tabula_t *tab)
             tabula_vicinum(tab, x, y, dir, &vx, &vy);
             cella_t *vic = tabula_da(tab, vx, vy);
 
-            c->p.animus.ultima_modus = act.modus;
+            c->p.animus.ultima_modus    = act.modus;
             c->p.animus.ultima_directio = dir;
 
             modus_t m = act.modus;
-            if (m == PELLE   && vic->genus == VACUUM) m = MOVE;
-            if (m == CAPE    && vic->genus == VACUUM) m = MOVE;
-            if (m == OPPUGNA && vic->genus == VACUUM) m = MOVE;
+            if (m == PELLE   && vic->genus == VACUUM)
+                m = MOVE;
+            if (m == CAPE    && vic->genus == VACUUM)
+                m = MOVE;
+            if (m == OPPUGNA && vic->genus == VACUUM)
+                m = MOVE;
 
             if (m == PELLE) {
                 /* pelle catenam — pondere fundata */
                 int cn, sp;
-                if (meti_catenam(tab, vx, vy, dir, &cn, &sp) &&
+                if (
+                    meti_catenam(tab, vx, vy, dir, &cn, &sp) &&
                     sp <= c->p.animus.vires &&
-                    prop_num < PROPOSITA_MAX) {
-                    proposita[prop_num].pulsor_x = x;
-                    proposita[prop_num].pulsor_y = y;
-                    proposita[prop_num].dir = dir;
+                    prop_num < PROPOSITA_MAX
+                ) {
+                    proposita[prop_num].pulsor_x   = x;
+                    proposita[prop_num].pulsor_y   = y;
+                    proposita[prop_num].dir        = dir;
                     proposita[prop_num].catena_num = cn;
-                    proposita[prop_num].validum = 1;
+                    proposita[prop_num].validum    = 1;
                     prop_num++;
                 } else {
                     c->p.animus.ultima_permissa = 0;
@@ -522,21 +564,25 @@ static void ursi_praegradum(tabula_t *tab)
                 c->p.animus.satietas += (vic->genus == FUNGUS) ? 2 : 1;
                 c->p.animus.ultima_permissa = 1;
                 move_animum(tab, x, y, vx, vy);
-            } else if (m == OPPUGNA &&
-                       genera_ops[vic->genus].phylum == ANIMA &&
-                       c->p.animus.vires > vic->p.animus.vitalitas) {
+            } else if (
+                m == OPPUGNA &&
+                genera_ops[vic->genus].phylum == ANIMA &&
+                c->p.animus.vires > vic->p.animus.vitalitas
+            ) {
                 /* oppugna: neca animum et move in locum eius */
                 c->p.animus.ultima_permissa = 1;
                 move_animum(tab, x, y, vx, vy);
             } else if (m == TRAHE && vic->genus == VACUUM) {
                 directio_t retro = (dir == SEPTENTRIO) ? MERIDIES :
-                                   (dir == MERIDIES) ? SEPTENTRIO :
-                                   (dir == OCCIDENS) ? ORIENS : OCCIDENS;
+                (dir == MERIDIES) ? SEPTENTRIO :
+                (dir == OCCIDENS) ? ORIENS : OCCIDENS;
                 int rx, ry;
                 tabula_vicinum(tab, x, y, retro, &rx, &ry);
                 cella_t *post = tabula_da(tab, rx, ry);
-                int trahibile = (post->genus != VACUUM &&
-                                 post->pondus <= c->p.animus.vires);
+                int trahibile = (
+                    post->genus != VACUUM &&
+                    post->pondus <= c->p.animus.vires
+                );
                 move_animum(tab, x, y, vx, vy);
                 if (trahibile) {
                     cella_t tractum = *post;
@@ -561,9 +607,11 @@ static void ursi_praegradum(tabula_t *tab)
 
     /* detege conflictus inter pulsiones */
     for (int i = 0; i < prop_num; i++) {
-        if (!proposita[i].validum) continue;
+        if (!proposita[i].validum)
+            continue;
         for (int j = i + 1; j < prop_num; j++) {
-            if (!proposita[j].validum) continue;
+            if (!proposita[j].validum)
+                continue;
             if (conflictum(tab, &proposita[i], &proposita[j])) {
                 proposita[i].validum = 0;
                 proposita[j].validum = 0;
@@ -573,8 +621,10 @@ static void ursi_praegradum(tabula_t *tab)
 
     /* exsequi pulsiones validas */
     for (int i = 0; i < prop_num; i++) {
-        cella_t *urs = tabula_da(tab,
-            proposita[i].pulsor_x, proposita[i].pulsor_y);
+        cella_t *urs = tabula_da(
+            tab,
+            proposita[i].pulsor_x, proposita[i].pulsor_y
+        );
         if (proposita[i].validum) {
             urs->p.animus.ultima_permissa = 1;
             exsequi_pulsionem(tab, &proposita[i]);
@@ -598,7 +648,10 @@ static void dei_praegradum(tabula_t *tab)
                 continue;
 
             genus_ops_t *ops = &genera_ops[c->genus];
-            if (!ops->cogito) { c->motum = 1; continue; }
+            if (!ops->cogito) {
+                c->motum = 1;
+                continue;
+            }
 
             actio_t act = ops->cogito(tab, x, y);
 
@@ -607,15 +660,20 @@ static void dei_praegradum(tabula_t *tab)
                 c->p.deus.mens_gradus = tab->gradus_num;
             }
 
-            if (act.modus == QUIESCE) { c->motum = 1; continue; }
+            if (act.modus == QUIESCE) {
+                c->motum = 1;
+                continue;
+            }
 
             /* loquere / clama */
             if (act.modus == LOQUERE) {
                 if (act.directio != DIR_NIHIL) {
                     int lx, ly;
                     tabula_vicinum(tab, x, y, act.directio, &lx, &ly);
-                    adde_sermonem(tabula_da(tab, lx, ly),
-                                  c->p.deus.nomen, act.sermo);
+                    adde_sermonem(
+                        tabula_da(tab, lx, ly),
+                        c->p.deus.nomen, act.sermo
+                    );
                 }
                 c->p.deus.ultima_modus = LOQUERE;
                 c->p.deus.ultima_directio = act.directio;
@@ -634,7 +692,7 @@ static void dei_praegradum(tabula_t *tab)
 
             /* teleporta — coordinatis, non directione */
             if (act.modus == TELEPORTA) {
-                c->p.deus.ultima_modus = TELEPORTA;
+                c->p.deus.ultima_modus    = TELEPORTA;
                 c->p.deus.ultima_directio = DIR_NIHIL;
                 int tx, ty;
                 if (parse_teleporta(act.sermo, x, y, latus, &tx, &ty)) {
@@ -663,12 +721,14 @@ static void dei_praegradum(tabula_t *tab)
             tabula_vicinum(tab, x, y, dir, &vx, &vy);
             cella_t *vic = tabula_da(tab, vx, vy);
 
-            c->p.deus.ultima_modus = act.modus;
+            c->p.deus.ultima_modus    = act.modus;
             c->p.deus.ultima_directio = dir;
 
             modus_t m = act.modus;
-            if (m == PELLE   && vic->genus == VACUUM) m = MOVE;
-            if (m == OPPUGNA && vic->genus == VACUUM) m = MOVE;
+            if (m == PELLE   && vic->genus == VACUUM)
+                m = MOVE;
+            if (m == OPPUGNA && vic->genus == VACUUM)
+                m = MOVE;
 
             if (m == PELLE) {
                 /* dei pellit sine limite virium */
@@ -676,17 +736,21 @@ static void dei_praegradum(tabula_t *tab)
                 (void)sp;
                 if (meti_catenam(tab, vx, vy, dir, &cn, &sp)) {
                     struct propositum p;
-                    p.pulsor_x = x; p.pulsor_y = y;
-                    p.dir = dir; p.catena_num = cn;
-                    p.validum = 1;
+                    p.pulsor_x   = x;
+                    p.pulsor_y   = y;
+                    p.dir        = dir;
+                    p.catena_num = cn;
+                    p.validum    = 1;
                     exsequi_pulsionem(tab, &p);
                     c = tabula_da(tab, x, y);
                 } else {
                     c->p.deus.ultima_permissa = 0;
                     c->motum = 1;
                 }
-            } else if (m == OPPUGNA &&
-                       genera_ops[vic->genus].phylum == ANIMA) {
+            } else if (
+                m == OPPUGNA &&
+                genera_ops[vic->genus].phylum == ANIMA
+            ) {
                 /* dei oppugnat quemlibet animum */
                 c->p.deus.ultima_permissa = 1;
                 move_animum(tab, x, y, vx, vy);
@@ -746,17 +810,19 @@ void tabula_gradus(tabula_t *tab)
                 if (act.directio != DIR_NIHIL) {
                     int lx, ly;
                     tabula_vicinum(tab, x, y, act.directio, &lx, &ly);
-                    adde_sermonem(tabula_da(tab, lx, ly),
-                                  c->p.animus.nomen, act.sermo);
+                    adde_sermonem(
+                        tabula_da(tab, lx, ly),
+                        c->p.animus.nomen, act.sermo
+                    );
                 }
-                c->p.animus.ultima_modus = LOQUERE;
+                c->p.animus.ultima_modus    = LOQUERE;
                 c->p.animus.ultima_directio = act.directio;
                 c->p.animus.ultima_permissa = 1;
                 continue;
             }
             if (act.modus == CLAMA) {
                 clama_ad_vicinos(tab, x, y, c->p.animus.nomen, act.sermo);
-                c->p.animus.ultima_modus = CLAMA;
+                c->p.animus.ultima_modus    = CLAMA;
                 c->p.animus.ultima_directio = DIR_NIHIL;
                 c->p.animus.ultima_permissa = 1;
                 continue;
@@ -764,15 +830,17 @@ void tabula_gradus(tabula_t *tab)
 
             /* teleporta — coordinatis, non directione */
             if (act.modus == TELEPORTA) {
-                c->p.animus.ultima_modus = TELEPORTA;
+                c->p.animus.ultima_modus    = TELEPORTA;
                 c->p.animus.ultima_directio = DIR_NIHIL;
                 int tx, ty;
                 if (parse_teleporta(act.sermo, x, y, latus, &tx, &ty)) {
                     cella_t *dest = tabula_da(tab, tx, ty);
                     if (genera_ops[dest->genus].phylum == DEI) {
                         c->p.animus.ultima_permissa = 0;
-                    } else if (genera_ops[dest->genus].phylum == ANIMA &&
-                               c->p.animus.vires > dest->p.animus.vitalitas) {
+                    } else if (
+                        genera_ops[dest->genus].phylum == ANIMA &&
+                        c->p.animus.vires > dest->p.animus.vitalitas
+                    ) {
                         c->p.animus.ultima_permissa = 1;
                         cella_t movens = *c;
                         *dest = movens;
@@ -816,12 +884,14 @@ void tabula_gradus(tabula_t *tab)
 
             cella_t *vic = tabula_da(tab, vx, vy);
 
-            c->p.animus.ultima_modus = act.modus;
+            c->p.animus.ultima_modus    = act.modus;
             c->p.animus.ultima_directio = dir;
 
             modus_t m = act.modus;
-            if (m == CAPE && vic->genus == VACUUM) m = MOVE;
-            if (m == OPPUGNA && vic->genus == VACUUM) m = MOVE;
+            if (m == CAPE && vic->genus == VACUUM)
+                m = MOVE;
+            if (m == OPPUGNA && vic->genus == VACUUM)
+                m = MOVE;
 
             int permissum = 0;
 
@@ -830,9 +900,11 @@ void tabula_gradus(tabula_t *tab)
             else if (m == CAPE && genera_ops[vic->genus].phylum == CIBUS) {
                 c->p.animus.satietas += (vic->genus == FUNGUS) ? 2 : 1;
                 permissum = 1;
-            } else if (m == OPPUGNA &&
-                       genera_ops[vic->genus].phylum == ANIMA &&
-                       c->p.animus.vires > vic->p.animus.vitalitas) {
+            } else if (
+                m == OPPUGNA &&
+                genera_ops[vic->genus].phylum == ANIMA &&
+                c->p.animus.vires > vic->p.animus.vitalitas
+            ) {
                 permissum = 1;
             }
 

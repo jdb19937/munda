@@ -29,8 +29,10 @@ directio_t fictio_quaere_proximum(const fictio_vicinitas_t *vic, char signum);
 /*
  * an signum sit vicinum (distantia 1) in directione data.
  */
-int fictio_vicinum_est(const fictio_vicinitas_t *vic,
-                       char signum, directio_t dir);
+int fictio_vicinum_est(
+    const fictio_vicinitas_t *vic,
+    char signum, directio_t dir
+);
 
 /* nomen directionis ("septentrio", "meridies", ...) */
 const char *fictio_dir_nomen(directio_t dir);

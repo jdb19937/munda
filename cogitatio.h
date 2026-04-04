@@ -48,13 +48,15 @@ typedef struct {
  *   instructiones — textus specificus (e.g. "pelle saxa ad orientem")
  *                   appenditur ad system prompt communem
  */
-void cogitatio_praecogita(struct tabula *tab, genus_t genus,
-                          int limen, int modulus,
-                          int plica_mag, int patientia,
-                          int radius,
-                          const char *sapientum,
-                          const char *instructiones,
-                          praecogitata_t *res);
+void cogitatio_praecogita(
+    struct tabula *tab, genus_t genus,
+    int limen, int modulus,
+    int plica_mag, int patientia,
+    int radius,
+    const char *sapientum,
+    const char *instructiones,
+    praecogitata_t *res
+);
 
 actio_t cogitatio_quaere(praecogitata_t *res, int x, int y);
 
@@ -65,9 +67,11 @@ actio_t cogitatio_quaere(praecogitata_t *res, int x, int y);
  * et statum cuiusque cellulae (ultima_actio, satietas, audita, mens).
  * responsum idem format: {"nomen": "actio", "nomen.mens": "cogitationes"}
  */
-void cogitatio_praecogita_tabulam(struct tabula *tab, genus_t genus,
-                                   const char *sapientum,
-                                   const char *instructiones,
-                                   praecogitata_t *res);
+void cogitatio_praecogita_tabulam(
+    struct tabula *tab, genus_t genus,
+    const char *sapientum,
+    const char *instructiones,
+    praecogitata_t *res
+);
 
 #endif /* COGITATIO_H */

@@ -30,15 +30,19 @@ struct ison_par;
  * quaere primam occurrentiam cuiuslibet chordae ex serie in textu.
  * reddit indicem chordae inventae, vel -1 si nulla inventa.
  */
-int prima_occurrentia(const char *textus,
-                      const char *const *chordae, int num);
+int prima_occurrentia(
+    const char *textus,
+    const char *const *chordae, int num
+);
 
 /*
  * scribe nuntium erroris ad stderr et exi.
  * includit nomen plicae et numerum lineae.
  */
-NORETURN void morire(const char *plica, int linea,
-                     const char *fmt, ...);
+NORETURN void morire(
+    const char *plica, int linea,
+    const char *fmt, ...
+);
 
 /* macro: morire cum __FILE__ et __LINE__ automatice */
 #define MORIRE(...) morire(__FILE__, __LINE__, __VA_ARGS__)
@@ -50,10 +54,12 @@ NORETURN void morire(const char *plica, int linea,
  *   → conatus:  "high" (vel "" si absens)
  * omnia scribuntur in pulvinaria data. spec non mutatur.
  */
-void lege_sapientum(const char *spec,
-                    char *provisor, size_t pmag,
-                    char *nomen, size_t nmag,
-                    char *conatus,  size_t cmag);
+void lege_sapientum(
+    const char *spec,
+    char *provisor, size_t pmag,
+    char *nomen, size_t nmag,
+    char *conatus,  size_t cmag
+);
 
 /*
  * lege totum plicam in memoriam. vocans liberet per free().
@@ -81,10 +87,14 @@ int lexicon_numerus(const lexicon_t *lex);
 const dictum_t *lexicon_dictum(const lexicon_t *lex, int index);
 
 /* lexicon cum clavibus compositis "prima:secunda" */
-void lexicon_adde_compositam(lexicon_t *lex, const char *prima,
-                              const char *secunda, long additum);
-long lexicon_da_compositam(const lexicon_t *lex, const char *prima,
-                            const char *secunda);
+void lexicon_adde_compositam(
+    lexicon_t *lex, const char *prima,
+    const char *secunda, long additum
+);
+long lexicon_da_compositam(
+    const lexicon_t *lex, const char *prima,
+    const char *secunda
+);
 
 /* enumera genera unica (partes primas ante ':') in tabulam */
 int lexicon_genera(const lexicon_t *lex, char genera[][64], int max_genera);
@@ -97,8 +107,10 @@ char *lege_plicam(const char *via);
  * lege_instructiones — legit plicam .md ex mundo.
  * construit "{munda}/{phylum}/{genus}.md", legit, monet si absens.
  */
-char *lege_instructiones(const char *munda, const char *phylum,
-                         const char *genus);
+char *lege_instructiones(
+    const char *munda, const char *phylum,
+    const char *genus
+);
 
 /*
  * lege plicam .ison iuxta plicam .c fontem et extrahe parametra.
@@ -108,12 +120,16 @@ char *lege_instructiones(const char *munda, const char *phylum,
 int lege_parametra(const char *plica_c, struct ison_par *pares, int max);
 
 /* da valorem numericam ex paribus per clavem, vel praefinitum si non inventa */
-int par_da_int(const struct ison_par *pares, int num,
-               const char *clavis, int praefinitum);
+int par_da_int(
+    const struct ison_par *pares, int num,
+    const char *clavis, int praefinitum
+);
 
 /* da valorem chordae ex paribus — reddit in pulvinar statum, vel praefinitum */
-const char *par_da_chordam(const struct ison_par *pares, int num,
-                           const char *clavis, const char *praefinitum);
+const char *par_da_chordam(
+    const struct ison_par *pares, int num,
+    const char *clavis, const char *praefinitum
+);
 
 /* --- I/O plena (cum retry) --- */
 
@@ -130,8 +146,10 @@ uint32_t leg24(const uint8_t *p);
 /* --- hex codificatio --- */
 
 void octeti_ad_hex(const uint8_t *src, size_t mag, char *dest);
-int  hex_ad_octetos(const char *hex, size_t hex_mag,
-                    uint8_t *dest, size_t dest_mag);
+int  hex_ad_octetos(
+    const char *hex, size_t hex_mag,
+    uint8_t *dest, size_t dest_mag
+);
 
 /* --- UTF-8 utilia --- */
 

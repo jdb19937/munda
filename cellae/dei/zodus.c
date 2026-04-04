@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-int zodus_imperium = 0;   /* DIR_NIHIL */
+int zodus_imperium  = 0;   /* DIR_NIHIL */
 int zodus_teleporta = 0;  /* 1 = teleporta fortuito */
 
 static void zodus_praepara(cella_t *c)
@@ -20,14 +20,17 @@ static void zodus_praepara(cella_t *c)
 
 static actio_t zodus_cogito(const struct tabula *tab, int x, int y)
 {
-    (void)x; (void)y;
+    (void)x;
+    (void)y;
 
     if (zodus_teleporta) {
         zodus_teleporta = 0;
-        actio_t act = ACTIO_NIHIL;
-        act.modus = TELEPORTA;
-        snprintf(act.sermo, SERMO_MAX, "%d %d",
-                 rand() % tab->latus, rand() % tab->latus);
+        actio_t act     = ACTIO_NIHIL;
+        act.modus       = TELEPORTA;
+        snprintf(
+            act.sermo, SERMO_MAX, "%d %d",
+            rand() % tab->latus, rand() % tab->latus
+        );
         return act;
     }
 
@@ -37,8 +40,8 @@ static actio_t zodus_cogito(const struct tabula *tab, int x, int y)
     if (dir == DIR_NIHIL)
         return ACTIO_NIHIL;
 
-    actio_t act = ACTIO_NIHIL;
-    act.modus = PELLE;
+    actio_t act  = ACTIO_NIHIL;
+    act.modus    = PELLE;
     act.directio = dir;
     return act;
 }
@@ -47,6 +50,6 @@ void zodus_initia(void)
 {
     cella_initia_ops(ZODUS, "\xE2\x9A\xA1", 'Z');
 
-    genera_ops[ZODUS].praepara     = zodus_praepara;
-    genera_ops[ZODUS].cogito       = zodus_cogito;
+    genera_ops[ZODUS].praepara = zodus_praepara;
+    genera_ops[ZODUS].cogito   = zodus_cogito;
 }

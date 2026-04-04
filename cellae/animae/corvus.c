@@ -30,9 +30,11 @@ void corvus_praecogita(tabula_t *tab)
         instructiones = lege_instructiones(tab->munda, "animae", "corvus");
     const char *sap = tab->sapientum[CORVUS][0] ?
                       tab->sapientum[CORVUS] : NULL;
-    cogitatio_praecogita(tab, CORVUS, 1, 1,
-                         1, 1, 5,
-                         sap, instructiones, &praecogitata);
+    cogitatio_praecogita(
+        tab, CORVUS, 1, 1,
+        1, 1, 5,
+        sap, instructiones, &praecogitata
+    );
 }
 
 static actio_t corvus_cogito(const struct tabula *tab, int x, int y)
@@ -43,10 +45,11 @@ static actio_t corvus_cogito(const struct tabula *tab, int x, int y)
 
 /* --- fictio: cape cibum, fuge ursos, clama interdum --- */
 
-static void corvus_fictio(const char *nomen,
-                          const struct fictio_vicinitas *vic,
-                          char *actio, size_t mag)
-{
+static void corvus_fictio(
+    const char *nomen,
+    const struct fictio_vicinitas *vic,
+    char *actio, size_t mag
+) {
     (void)nomen;
 
     /* fuge ursum vicinum */
@@ -67,8 +70,10 @@ static void corvus_fictio(const char *nomen,
 
     /* cape cibum vicinum — avide */
     for (int d = SEPTENTRIO; d <= ORIENS; d++) {
-        if (fictio_vicinum_est(vic, 'r', (directio_t)d) ||
-            fictio_vicinum_est(vic, 'f', (directio_t)d)) {
+        if (
+            fictio_vicinum_est(vic, 'r', (directio_t)d) ||
+            fictio_vicinum_est(vic, 'f', (directio_t)d)
+        ) {
             snprintf(actio, mag, "cape %s", fictio_dir_nomen((directio_t)d));
             return;
         }
@@ -97,7 +102,7 @@ void corvus_initia(void)
 {
     cella_initia_ops(CORVUS, "\xF0\x9F\x90\xA6", 'C');
 
-    genera_ops[CORVUS].praepara     = corvus_praepara;
-    genera_ops[CORVUS].cogito       = corvus_cogito;
+    genera_ops[CORVUS].praepara = corvus_praepara;
+    genera_ops[CORVUS].cogito   = corvus_cogito;
     genera_ops[CORVUS].fictio   = corvus_fictio;
 }

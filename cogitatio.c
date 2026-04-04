@@ -52,7 +52,7 @@ static const char *modus_descriptio[] = {
     [LOQUERE]   = "- loquere DIRECTIO verba: dic verba ad vicinum in ea directione (non moveris)\n",
     [CLAMA]     = "- clama verba: clama ad omnes in vicinitate 3x3 (non moveris, directio non requiritur)\n",
     [TELEPORTA] = "- teleporta X Y: teleporta ad cellulam absolutam (X,Y)\n"
-                  "- teleporta +DX +DY: teleporta relative ab positione tua (e.g. teleporta +3 -2)\n",
+    "- teleporta +DX +DY: teleporta relative ab positione tua (e.g. teleporta +3 -2)\n",
 };
 #define MODUS_DESCRIPTIO_NUM (int)(sizeof(modus_descriptio) / sizeof(modus_descriptio[0]))
 
@@ -78,18 +78,21 @@ static char genus_signum(genus_t g)
 }
 
 /* aedifica vicinitatem ut ISON array duplex: [[".","."],["@","#"]] */
-static void aedifica_vicinitatem(const tabula_t *tab, int cx, int cy,
-                                 int radius, char *buf, size_t mag)
-{
-    char *p = buf;
+static void aedifica_vicinitatem(
+    const tabula_t *tab, int cx, int cy,
+    int radius, char *buf, size_t mag
+) {
+    char *p     = buf;
     char *finis = buf + mag - 1;
 
     *p++ = '[';
     for (int dy = -radius; dy <= radius; dy++) {
-        if (p >= finis) break;
+        if (p >= finis)
+            break;
         *p++ = '[';
         for (int dx = -radius; dx <= radius; dx++) {
-            if (p + 4 >= finis) break;
+            if (p + 4 >= finis)
+                break;
             *p++ = '"';
             const cella_t *c = tabula_da_const(tab, cx + dx, cy + dy);
             *p++ = (dx == 0 && dy == 0) ? '@' : genus_signum(c->genus);
@@ -102,7 +105,7 @@ static void aedifica_vicinitatem(const tabula_t *tab, int cx, int cy,
             *p++ = ',';
     }
     *p++ = ']';
-    *p = '\0';
+    *p   = '\0';
 }
 
 /* directiones communes — adhibitae a parse_actionem */
@@ -121,11 +124,13 @@ static const directio_t dir_val[] = {
 static void extrahe_sermonem(const char *val, size_t pos, char *sermo)
 {
     const char *p = val + pos;
-    while (*p == ' ') p++;
+    while (*p == ' ')
+        p++;
     snprintf(sermo, SERMO_MAX, "%s", p);
     /* recide spatia ad finem */
     size_t l = strlen(sermo);
-    while (l > 0 && sermo[l - 1] == ' ') sermo[--l] = '\0';
+    while (l > 0 && sermo[l - 1] == ' ')
+        sermo[--l] = '\0';
 }
 
 /* extrahe actionem (modus + directio + sermo) ex valore responsi */
@@ -146,7 +151,7 @@ static actio_t parse_actionem(const char *val)
             int di = prima_occurrentia(minus + post, dir_nomina, DIR_NUM);
             if (di >= 0) {
                 res.directio = dir_val[di];
-                char *dp = strstr(minus + post, dir_nomina[di]);
+                char *dp     = strstr(minus + post, dir_nomina[di]);
                 if (dp) {
                     size_t spos = (size_t)(dp - minus) + dir_lon[di];
                     extrahe_sermonem(val, spos, res.sermo);
@@ -187,7 +192,7 @@ static actio_t parse_actionem(const char *val)
     };
 
     modus_t modus = MOVE;  /* praefinitum */
-    int mi = prima_occurrentia(minus, modi_nomina, 4);
+    int mi        = prima_occurrentia(minus, modi_nomina, 4);
     if (mi >= 0)
         modus = modi_val[mi];
 
@@ -221,32 +226,38 @@ static int iam_in_processu(const praecogitata_t *res, int x, int y)
 /* scribe descriptiones modorum permissorum in buferum */
 static size_t scribe_modos(char *buf, size_t mag, unsigned int capacitates)
 {
-    char *p = buf;
+    char *p         = buf;
     size_t reliquum = mag;
     for (int m = 1; m < MODUS_DESCRIPTIO_NUM; m++) {
-        if (!(capacitates & (1u << m))) continue;
-        if (!modus_descriptio[m]) continue;
+        if (!(capacitates & (1u << m)))
+            continue;
+        if (!modus_descriptio[m])
+            continue;
         int n = snprintf(p, reliquum, "%s", modus_descriptio[m]);
-        p += n; reliquum -= (size_t)n;
+        p += n;
+        reliquum -= (size_t)n;
     }
     return (size_t)(p - buf);
 }
 
 /* aedifica instructiones: caput + modi selecti + cauda + specifica */
-static char *aedifica_instructiones(const char *specifica,
-                                    unsigned int capacitates)
-{
+static char *aedifica_instructiones(
+    const char *specifica,
+    unsigned int capacitates
+) {
     size_t mag = strlen(INSTRUCTIONES_CAPUT) + 2048 +
-                 strlen(INSTRUCTIONES_CAUDA) + strlen(specifica) + 1;
+    strlen(INSTRUCTIONES_CAUDA) + strlen(specifica) + 1;
     char *res = malloc(mag);
-    if (!res) return NULL;
+    if (!res)
+        return NULL;
 
-    char *p = res;
+    char *p         = res;
     size_t reliquum = mag;
     int n;
 
     n = snprintf(p, reliquum, "%s", INSTRUCTIONES_CAPUT);
-    p += n; reliquum -= (size_t)n;
+    p += n;
+    reliquum -= (size_t)n;
 
     p += scribe_modos(p, reliquum, capacitates);
     reliquum = mag - (size_t)(p - res);
@@ -258,10 +269,11 @@ static char *aedifica_instructiones(const char *specifica,
 
 /* aedifica valorem structuratum ISON pro una cellula:
  * {"vicinitas": [[...]], "ultimus_motus": "..., ..."} */
-static void aedifica_valorem(const tabula_t *tab,
-                             int x, int y, int radius,
-                             char *buf, size_t mag)
-{
+static void aedifica_valorem(
+    const tabula_t *tab,
+    int x, int y, int radius,
+    char *buf, size_t mag
+) {
     static const char *dir_nomina[] = {
         "nihil", "septentrio", "meridies", "occidens", "oriens"
     };
@@ -281,62 +293,90 @@ static void aedifica_valorem(const tabula_t *tab,
     const char *audita = est_deus ? c->p.deus.audita : c->p.animus.audita;
     const char *mens   = est_deus ? c->p.deus.mens   : c->p.animus.mens;
 
-    char *p = buf;
+    char *p  = buf;
     size_t r = mag;
     int n;
 
     n = snprintf(p, r, "{\"vicinitas\": %s", vic);
-    p += n; r -= (size_t)n;
+    p += n;
+    r -= (size_t)n;
 
     if (um > 0 && um <= 4 && ud >= 1 && ud <= 4) {
-        n = snprintf(p, r, ", \"ultima_actio\": \"%s %s, %s\"",
-                     modus_nomina[um], dir_nomina[ud],
-                     up ? "successum" : "impeditus");
-        p += n; r -= (size_t)n;
+        n = snprintf(
+            p, r, ", \"ultima_actio\": \"%s %s, %s\"",
+            modus_nomina[um], dir_nomina[ud],
+            up ? "successum" : "impeditus"
+        );
+        p += n;
+        r -= (size_t)n;
     }
 
     if (!est_deus && c->p.animus.satietas > 0) {
         n = snprintf(p, r, ", \"satietas\": %d", c->p.animus.satietas);
-        p += n; r -= (size_t)n;
+        p += n;
+        r -= (size_t)n;
     }
 
     /* audita — verba audita */
     if (audita[0]) {
         n = snprintf(p, r, ", \"audita\": \"");
-        p += n; r -= (size_t)n;
+        p += n;
+        r -= (size_t)n;
         for (const char *a = audita; *a && r > 4; a++) {
-            if (*a == '"' || *a == '\\') { *p++ = '\\'; r--; }
-            else if (*a == '\n') { *p++ = '\\'; *p++ = 'n'; r -= 2; continue; }
-            *p++ = *a; r--;
+            if (*a == '"' || *a == '\\') {
+                *p++ = '\\';
+                r--;
+            } else if (*a == '\n') {
+                *p++ = '\\';
+                *p++ = 'n';
+                r -= 2;
+                continue;
+            }
+            *p++ = *a;
+            r--;
         }
-        *p++ = '"'; r--;
+        *p++ = '"';
+        r--;
     }
 
     /* mens — cogitationes currentis */
     if (mens[0]) {
         n = snprintf(p, r, ", \"mens\": \"");
-        p += n; r -= (size_t)n;
+        p += n;
+        r -= (size_t)n;
         for (const char *m = mens; *m && r > 4; m++) {
-            if (*m == '"' || *m == '\\') { *p++ = '\\'; r--; }
-            else if (*m == '\n') { *p++ = '\\'; *p++ = 'n'; r -= 2; continue; }
-            *p++ = *m; r--;
+            if (*m == '"' || *m == '\\') {
+                *p++ = '\\';
+                r--;
+            } else if (*m == '\n') {
+                *p++ = '\\';
+                *p++ = 'n';
+                r -= 2;
+                continue;
+            }
+            *p++ = *m;
+            r--;
         }
-        *p++ = '"'; r--;
+        *p++ = '"';
+        r--;
     }
 
     snprintf(p, r, "}");
 }
 
 /* mitte plicam asynchrone. reddit 1 si missum. */
-static int mitte_pendentes(const tabula_t *tab, praecogitata_t *res,
-                           int initium, int fm, int radius,
-                           const char *sapientum,
-                           const char *instructiones_completae)
-{
-    if (res->volantes_num >= VOLANTES_MAX) return 0;
+static int mitte_pendentes(
+    const tabula_t *tab, praecogitata_t *res,
+    int initium, int fm, int radius,
+    const char *sapientum,
+    const char *instructiones_completae
+) {
+    if (res->volantes_num >= VOLANTES_MAX)
+        return 0;
 
     ison_scriptor_t *js = ison_scriptor_crea();
-    if (!js) return 0;
+    if (!js)
+        return 0;
 
     int vi = res->volantes_num;
     cogitatio_volans_t *vl = &res->volantes[vi];
@@ -354,12 +394,14 @@ static int mitte_pendentes(const tabula_t *tab, praecogitata_t *res,
     }
 
     char *rogatum = ison_scriptor_fini(js);
-    if (!rogatum) return 0;
+    if (!rogatum)
+        return 0;
 
     int fossa = oraculum_mitte(sapientum, instructiones_completae, rogatum);
     free(rogatum);
 
-    if (fossa < 0) return 0;
+    if (fossa < 0)
+        return 0;
 
     vl->fossa = fossa;
     res->volantes_num++;
@@ -367,39 +409,49 @@ static int mitte_pendentes(const tabula_t *tab, praecogitata_t *res,
 }
 
 /* lege responsum completum, adde ad acta */
-static void collige_responsum(const char *responsum,
-                              const cogitatio_volans_t *vl,
-                              praecogitata_t *res)
-{
+static void collige_responsum(
+    const char *responsum,
+    const cogitatio_volans_t *vl,
+    praecogitata_t *res
+) {
     const char *ison_initium = strchr(responsum, '{');
-    if (!ison_initium) return;
+    if (!ison_initium)
+        return;
 
     ison_par_t pares[PLICA_MAX];
     int np = ison_lege(ison_initium, pares, PLICA_MAX);
-    if (np <= 0) return;
+    if (np <= 0)
+        return;
 
     for (int i = 0; i < np; i++) {
         /* si clavis finitur ".mens", quaere actum iam additum */
         size_t clon = strlen(pares[i].clavis);
-        if (clon > 5 &&
-            strcmp(pares[i].clavis + clon - 5, ".mens") == 0) {
+        if (
+            clon > 5 &&
+            strcmp(pares[i].clavis + clon - 5, ".mens") == 0
+        ) {
             char nomen[64];
             memcpy(nomen, pares[i].clavis, clon - 5);
             nomen[clon - 5] = '\0';
             for (int a = 0; a < res->num; a++) {
-                if (res->acta[a].x < 0) continue;
+                if (res->acta[a].x < 0)
+                    continue;
                 /* compara per nomen in volante */
                 for (int j = 0; j < vl->num; j++) {
-                    if (res->acta[a].x == vl->xx[j] &&
+                    if (
+                        res->acta[a].x == vl->xx[j] &&
                         res->acta[a].y == vl->yy[j] &&
-                        strcmp(nomen, vl->nomina[j]) == 0) {
-                        snprintf(res->acta[a].actio.mens, MENS_MAX,
-                                 "%s", pares[i].valor);
+                        strcmp(nomen, vl->nomina[j]) == 0
+                    ) {
+                        snprintf(
+                            res->acta[a].actio.mens, MENS_MAX,
+                            "%s", pares[i].valor
+                        );
                         goto mens_inventa;
                     }
                 }
             }
-            mens_inventa:
+mens_inventa:
             continue;
         }
 
@@ -418,21 +470,23 @@ static void collige_responsum(const char *responsum,
     }
 }
 
-void cogitatio_praecogita(tabula_t *tab, genus_t genus,
-                          int limen, int modulus,
-                          int plica_mag, int patientia,
-                          int radius,
-                          const char *sapientum,
-                          const char *instructiones,
-                          praecogitata_t *res)
-{
+void cogitatio_praecogita(
+    tabula_t *tab, genus_t genus,
+    int limen, int modulus,
+    int plica_mag, int patientia,
+    int radius,
+    const char *sapientum,
+    const char *instructiones,
+    praecogitata_t *res
+) {
     oraculum_processus();
 
     /* --- 1. collige responsa completa --- */
     {
         int dest = 0;
         for (int v = 0; v < res->volantes_num; v++) {
-            if (res->volantes[v].fossa < 0) continue;
+            if (res->volantes[v].fossa < 0)
+                continue;
 
             char *responsum = NULL;
             int st = oraculum_status(res->volantes[v].fossa, &responsum);
@@ -468,7 +522,7 @@ void cogitatio_praecogita(tabula_t *tab, genus_t genus,
             p->x = x;
             p->y = y;
             const char *nom = (genera_ops[genus].phylum == DEI)
-                              ? c->p.deus.nomen : c->p.animus.nomen;
+            ? c->p.deus.nomen : c->p.animus.nomen;
             memcpy(p->nomen, nom, 8);
             res->pendentes_num++;
         }
@@ -479,20 +533,26 @@ void cogitatio_praecogita(tabula_t *tab, genus_t genus,
 
     /* --- 3. mitte plicas quando parati --- */
     int paratus = (res->pendentes_num >= plica_mag) ||
-                  (res->pendentes_num > 0 &&
-                   res->pendentes_gradus >= patientia);
+                  (
+                      res->pendentes_num > 0 &&
+                      res->pendentes_gradus >= patientia
+                  );
 
     if (paratus) {
-        char *inst = aedifica_instructiones(instructiones,
-                                            genera_ops[genus].capacitates);
-        if (!inst) return;
+        char *inst = aedifica_instructiones(
+            instructiones,
+            genera_ops[genus].capacitates
+        );
+        if (!inst)
+            return;
 
         int missi = 0;
         while (missi < res->pendentes_num) {
             if (res->volantes_num >= VOLANTES_MAX)
                 break;
             int fm = res->pendentes_num - missi;
-            if (fm > plica_mag) fm = plica_mag;
+            if (fm > plica_mag)
+                fm = plica_mag;
 
             if (!mitte_pendentes(tab, res, missi, fm, radius, sapientum, inst))
                 break;
@@ -514,8 +574,10 @@ void cogitatio_praecogita(tabula_t *tab, genus_t genus,
 
             int reliqui = res->pendentes_num - missi;
             if (reliqui > 0)
-                memmove(res->pendentes, res->pendentes + missi,
-                        (size_t)reliqui * sizeof(res->pendentes[0]));
+                memmove(
+                    res->pendentes, res->pendentes + missi,
+                    (size_t)reliqui * sizeof(res->pendentes[0])
+                );
             res->pendentes_num = reliqui;
         }
         if (res->pendentes_num == 0)
@@ -564,25 +626,28 @@ static const char *INSTRUCTIONES_TABULAE_CAUDA =
     "\"B002\": \"oppugna septentrio\"}\n\n";
 
 /* aedifica tabulam ISON: [[".", "B001", "F"], ...] */
-static void aedifica_tabulam_ison(const tabula_t *tab, genus_t genus,
-                                   char *buf, size_t mag)
-{
-    char *p = buf;
+static void aedifica_tabulam_ison(
+    const tabula_t *tab, genus_t genus,
+    char *buf, size_t mag
+) {
+    char *p     = buf;
     char *finis = buf + mag - 2;
-    int latus = tab->latus;
+    int latus   = tab->latus;
 
     *p++ = '[';
     for (int y = 0; y < latus && p < finis; y++) {
-        if (y > 0) *p++ = ',';
+        if (y > 0)
+            *p++ = ',';
         *p++ = '[';
         for (int x = 0; x < latus && p + 12 < finis; x++) {
-            if (x > 0) *p++ = ',';
+            if (x > 0)
+                *p++ = ',';
             const cella_t *c = tabula_da_const(tab, x, y);
             *p++ = '"';
             if (c->genus == genus) {
                 /* ostende nomen */
                 const char *nom = (genera_ops[genus].phylum == DEI)
-                                  ? c->p.deus.nomen : c->p.animus.nomen;
+                ? c->p.deus.nomen : c->p.animus.nomen;
                 for (const char *n = nom; *n && p + 2 < finis; n++)
                     *p++ = *n;
             } else {
@@ -593,34 +658,38 @@ static void aedifica_tabulam_ison(const tabula_t *tab, genus_t genus,
         *p++ = ']';
     }
     *p++ = ']';
-    *p = '\0';
+    *p   = '\0';
 }
 
 /* aedifica listam nominum: ["B001","B002",...] */
-static void aedifica_nomina_ison(const tabula_t *tab, genus_t genus,
-                                  int *xx, int *yy, char nomina[][8],
-                                  int *num_out,
-                                  char *buf, size_t mag)
-{
-    char *p = buf;
+static void aedifica_nomina_ison(
+    const tabula_t *tab, genus_t genus,
+    int *xx, int *yy, char nomina[][8],
+    int *num_out,
+    char *buf, size_t mag
+) {
+    char *p     = buf;
     char *finis = buf + mag - 2;
-    int latus = tab->latus;
-    int n = 0;
+    int latus   = tab->latus;
+    int n       = 0;
 
     *p++ = '[';
     for (int y = 0; y < latus; y++) {
         for (int x = 0; x < latus; x++) {
             const cella_t *c = tabula_da_const(tab, x, y);
-            if (c->genus != genus) continue;
-            if (n >= PLICA_MAX) break;
+            if (c->genus != genus)
+                continue;
+            if (n >= PLICA_MAX)
+                break;
 
             const char *nom = (genera_ops[genus].phylum == DEI)
-                              ? c->p.deus.nomen : c->p.animus.nomen;
+            ? c->p.deus.nomen : c->p.animus.nomen;
             xx[n] = x;
             yy[n] = y;
             memcpy(nomina[n], nom, 8);
 
-            if (n > 0 && p < finis) *p++ = ',';
+            if (n > 0 && p < finis)
+                *p++ = ',';
             *p++ = '"';
             for (const char *s = nom; *s && p + 2 < finis; s++)
                 *p++ = *s;
@@ -628,15 +697,16 @@ static void aedifica_nomina_ison(const tabula_t *tab, genus_t genus,
             n++;
         }
     }
-    *p++ = ']';
-    *p = '\0';
+    *p++     = ']';
+    *p       = '\0';
     *num_out = n;
 }
 
 /* aedifica statum unius cellulae (sine vicinitate) */
-static void aedifica_statum(const tabula_t *tab, int x, int y,
-                             char *buf, size_t mag)
-{
+static void aedifica_statum(
+    const tabula_t *tab, int x, int y,
+    char *buf, size_t mag
+) {
     static const char *dir_nomina_s[] = {
         "nihil", "septentrio", "meridies", "occidens", "oriens"
     };
@@ -653,68 +723,97 @@ static void aedifica_statum(const tabula_t *tab, int x, int y,
     const char *audita = est_deus ? c->p.deus.audita : c->p.animus.audita;
     const char *mens   = est_deus ? c->p.deus.mens   : c->p.animus.mens;
 
-    char *p = buf;
+    char *p  = buf;
     size_t r = mag;
     int n;
 
     n = snprintf(p, r, "{");
-    p += n; r -= (size_t)n;
+    p += n;
+    r -= (size_t)n;
 
     int primo = 1;
 
     if (um > 0 && um <= 4 && ud >= 1 && ud <= 4) {
-        n = snprintf(p, r, "\"ultima_actio\": \"%s %s, %s\"",
-                     modus_nomina_s[um], dir_nomina_s[ud],
-                     up ? "successum" : "impeditus");
-        p += n; r -= (size_t)n;
+        n = snprintf(
+            p, r, "\"ultima_actio\": \"%s %s, %s\"",
+            modus_nomina_s[um], dir_nomina_s[ud],
+            up ? "successum" : "impeditus"
+        );
+        p += n;
+        r -= (size_t)n;
         primo = 0;
     }
 
     if (!est_deus && c->p.animus.satietas > 0) {
-        n = snprintf(p, r, "%s\"satietas\": %d",
-                     primo ? "" : ", ", c->p.animus.satietas);
-        p += n; r -= (size_t)n;
+        n = snprintf(
+            p, r, "%s\"satietas\": %d",
+            primo ? "" : ", ", c->p.animus.satietas
+        );
+        p += n;
+        r -= (size_t)n;
         primo = 0;
     }
 
     if (audita[0]) {
         n = snprintf(p, r, "%s\"audita\": \"", primo ? "" : ", ");
-        p += n; r -= (size_t)n;
+        p += n;
+        r -= (size_t)n;
         for (const char *a = audita; *a && r > 4; a++) {
-            if (*a == '"' || *a == '\\') { *p++ = '\\'; r--; }
-            else if (*a == '\n') { *p++ = '\\'; *p++ = 'n'; r -= 2; continue; }
-            *p++ = *a; r--;
+            if (*a == '"' || *a == '\\') {
+                *p++ = '\\';
+                r--;
+            } else if (*a == '\n') {
+                *p++ = '\\';
+                *p++ = 'n';
+                r -= 2;
+                continue;
+            }
+            *p++ = *a;
+            r--;
         }
-        *p++ = '"'; r--;
+        *p++ = '"';
+        r--;
         primo = 0;
     }
 
     if (mens[0]) {
         n = snprintf(p, r, "%s\"mens\": \"", primo ? "" : ", ");
-        p += n; r -= (size_t)n;
+        p += n;
+        r -= (size_t)n;
         for (const char *m = mens; *m && r > 4; m++) {
-            if (*m == '"' || *m == '\\') { *p++ = '\\'; r--; }
-            else if (*m == '\n') { *p++ = '\\'; *p++ = 'n'; r -= 2; continue; }
-            *p++ = *m; r--;
+            if (*m == '"' || *m == '\\') {
+                *p++ = '\\';
+                r--;
+            } else if (*m == '\n') {
+                *p++ = '\\';
+                *p++ = 'n';
+                r -= 2;
+                continue;
+            }
+            *p++ = *m;
+            r--;
         }
-        *p++ = '"'; r--;
+        *p++ = '"';
+        r--;
     }
 
     snprintf(p, r, "}");
 }
 
-void cogitatio_praecogita_tabulam(tabula_t *tab, genus_t genus,
-                                   const char *sapientum,
-                                   const char *instructiones,
-                                   praecogitata_t *res)
-{
+void cogitatio_praecogita_tabulam(
+    tabula_t *tab, genus_t genus,
+    const char *sapientum,
+    const char *instructiones,
+    praecogitata_t *res
+) {
     oraculum_processus();
 
     /* --- 1. collige responsa completa --- */
     {
         int dest = 0;
         for (int v = 0; v < res->volantes_num; v++) {
-            if (res->volantes[v].fossa < 0) continue;
+            if (res->volantes[v].fossa < 0)
+                continue;
 
             char *responsum = NULL;
             int st = oraculum_status(res->volantes[v].fossa, &responsum);
@@ -734,7 +833,8 @@ void cogitatio_praecogita_tabulam(tabula_t *tab, genus_t genus,
     }
 
     /* si iam volans est, expecta */
-    if (res->volantes_num > 0) return;
+    if (res->volantes_num > 0)
+        return;
 
     /* purga acta obsoleta (dalekus mortuus vel motus) */
     {
@@ -749,23 +849,29 @@ void cogitatio_praecogita_tabulam(tabula_t *tab, genus_t genus,
     }
 
     /* si acta nondum consumpta, expecta */
-    if (res->num > 0) return;
+    if (res->num > 0)
+        return;
 
     /* --- 2. aedifica et mitte tabulam totam --- */
     unsigned int cap = genera_ops[genus].capacitates;
-    char *inst = aedifica_instructiones(instructiones, cap);
-    if (!inst) return;
+    char *inst       = aedifica_instructiones(instructiones, cap);
+    if (!inst)
+        return;
 
     /* praepone instructiones tabulae cum modis selectis */
     size_t imag = strlen(INSTRUCTIONES_TABULAE_CAPUT) + 2048 +
-                  strlen(INSTRUCTIONES_TABULAE_CAUDA) + strlen(inst) + 1;
+    strlen(INSTRUCTIONES_TABULAE_CAUDA) + strlen(inst) + 1;
     char *inst_totae = malloc(imag);
-    if (!inst_totae) { free(inst); return; }
+    if (!inst_totae) {
+        free(inst);
+        return;
+    }
     {
         char *p = inst_totae;
         size_t reliquum = imag;
         int n = snprintf(p, reliquum, "%s", INSTRUCTIONES_TABULAE_CAPUT);
-        p += n; reliquum -= (size_t)n;
+        p += n;
+        reliquum -= (size_t)n;
         p += scribe_modos(p, reliquum, cap);
         reliquum = imag - (size_t)(p - inst_totae);
         snprintf(p, reliquum, "%s%s", INSTRUCTIONES_TABULAE_CAUDA, inst);
@@ -774,12 +880,19 @@ void cogitatio_praecogita_tabulam(tabula_t *tab, genus_t genus,
 
     /* aedifica rogatum */
     ison_scriptor_t *js = ison_scriptor_crea();
-    if (!js) { free(inst_totae); return; }
+    if (!js) {
+        free(inst_totae);
+        return;
+    }
 
     /* tabula ISON */
     size_t tab_mag = (size_t)tab->latus * tab->latus * 12 + 256;
-    char *tab_buf = malloc(tab_mag);
-    if (!tab_buf) { free(inst_totae); ison_scriptor_fini(js); return; }
+    char *tab_buf  = malloc(tab_mag);
+    if (!tab_buf) {
+        free(inst_totae);
+        ison_scriptor_fini(js);
+        return;
+    }
     aedifica_tabulam_ison(tab, genus, tab_buf, tab_mag);
     ison_scriptor_adde_crudum(js, "tabula", tab_buf);
     free(tab_buf);
@@ -789,10 +902,16 @@ void cogitatio_praecogita_tabulam(tabula_t *tab, genus_t genus,
     vl->num = 0;
 
     size_t nom_mag = PLICA_MAX * 12 + 64;
-    char *nom_buf = malloc(nom_mag);
-    if (!nom_buf) { free(inst_totae); ison_scriptor_fini(js); return; }
-    aedifica_nomina_ison(tab, genus, vl->xx, vl->yy, vl->nomina,
-                          &vl->num, nom_buf, nom_mag);
+    char *nom_buf  = malloc(nom_mag);
+    if (!nom_buf) {
+        free(inst_totae);
+        ison_scriptor_fini(js);
+        return;
+    }
+    aedifica_nomina_ison(
+        tab, genus, vl->xx, vl->yy, vl->nomina,
+        &vl->num, nom_buf, nom_mag
+    );
     ison_scriptor_adde_crudum(js, "nomina", nom_buf);
     free(nom_buf);
 
@@ -804,15 +923,19 @@ void cogitatio_praecogita_tabulam(tabula_t *tab, genus_t genus,
     }
 
     char *rogatum = ison_scriptor_fini(js);
-    if (!rogatum) { free(inst_totae); return; }
+    if (!rogatum) {
+        free(inst_totae);
+        return;
+    }
 
     int fossa = oraculum_mitte(sapientum, inst_totae, rogatum);
     free(rogatum);
     free(inst_totae);
 
-    if (fossa < 0) return;
+    if (fossa < 0)
+        return;
 
-    vl->fossa = fossa;
+    vl->fossa         = fossa;
     res->volantes_num = 1;
 
     /* purga audita */
@@ -829,7 +952,7 @@ actio_t cogitatio_quaere(praecogitata_t *res, int x, int y)
 {
     for (int i = 0; i < res->num; i++) {
         if (res->acta[i].x == x && res->acta[i].y == y) {
-            actio_t act = res->acta[i].actio;
+            actio_t act  = res->acta[i].actio;
             res->acta[i] = res->acta[res->num - 1];
             res->num--;
             return act;

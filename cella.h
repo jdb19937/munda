@@ -86,8 +86,10 @@ typedef struct {
     actio_t (*cogito)(const struct tabula *tab, int x, int y);
     /* fictio: genera actionem fictam pro probatione.
      * logica in plicis generum ipsis definitur. */
-    void (*fictio)(const char *nomen, const struct fictio_vicinitas *vic,
-                   char *actio, size_t mag);
+    void (*fictio)(
+        const char *nomen, const struct fictio_vicinitas *vic,
+        char *actio, size_t mag
+    );
 } genus_ops_t;
 
 /* tabula operationum — index per genus_t */

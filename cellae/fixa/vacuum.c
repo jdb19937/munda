@@ -6,7 +6,9 @@
 
 static actio_t vacuum_cogito(const struct tabula *tab, int x, int y)
 {
-    (void)tab; (void)x; (void)y;
+    (void)tab;
+    (void)x;
+    (void)y;
     return ACTIO_NIHIL;
 }
 
