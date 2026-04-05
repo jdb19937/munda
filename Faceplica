@@ -5,7 +5,7 @@ FACE     ?= make
 
 CC     ?= cc
 CFLAGS ?= -Wall -Wextra -pedantic -std=c99 -O2
-CFLAGS += -I. -I$(APOTHECA)/ison -I$(APOTHECA)/crispus
+CFLAGS += -I. -I$(APOTHECA)/ison -I$(APOTHECA)/crispus -I$(APOTHECA)/phantasma
 
 LIBISON      = $(APOTHECA)/ison/libison.a
 LIBCRISPUS   = $(APOTHECA)/crispus/libcrispus.a
