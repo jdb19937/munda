@@ -19,8 +19,7 @@ COMMUNES = ../tabula.c \
           ../cogitatio.c ../ison.c ../utilia.c ../fictio.c
 COMMUNES_OBJ = $(patsubst ../%.c,obj/%.o,$(COMMUNES))
 
-ORACULA_OBJ = obj/oraculum.o obj/oracula/openai.o obj/oracula/xai.o \
-              obj/oracula/anthropic.o obj/oracula/fictus.o
+LIBDELPHI = ../delphi/libdelphi.a
 
 CRISPUS_OBJ = obj/crispus/crispus.o obj/crispus/velum.o
 ARCANA_OBJ  = obj/arcana/summa.o obj/arcana/arca.o obj/arcana/numerus.o
@@ -29,7 +28,7 @@ ARCANA_OBJ  = obj/arcana/summa.o obj/arcana/arca.o obj/arcana/numerus.o
 
 omnia: vide
 
-vide: obj/vide.o obj/fenestra.o $(COMMUNES_OBJ) $(ORACULA_OBJ) $(CRISPUS_OBJ) $(ARCANA_OBJ)
+vide: obj/vide.o obj/fenestra.o $(COMMUNES_OBJ) $(LIBDELPHI) $(CRISPUS_OBJ) $(ARCANA_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^ $(SDL_LIBS)
 
 obj/vide.o: vide.c fenestra.h
@@ -39,14 +38,6 @@ obj/vide.o: vide.c fenestra.h
 obj/fenestra.o: fenestra.c fenestra.h
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) -c $< -o $@
-
-obj/oraculum.o: ../oraculum.c
-	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-obj/oracula/%.o: ../oracula/%.c
-	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c $< -o $@
 
 obj/crispus/%.o: ../crispus/%.c
 	@mkdir -p $(@D)

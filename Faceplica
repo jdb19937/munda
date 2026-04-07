@@ -5,21 +5,21 @@ FACE     ?= make
 
 CC     ?= cc
 CFLAGS ?= -Wall -Wextra -pedantic -std=c99 -O2
-CFLAGS += -I. -I$(APOTHECA)/ison -I$(APOTHECA)/crispus -I$(APOTHECA)/phantasma
+CFLAGS += -I. -I$(APOTHECA)/ison -I$(APOTHECA)/crispus -I$(APOTHECA)/phantasma -I$(APOTHECA)/delphi
 
 LIBISON      = $(APOTHECA)/ison/libison.a
 LIBCRISPUS   = $(APOTHECA)/crispus/libcrispus.a
 LIBPHANTASMA = $(APOTHECA)/phantasma/libphantasma.a
+LIBDELPHI    = $(APOTHECA)/delphi/libdelphi.a
 NEXUS_PFR    = `cat $(APOTHECA)/phantasma/nexus_phantasma 2>/dev/null`
 
 # capita omnia — non opus exactis dependentiis per obiectum
-CAPITA = cellula.h cella.h tabula.h terminalis.h oraculum.h cogitatio.h \
+CAPITA = cellula.h cella.h tabula.h terminalis.h cogitatio.h \
          utilia.h fictio.h genera.h \
          cellae/animae/feles.h cellae/animae/dalekus.h \
          cellae/animae/ursus.h cellae/animae/corvus.h \
          cellae/fixum.h cellae/cibus.h cellae/animus.h cellae/deus.h \
          cellae/dei/zodus.h cellae/dei/oculus.h \
-         oracula/nativus.h oracula/nativus_lexator.h oracula/provisor.h \
          retis/retis.h
 
 # omnes obiecti communes → libmunda.a
@@ -32,30 +32,27 @@ LIB_OBJ = \
     cellae/dei/zodus.o cellae/dei/oculus.o cellae/deus.o \
     cella_ops.o cellae/fixum.o cellae/cibus.o cellae/animus.o \
     cogitatio.o utilia.o fictio.o \
-    oraculum.o \
-    oracula/openai.o oracula/xai.o oracula/anthropic.o oracula/fictus.o \
-    oracula/nativus_cursus.o oracula/nativus_lexator.o \
-    oracula/nativus_exercitatio.o oracula/nativus_provisor.o \
     retis/retis.o retis/serializa.o retis/visus.o retis/cliens.o retis/crudus.o
 
 # nexus communis (omnes binarii principale utuntur)
-NEXUS = libmunda.a $(LIBPHANTASMA) $(LIBCRISPUS) $(LIBISON)
+NEXUS = libmunda.a $(LIBDELPHI) $(LIBPHANTASMA) $(LIBCRISPUS) $(LIBISON)
 
 # --- omnia ---
 
 omnia: curre lude fare proba valida daemonium coniunge specta \
-       fac_certificatum nativus_exercita proba_nativus
+       fac_certificatum
 
 # --- submoduli ---
 
 para:
-	git submodule update --init ison crispus phantasma
+	git submodule update --init ison crispus phantasma delphi
 	$(FACE) -C $(APOTHECA)/ison
 	$(FACE) -C $(APOTHECA)/crispus
 	$(FACE) -C $(APOTHECA)/phantasma
+	$(FACE) -C $(APOTHECA)/delphi
 
 expara:
-	git submodule deinit -f ison crispus phantasma
+	git submodule deinit -f ison crispus phantasma delphi
 
 $(LIBISON):
 	$(FACE) -C $(APOTHECA)/ison
@@ -66,12 +63,12 @@ $(LIBCRISPUS):
 $(LIBPHANTASMA):
 	$(FACE) -C $(APOTHECA)/phantasma
 
+$(LIBDELPHI):
+	$(FACE) -C $(APOTHECA)/delphi
+
 # --- compilatio ---
 
 %.o: %.c $(CAPITA)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-oracula/%.o: oracula/%.c $(CAPITA)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 retis/%.o: retis/%.c $(CAPITA)
@@ -105,12 +102,6 @@ specta: specta.o libmunda.a
 fac_certificatum: fac_certificatum.o libmunda.a
 	$(CC) $(CFLAGS) -o $@ fac_certificatum.o $(NEXUS) $(NEXUS_PFR) -lm
 
-nativus_exercita: oracula/nativus_exercita.o libmunda.a
-	$(CC) $(CFLAGS) -o $@ oracula/nativus_exercita.o $(NEXUS) $(NEXUS_PFR) -lm
-
-proba_nativus: oracula/proba_nativus.o libmunda.a
-	$(CC) $(CFLAGS) -o $@ oracula/proba_nativus.o $(NEXUS) $(NEXUS_PFR) -lm
-
 CRISPUS_PROBA_OBJ = $(APOTHECA)/crispus/proba.o
 
 $(CRISPUS_PROBA_OBJ): $(APOTHECA)/crispus/proba.c $(APOTHECA)/crispus/proba.h
@@ -128,13 +119,11 @@ purga:
 	rm -f $(LIB_OBJ) libmunda.a
 	rm -f curre.o lude.o terminalis.o fare.o daemonium.o
 	rm -f coniunge.o specta.o fac_certificatum.o proba.o valida.o
-	rm -f oracula/nativus_exercita.o oracula/proba_nativus.o
 	@if [ "$(APOTHECA)" = "." ]; then rm -f crispus/proba.o; fi
-	rm -f curre lude fare proba valida proba_nativus nativus_exercita
+	rm -f curre lude fare proba valida
 	rm -f daemonium coniunge specta fac_certificatum
-	rm -f nativus_dieta_1526.bin nativus_dieta_1526.lex
 
 linte:
-	insinulint -c *.[ch] retis/*.[ch] oracula/*.[ch] cellae/*.[ch] cellae/*/*.[ch]
+	insinulint -c *.[ch] retis/*.[ch] cellae/*.[ch] cellae/*/*.[ch]
 
 .PHONY: omnia para expara purga linte

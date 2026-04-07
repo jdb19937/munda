@@ -12,7 +12,7 @@
 #include "tabula.h"
 #include "fenestra.h"
 #include "oraculum.h"
-#include "oracula/provisor.h"
+#include "delphi/provisor.h"
 #include "utilia.h"
 
 #include <stdio.h>

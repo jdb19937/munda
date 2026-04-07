@@ -256,7 +256,7 @@ void terminalis_pinge(const tabula_t *tab)
     /* summa solum si plures modelli */
     if (nmod > 1) {
         p += sprintf(
-            p, "\033[%d;%dH" ANSI_BLD ANSI_DIM "── summa oracula ──"
+            p, "\033[%d;%dH" ANSI_BLD ANSI_DIM "── summa delphi ──"
             ANSI_RST "\033[K", versus++, col
         );
         p += sprintf(

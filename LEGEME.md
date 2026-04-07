@@ -122,7 +122,7 @@ cellae/            — implementationes singulorum generum
   dei/             — zodus, oculus
 mundae/            — configurationes mundorum
 schemae/           — schemata ISON pro validatione
-oracula/           — provisores LLM (openai, anthropic, xai, fictus)
+delphi/            — provisores LLM (openai, anthropic, xai, fictus, ὀμφαλός)
 ```
 
 ## Purgatio

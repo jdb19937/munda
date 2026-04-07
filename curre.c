@@ -9,7 +9,7 @@
 #include "cella.h"
 #include "tabula.h"
 #include "oraculum.h"
-#include "oracula/provisor.h"
+#include "delphi/provisor.h"
 #include "utilia.h"
 
 #include <stdio.h>

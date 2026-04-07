@@ -7,3 +7,6 @@
 [submodule "phantasma"]
 	path = phantasma
 	url = git@github.com:jdb19937/phantasma.git
+[submodule "delphi"]
+	path = delphi
+	url = git@github.com:jdb19937/delphi
