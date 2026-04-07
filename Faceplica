@@ -77,8 +77,11 @@ specta: specta.o libmunda.a
 fac_certificatum: fac_certificatum.o libmunda.a
 	$(CC) $(CFLAGS) -o $@ fac_certificatum.o $(NEXUS) $(NEXUS_PFR) -lm
 
-proba: proba.o libmunda.a
-	$(CC) $(CFLAGS) -o $@ proba.o $(NEXUS) -lm
+proba_prima: proba_prima.o libmunda.a
+	$(CC) $(CFLAGS) -o $@ proba_prima.o $(NEXUS) -lm
+
+proba: proba_prima
+	./proba_prima
 
 valida: valida.o $(LIBISON)
 	$(CC) $(CFLAGS) -o $@ valida.o $(LIBISON)
@@ -101,11 +104,11 @@ colloca: omnia
 purga:
 	rm -f $(LIB_OBJ) libmunda.a
 	rm -f curre.o lude.o terminalis.o fare.o daemonium.o
-	rm -f coniunge.o specta.o fac_certificatum.o proba.o valida.o
-	rm -f curre lude fare proba valida
+	rm -f coniunge.o specta.o fac_certificatum.o proba_prima.o valida.o
+	rm -f curre lude fare proba_prima valida
 	rm -f daemonium coniunge specta fac_certificatum
 
 linte:
 	insinulint -c *.[ch] retis/*.[ch] cellae/*.[ch] cellae/*/*.[ch]
 
-.PHONY: omnia colloca purga linte
+.PHONY: omnia colloca purga proba linte
