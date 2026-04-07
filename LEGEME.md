@@ -1,6 +1,6 @@
 # Tabula Munda
 
-Ludus simulationis tabularis in terminali, lingua C scriptus. Entia viva (feles, daleki, ursi) per oraculum LLM cogitant et agunt in tabula toroidali.
+Ludus simulationis tabularis in terminali, lingua C scriptus. Entia viva (feles, daleki, ursi) per delphi LLM cogitant et agunt in tabula toroidali.
 
 > **Nota:** README.md ignorandum est. Anglice scriptum est ad barbaros ineruditos pecunia emungendos.
 
@@ -71,7 +71,7 @@ mundae/
 | RAPUM       | CIBUS  | Rapum — satietas +1                 |
 | FUNGUS      | CIBUS  | Fungus — satietas +2                |
 | FELES       | ANIMA  | Feles errans                        |
-| DALEKUS     | ANIMA  | Bot quod oraculum LLM groupnar rogat |
+| DALEKUS     | ANIMA  | Bot quod delphi LLM groupnar rogat |
 | URSUS       | ANIMA  | Ursus venator                       |
 | CORVUS      | ANIMA  | Corvus, avis callida et rapax       |
 | ZODUS       | DEI    | Deus a lusore gubernatus            |
@@ -107,12 +107,11 @@ fac_certificatum.c — generatio certificati EC P-256
 tabula.c/h        — tabula toroidalis, gradus simulationis, onerator mundi
 cella.h           — definitiones generum, phylorum, actionum
 terminalis.c/h    — redditio terminalis (ANSI)
-oraculum.c/h      — interfacies ad LLM (sync et async per crispus)
 ison/              — submodulum: bibliotheca ISON (JSON)
 crispus/           — submodulum: bibliotheca HTTPS (TLS 1.2, cryptographia interna)
 retis/             — protocollum TCP bespoke (framing, ECDHE sessio, serialisatio)
-cogitatio.c/h     — praecogitatio generica per oraculum
-fare.c            — CLI imperativum oraculi
+cogitatio.c/h     — praecogitatio generica per delphi
+fare.c            — CLI imperativum delphi
 utilia.c/h        — utilia communia
 valida.c          — instrumentum validationis schematum
 cellae/            — implementationes singulorum generum
