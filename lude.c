@@ -10,7 +10,7 @@
 #include "tabula.h"
 #include "terminalis.h"
 #include "oraculum.h"
-#include "delphi/provisor.h"
+#include "provisor.h"
 #include "utilia.h"
 
 #include <stdio.h>

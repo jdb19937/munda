@@ -1,17 +1,16 @@
 # Faceplica — TABULA MUNDA
 
-APOTHECA ?= .
-FACE     ?= make
+PREFIX = /opt/apotheca
 
 CC     ?= cc
 CFLAGS ?= -Wall -Wextra -pedantic -std=c99 -O2
-CFLAGS += -I. -I$(APOTHECA)/ison -I$(APOTHECA)/crispus -I$(APOTHECA)/phantasma -I$(APOTHECA)/delphi
+CFLAGS += -I. -I$(PREFIX)/include/ison -I$(PREFIX)/include/crispus -I$(PREFIX)/include/phantasma -I$(PREFIX)/include/delphi
 
-LIBISON      = $(APOTHECA)/ison/libison.a
-LIBCRISPUS   = $(APOTHECA)/crispus/libcrispus.a
-LIBPHANTASMA = $(APOTHECA)/phantasma/libphantasma.a
-LIBDELPHI    = $(APOTHECA)/delphi/libdelphi.a
-NEXUS_PFR    = `cat $(APOTHECA)/phantasma/nexus_phantasma 2>/dev/null`
+LIBISON      = $(PREFIX)/lib/libison.a
+LIBCRISPUS   = $(PREFIX)/lib/libcrispus.a
+LIBPHANTASMA = $(PREFIX)/lib/libphantasma.a
+LIBDELPHI    = $(PREFIX)/lib/libdelphi.a
+NEXUS_PFR    = `cat $(PREFIX)/lib/nexus_phantasma 2>/dev/null`
 
 # capita omnia — non opus exactis dependentiis per obiectum
 CAPITA = cellula.h cella.h tabula.h terminalis.h cogitatio.h \
@@ -41,30 +40,6 @@ NEXUS = libmunda.a $(LIBDELPHI) $(LIBPHANTASMA) $(LIBCRISPUS) $(LIBISON)
 
 omnia: curre lude fare proba valida daemonium coniunge specta \
        fac_certificatum
-
-# --- submoduli ---
-
-para:
-	git submodule update --init ison crispus phantasma delphi
-	$(FACE) -C $(APOTHECA)/ison
-	$(FACE) -C $(APOTHECA)/crispus
-	$(FACE) -C $(APOTHECA)/phantasma
-	$(FACE) -C $(APOTHECA)/delphi
-
-expara:
-	git submodule deinit -f ison crispus phantasma delphi
-
-$(LIBISON):
-	$(FACE) -C $(APOTHECA)/ison
-
-$(LIBCRISPUS):
-	$(FACE) -C $(APOTHECA)/crispus
-
-$(LIBPHANTASMA):
-	$(FACE) -C $(APOTHECA)/phantasma
-
-$(LIBDELPHI):
-	$(FACE) -C $(APOTHECA)/delphi
 
 # --- compilatio ---
 
@@ -102,16 +77,24 @@ specta: specta.o libmunda.a
 fac_certificatum: fac_certificatum.o libmunda.a
 	$(CC) $(CFLAGS) -o $@ fac_certificatum.o $(NEXUS) $(NEXUS_PFR) -lm
 
-CRISPUS_PROBA_OBJ = $(APOTHECA)/crispus/proba.o
-
-$(CRISPUS_PROBA_OBJ): $(APOTHECA)/crispus/proba.c $(APOTHECA)/crispus/proba.h
-	$(CC) $(CFLAGS) -c $< -o $@
-
-proba: proba.o $(CRISPUS_PROBA_OBJ) libmunda.a
-	$(CC) $(CFLAGS) -o $@ proba.o $(CRISPUS_PROBA_OBJ) $(NEXUS) -lm
+proba: proba.o libmunda.a
+	$(CC) $(CFLAGS) -o $@ proba.o $(NEXUS) -lm
 
 valida: valida.o $(LIBISON)
 	$(CC) $(CFLAGS) -o $@ valida.o $(LIBISON)
+
+# --- collocatio ---
+
+colloca: omnia
+	install -d $(PREFIX)/bin $(PREFIX)/lib
+	install -d $(PREFIX)/include/munda/cellae/animae $(PREFIX)/include/munda/cellae/dei $(PREFIX)/include/munda/retis
+	install -m 755 curre lude fare daemonium coniunge specta fac_certificatum $(PREFIX)/bin/
+	install -m 644 libmunda.a $(PREFIX)/lib/
+	install -m 644 cellula.h cella.h tabula.h terminalis.h cogitatio.h utilia.h fictio.h genera.h $(PREFIX)/include/munda/
+	install -m 644 cellae/fixum.h cellae/cibus.h cellae/animus.h cellae/deus.h $(PREFIX)/include/munda/cellae/
+	install -m 644 cellae/animae/feles.h cellae/animae/dalekus.h cellae/animae/ursus.h cellae/animae/corvus.h $(PREFIX)/include/munda/cellae/animae/
+	install -m 644 cellae/dei/zodus.h cellae/dei/oculus.h $(PREFIX)/include/munda/cellae/dei/
+	install -m 644 retis/retis.h $(PREFIX)/include/munda/retis/
 
 # --- mundatio ---
 
@@ -119,11 +102,10 @@ purga:
 	rm -f $(LIB_OBJ) libmunda.a
 	rm -f curre.o lude.o terminalis.o fare.o daemonium.o
 	rm -f coniunge.o specta.o fac_certificatum.o proba.o valida.o
-	@if [ "$(APOTHECA)" = "." ]; then rm -f crispus/proba.o; fi
 	rm -f curre lude fare proba valida
 	rm -f daemonium coniunge specta fac_certificatum
 
 linte:
 	insinulint -c *.[ch] retis/*.[ch] cellae/*.[ch] cellae/*/*.[ch]
 
-.PHONY: omnia para expara purga linte
+.PHONY: omnia colloca purga linte

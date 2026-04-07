@@ -9,7 +9,7 @@
  */
 
 #include "oraculum.h"
-#include "delphi/provisor.h"
+#include "provisor.h"
 #include "utilia.h"
 
 #include "crispus.h"
